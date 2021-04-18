@@ -6,24 +6,17 @@ import cats.implicits._
 import cats.data._
 
 case class Rotor private (
-  name: String,
-  wiring: Vector[Char],
+  name: Rotor.Name,
+  wiring: Rotor.Wiring,
   notches: Vector[Rotor.Position],
   ringSetting: Rotor.Position):
 
   import Rotor._
 
   val reversed: Map[Int,Int] =
-    wiring.zipWithIndex.map(tup => tup._2 -> tup._1.toInt).toMap
+    wiring.v.zipWithIndex.map(tup => tup._2 -> tup._1.toInt).toMap
 
   def lookup(in: Int, pos: Int): Either[String, Int] = ???
-
-  def copy(
-    name: Name = name,
-    wiring: Wiring = wiring,
-    notches: Vector[Position] = notches,
-    ringSetting: Position): Either[String, Rotor] =
-      Rotor.validate(name, wiring, notches, ringSetting)
 
 object Rotor:
   val RotorSize = 26
@@ -43,36 +36,34 @@ object Rotor:
 
     def apply(v: Vector[Char]): Either[String, Wiring] = v match
       case v if v.length != RotorSize => Left("Wiring string must be 26 characters.")
-      case v if v.distinct.length != 26 => Left("Wiring string must contain no duplicate letters.")
+      case v if v.distinct.length != RotorSize => Left("Wiring string must contain no duplicate letters.")
       case v if v.exists(c => c < 'A' || c > 'Z') => Left("Wiring string must contain only letters.")
       case v => Right(new Wiring(v))
 
   case class Name private (s: String)
 
   object Name:
-    def apply(s: String): Either[String, String] = s.trim match
+    def apply(s: String): Either[String, Name] = s.trim match
       case s if s.isEmpty => Left("Name cannot be blank.")
-      case s => Right(s)
+      case s => Right(new Name(s))
 
   private def apply(name: String, wiring: String, notches: Vector[Int], ringSetting: Int): Either[String, Rotor] =
-    validate(name, wiring.toVector, notches, ringSetting)
+    validate(name, wiring, notches, ringSetting)
 
-  private def validateNotches(notches: Vector[Int]): ValidationResult[Vector[Int]] = notches match
-    case v if v.length > RotorSize => "Notches must not be larger than rotor size.".invalidNec
-    case v if v.length != v.distinct.length => "Notches must not contain duplicates.".invalidNec
-    case v if v.exists(n => n < 0 || n >= RotorSize) => "Notch indices must be >= 0 and < rotor size.".invalidNec
-    case v => v.validNec
+  private def validateNotches(notches: Vector[Position]): Either[String, Vector[Position]] = notches match
+    case v if v.length > RotorSize => Left("Notches must not be larger than rotor size.")
+    case v if v.length != v.distinct.length => Left("Notches must not contain duplicates.")
+    case v => Right(v)
 
   private def validate(
     name: String,
-    wiring: Vector[Char],
+    wiring: String,
     notches: Vector[Int],
-    ringSetting: Int): Either[String, Rotor] = (
-      validateName(name),
-      validateWiring(wiring),
-      validateNotches(notches),
-      validateRingSetting(ringSetting))
-        .mapN(Rotor.apply)
-        .toEither
-        .left
-        .map(_.mkString_("\n"))
+    ringSetting: Int): Either[String, Rotor] =
+      for
+        vname <- Name(name)
+        vwiring <- Wiring(wiring)
+        vn <- notches.traverse(Position.apply)
+        vnotches <- validateNotches(vn)
+        vringSetting <- Position(ringSetting)
+      yield new Rotor(vname, vwiring, vnotches, vringSetting)
