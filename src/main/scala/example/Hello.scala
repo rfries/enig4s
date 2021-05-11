@@ -22,5 +22,5 @@ trait Run:
     case Right(rotor) =>
       println(rotor.toString)
       println(rotor.ringSetting.value)
-      summon[Show[Position]].show(rotor.ringSetting)
+      //summon[Show[Position]].show(rotor.ringSetting)
 end Run

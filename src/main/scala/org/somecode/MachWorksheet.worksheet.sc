@@ -12,8 +12,8 @@ rotor
 val p1 = Position.unsafe(3)
 
 p1.toString
-summon[Show[Position]].show(p1)
+//summon[Show[Position]].show(p1)
 
 3.toString
 
-3+5
+3+61
