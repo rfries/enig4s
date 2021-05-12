@@ -17,10 +17,10 @@ trait Greeting {
 
 trait Run:
   def run: Unit =
-    Rotor("f1", "ZABCDEFGHIJKLMNOPQRSTUVWXY", Vector(5), 0x1) match
+    Rotor("f1", "ZABCDEFGHIJKLMNOPQRSTUVWXY", Set(5), 0x1) match
     case Left(s) => throw new RuntimeException(s)
     case Right(rotor) =>
       println(rotor.toString)
-      println(rotor.ringSetting.value)
+      println(rotor.ringSetting)
       //summon[Show[Position]].show(rotor.ringSetting)
 end Run

@@ -5,7 +5,7 @@ import Rotor._
 
 val r: Option[Name] = Name("hello").toOption
 
-val rotor = Rotor("f1", "ZABCDEFGHIJKLMNOPQRSTUVWXY", Vector(5), 1)
+val rotor = Rotor("f1", "ZABCDEFGHIJKLMNOPQRSTUVWXY", Set(5), 1)
 
 rotor
 
@@ -16,4 +16,9 @@ p1.toString
 
 3.toString
 
-3+61
+val a = Value(2)
+val b = Value(29)
+val c = a match
+  case Left(s) => throw new RuntimeException("bad a")
+  case Right(v) => v.copy(v = 29)
+
