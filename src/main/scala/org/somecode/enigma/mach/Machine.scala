@@ -5,7 +5,7 @@ class Machine(
   rotors: Vector[Rotor],
   reflector: Rotor,
   wheelSettings: String,
-  ringSettings: Vector[Rotor.Position]):
+  ringSettings: Vector[Value]):
     val wheels = rotors.size
 
 end Machine

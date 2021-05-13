@@ -16,7 +16,7 @@ p1.toString
 
 3.toString
 
-val a = Value(1)
+val a = Value(24)
 val b = Value(25)
 // val c = a match
 //   case Left(s) => throw new RuntimeException("bad a")
@@ -27,27 +27,3 @@ for
 yield
   (va + vb, va - vb)
 
-
-val n = 5
-
-val abs: Int => Int = Math.abs
-
-2 + 2*n % n
-
-2 - 14 % n
-
--6 % 5
-abs(-11 % 5)
-
--11 % 6
-
-
-
-
-
-(3-1) - Math.abs((1-3) % 3)
-
-Math.abs((1-4) % 3)
-
-  
-Math.abs(3-13) % 3

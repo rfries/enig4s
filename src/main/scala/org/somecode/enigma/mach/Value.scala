@@ -1,28 +1,29 @@
 package org.somecode.enigma
 package mach
 
-// final case class Value private (v: Int):
-//   def copy(v: Int = v) = Value.apply(v)
+import Wiring.Paths
 
 opaque type Value = Int
 
 object Value:
-  val Max = Wiring.Lines
 
   def apply(c: Int): Either[String, Value] =
-    if (c < 0 || c >= Max)
-      Left(s"Position must be between 0 and ${Max-1}, inclusive.)")
+    if (c < 0 || c >= Paths)
+      Left(s"Position must be between 0 and ${Paths-1}, inclusive.)")
     else
       Right(c)
 
-  def unsafe(c: Int): Value = apply(c) match
+  def unsafe(n: Int): Value = apply(n) match
     case Left(s) => throw new IllegalArgumentException(s)
     case Right(v) => v
 
   extension (vv: Value)
-    def next: Int = ((vv + 1) % Value.Max)
+    def next: Value = (vv + 1) % Paths
     def value: Int = vv
-    def +(other: Value): Value = (vv + other) % Max
+    def +(other: Value): Value = (vv + other) % Paths
+    
     def -(other: Value): Value =
       val diff = vv - other
-      if diff < 0 then Max - Math.abs(diff % Max) else diff % Max
+      /* if diff is less than zero, then we must use the
+         compliment of the mod to match the wheel markings */
+      if diff < 0 then Paths + diff % Paths else diff % Paths
