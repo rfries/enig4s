@@ -5,16 +5,17 @@ ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "enig4s"
 
 val v = new {
-  val cats          = "2.6.0"
-  val scalatest     = "3.2.8"
+  val cats        = "2.6.0"
+  val munit       = "0.7.26"
 }
 
 lazy val root = (project in file("."))
   .settings(
     name := "enig4s",
     libraryDependencies ++= Seq(
-      "org.typelevel"   %% "cats-core"      % v.cats,
-      "org.scalatest"   %% "scalatest"      % v.scalatest   % "test"
+      "org.typelevel"   %% "cats-core"        % v.cats,
+      "org.scalameta"   %% "munit"            % v.munit   % Test,
+      "org.scalameta"   %% "munit-scalacheck" % v.munit   % Test
     )
   )
 
