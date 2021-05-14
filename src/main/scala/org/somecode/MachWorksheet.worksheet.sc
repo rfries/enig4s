@@ -16,8 +16,8 @@ p1.toString
 
 3.toString
 
-val a = Value(24)
-val b = Value(25)
+val a = Position(24)
+val b = Position(25)
 // val c = a match
 //   case Left(s) => throw new RuntimeException("bad a")
 //   case Right(v) => v + Value(29)

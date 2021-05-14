@@ -8,8 +8,8 @@ import cats.data._
 case class Rotor private (
   name: Rotor.Name,
   wiring: Wiring,
-  notches: Set[Value],
-  ringSetting: Value)
+  notches: Set[Position],
+  ringSetting: Position)
 
 object Rotor:
 
@@ -32,13 +32,13 @@ object Rotor:
       for
         vname   <- Name(name)
         vwire   <- Wiring(wiring)
-        vnpos   <- notches.toVector.traverse(Value.apply)
+        vnpos   <- notches.toVector.traverse(Position.apply)
         vnotch  <- validateNotches(vnpos.toSet)
-        vring   <- Value(ringSetting)
+        vring   <- Position(ringSetting)
       yield
         new Rotor(vname, vwire, vnotch, vring)
 
-  private def validateNotches(notches: Set[Value]): Either[String, Set[Value]] =
+  private def validateNotches(notches: Set[Position]): Either[String, Set[Position]] =
     notches match
       case v if v.size > RotorSize => Left("Notches must not be larger than rotor size.")
       case v => Right(v)

@@ -10,7 +10,8 @@ trait Wiring (offsets: Vector[Int]):
   //def reverseLookup(pos: Value, v: Value): Value
 
 object Wiring:
-  val Paths = 26
+  val Paths = Position.Max
+  
   /** Create Wiring from a letter map */
   def apply(s: String): Either[String, Wiring] = s.toUpperCase match
     case s if s.length != Paths => Left(s"Letter maps must contain exactly $Paths characters.")
