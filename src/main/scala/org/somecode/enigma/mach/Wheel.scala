@@ -1,13 +1,13 @@
 package org.somecode.enigma
 package mach
 
-final case class Wheel private (forward: Vector[Position], ringSetting: Position, notches: Set[Position]) extends Machine.Bus:
+class Wheel private (forward: Vector[Position], val ringSetting: Position, val notches: Set[Position]) extends Machine.Bus:
   val reverse: Vector[Position] = forward.zipWithIndex.sortBy(_._1.value).map((n, off) => Position.unsafe(off))
  
   override def lookup(state: Machine.State, in: Position): Position = forward((in + ringSetting).value)
   override def reverseLookup(state: Machine.State, in: Position): Position = reverse((in - ringSetting).value)
 
-  def next(): (Machine.State, Position) = ???
+  def shouldAdvance(p: Position): Boolean = notches.contains(p)
 
 object Wheel:
   // def apply(letterMap: String, ringSetting: Position): Either[String, Wheel] =
