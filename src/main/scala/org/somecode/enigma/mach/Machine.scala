@@ -2,14 +2,18 @@ package org.somecode.enigma
 package mach
 
 class Machine(
-  rotors: Vector[Rotor],
-  reflector: Rotor,
+  wheels: Vector[Wheel],
+  reflector: Wheel,
   wheelSettings: String,
   ringSettings: Vector[Position]):
-    val wheels = rotors.size
 
 end Machine
 
-object Machine
+object Machine:
 
-end Machine
+  final case class State(position: Vector[Position], val ringSettings: Vector[Position])
+
+  trait Bus:
+    def lookup(state: State, key: Position): Position
+    def reverseLookup(state: State, key: Position): Position
+

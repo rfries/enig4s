@@ -3,9 +3,6 @@ package example
 import org.somecode.enigma.mach.*
 import cats.*
 
-import Rotor._
-
-
 object Hello extends Greeting with Run with App {
   println(greeting)
   run
@@ -17,10 +14,10 @@ trait Greeting {
 
 trait Run:
   def run: Unit =
-    Rotor("f1", "ZABCDEFGHIJKLMNOPQRSTUVWXY", Set(5), 0x1) match
+    Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Position.unsafe(1), Set(Position.unsafe(5))) match
     case Left(s) => throw new RuntimeException(s)
-    case Right(rotor) =>
-      println(rotor.toString)
-      println(rotor.ringSetting)
+    case Right(wheel) =>
+      println(wheel.toString)
+      println(wheel.ringSetting)
       //summon[Show[Position]].show(rotor.ringSetting)
 end Run
