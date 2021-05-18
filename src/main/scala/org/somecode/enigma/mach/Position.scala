@@ -25,3 +25,7 @@ object Position:
       /* if diff is less than zero, then we must use the
          compliment of the mod to match the wheel markings */
       if diff < 0 then Max + diff % Max else diff % Max
+  
+  val zero = Position.unsafe(0)
+
+  given Ordering[Position] = summon[Ordering[Int]]

@@ -1,0 +1,26 @@
+package org.somecode.enigma
+package mach
+
+sealed abstract case class Wiring private (forward: Vector[Position]):
+  val reverse: Vector[Position] = forward
+    .zipWithIndex
+    .sortBy(_._1.value)
+    .map((n, off) => Position.unsafe(off))
+
+object Wiring:
+  // def apply(offsets: Vector[Int]): Either[String, Wiring] =
+  //   offsets match
+  //     case v if v.size != Position.Max => Left(s"Wiri")
+    
+  def apply(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match
+    case s if s.length != Position.Max => Left(s"Letter maps must contain exactly $Position.Max characters.")
+    case s if s.length != s.distinct.length => Left(s"Letter maps must not contain duplicate characters.")
+    case s if s.exists(c => c < 'A' || c > 'Z') => Left(s"Letter maps must contain only letters from 'A' to 'Z', inclusive.")
+    case s => apply(s.toVector.map( c => Position.unsafe(c - 'A')) )
+
+  /** Create Wiring from a vector of offsets  */
+  def apply(offsets: Vector[Position]): Either[String, Wiring] = offsets match
+    case v if v.length != Position.Max => Left(s"Wiring vectors must contain exactly ${Position.Max} values.")
+    case v if v.length != v.distinct.length => Left(s"Wiring vectors must not contain duplicate values.")
+    case v => Right(new Wiring(v) {})
+
