@@ -13,7 +13,7 @@ object Wiring:
   //     case v if v.size != Position.Max => Left(s"Wiri")
     
   def fromString(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match
-    case s if s.length != Position.Max => Left(s"Letter maps must contain exactly $Position.Max characters.")
+    case s if s.length != Position.Max => Left(s"Letter maps must contain exactly ${Position.Max} characters.")
     case s if s.length != s.distinct.length => Left(s"Letter maps must not contain duplicate characters.")
     case s if s.exists(c => c < 'A' || c > 'Z') => Left(s"Letter maps must contain only letters from 'A' to 'Z', inclusive.")
     case s => Right(new Wiring(s.toVector.map( c => Position.unsafe(c - 'A'))) {} )
