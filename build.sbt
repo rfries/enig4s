@@ -15,12 +15,13 @@ lazy val root = (project in file("."))
   .settings(
     name := "enig4s",
     libraryDependencies ++= Seq(
-      "org.typelevel"     %% "cats-core"        % v.cats,
-      "org.scalactic"     %% "scalactic"        % v.scalatest,
-      "org.scalatest"     %% "scalatest"        % v.scalatest % Test,
-      "org.scalatestplus" %% "scalacheck-1-15"  % v.scalatest_scalacheck % Test,
-      "org.scalameta"     %% "munit"            % v.munit   % Test,
-      "org.scalameta"     %% "munit-scalacheck" % v.munit   % Test
+      "org.typelevel"     %% "cats-core"            % v.cats,
+      "org.scalactic"     %% "scalactic"            % v.scalatest,
+      "org.scalatest"     %% "scalatest-funsuite"   % v.scalatest     % Test,
+      "org.scalatest"     %% "scalatest-propspec"   % v.scalatest     % Test,
+      "org.scalatestplus" %% "scalacheck-1-15"      % v.scalatest_scalacheck % Test,
+      "org.scalameta"     %% "munit"                % v.munit         % Test,
+      "org.scalameta"     %% "munit-scalacheck"     % v.munit         % Test
     )
   )
 
