@@ -18,12 +18,12 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
   property("Wiring translation (properties)") {
     forAll(genPosVector) { (v: Vector[Int]) =>
       whenever(v.length === Position.Max) {
-        assert(v.length == Position.Max)
+        //assert(v.length == Position.Max)
         val wiring = Wiring.fromPositions(v.map(Position.unsafe)).require
         (0 to Position.Max-1).foreach { n =>
           val forward = wiring.forward(n).value
           assert(forward == v(n))
-          assert(wiring.reverse(forward).value == n+1)
+          assert(wiring.reverse(forward).value == n)
         }
       }
     }
