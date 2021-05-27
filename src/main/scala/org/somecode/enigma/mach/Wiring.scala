@@ -8,10 +8,6 @@ sealed abstract case class Wiring private (forward: Vector[Position]):
     .map((n, off) => Position.unsafe(off))
 
 object Wiring:
-  // def apply(offsets: Vector[Int]): Either[String, Wiring] =
-  //   offsets match
-  //     case v if v.size != Position.Max => Left(s"Wiri")
-    
   def fromString(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match
     case s if s.length != Position.Max => Left(s"Letter maps must contain exactly ${Position.Max} characters.")
     case s if s.length != s.distinct.length => Left(s"Letter maps must not contain duplicate characters.")
