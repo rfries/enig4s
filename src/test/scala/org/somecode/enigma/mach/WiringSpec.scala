@@ -12,7 +12,7 @@ class WiringSpec extends AnyWordSpec with should.Matchers:
   "Wiring" should {
     "allow creation with well-formed letter maps" in {
       Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value shouldBe a [Wiring]
-      Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value shouldBe a [Wiring]
+      Wiring.fromString("abCDfeGHIJKLMNpoQRSTUVWXYZ").value shouldBe a [Wiring]
       Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").value shouldBe a [Wiring]
     }
 
