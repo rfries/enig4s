@@ -28,10 +28,10 @@ class WiringSpec extends AnyWordSpec with should.Matchers:
       val p1 = Position(1).require
 
       val wiringId = Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").require
-      assert(wiringId.forward(p0.value) === p0)
-      assert(wiringId.reverse(p0.value) === p0)
+      assert(wiringId.forward(p0) === p0)
+      assert(wiringId.reverse(p0) === p0)
       val wiringPlusOne = Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").require
-      assert(wiringPlusOne.forward(p0.value) === p1)
-      assert(wiringPlusOne.reverse(p1.value) === p0)
+      assert(wiringPlusOne.forward(p0) === p1)
+      assert(wiringPlusOne.reverse(p1) === p0)
     }
   }

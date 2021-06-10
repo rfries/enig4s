@@ -1,7 +1,7 @@
 package org.somecode.enigma
 package mach
 
-opaque type Position = Int
+opaque type Position <: Int = Int
 object Position:
 
   val Max = 26
@@ -18,7 +18,6 @@ object Position:
 
   extension (p: Position)
     def next: Position = (p + 1) % Max
-    def value: Int = p
     def +(other: Position): Position = (p + other) % Max
     def -(other: Position): Position =
       val diff = p - other
@@ -28,4 +27,4 @@ object Position:
   
   val zero = Position.unsafe(0)
 
-  given Ordering[Position] = summon[Ordering[Int]]
+  //given Ordering[Position] = summon[Ordering[Int]]

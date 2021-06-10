@@ -18,17 +18,17 @@ class PositionSuite extends ScalaCheckSuite:
     intercept[java.lang.IllegalArgumentException] {
       Position.unsafe(Position.Max)
     }
-    assertEquals(Position.unsafe(Position.Max-1).value, Position.Max - 1)
+    assert(Position.unsafe(Position.Max-1) == Position.Max - 1)
   }
 
   test("Position.next should advance/wrap over size boundry") {
-    assertEquals(Position(0).require.next.value, 1)
-    assertEquals(Position(1).require.next.value, 2)
-    assertEquals(Position(Position.Max-1).require.next.value, 0)
+    assert(Position(0).require.next == 1)
+    assert(Position(1).require.next == 2)
+    assert(Position(Position.Max-1).require.next == 0)
   }
 
   property("Position Addition Property") {
     forAll (posGen, posGen) { (p1: Position, p2: Position) =>
-      assert((p1 + p2).value == (p1.value + p2.value) % Position.Max)
+      assert((p1 + p2) == (p1 + p2) % Position.Max)
     }
   }

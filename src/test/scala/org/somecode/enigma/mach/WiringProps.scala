@@ -23,9 +23,9 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
       whenever(v.length === Position.Max) {
         val wiring = Wiring.fromPositions(v.map(Position.unsafe)).value
         (0 to Position.Max-1).foreach { n =>
-          val forward = wiring.forward(n).value
+          val forward = wiring.forward(n)
           assert(forward === v(n))
-          assert(wiring.reverse(forward).value === n)
+          assert(wiring.reverse(forward) === n)
         }
       }
     }

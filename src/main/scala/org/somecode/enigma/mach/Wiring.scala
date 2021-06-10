@@ -4,7 +4,7 @@ package mach
 sealed abstract case class Wiring private (forward: Vector[Position]):
   val reverse: Vector[Position] = forward
     .zipWithIndex
-    .sortBy(_._1.value)
+    .sortBy(_._1)
     .map((n, off) => Position.unsafe(off))
 
 object Wiring:

@@ -7,10 +7,10 @@ case class Wheel(
   notches: Set[Position]) extends Machine.Bus:
 
   override def lookup(state: Machine.State, in: Position): Position =
-    wiring.forward((in + ringSetting).value)
+    wiring.forward(in + ringSetting)
 
   override def reverseLookup(state: Machine.State, in: Position): Position =
-    wiring.reverse((in - ringSetting).value)
+    wiring.reverse(in - ringSetting)
 
   def shouldAdvance(p: Position): Boolean = notches.contains(p)
 
