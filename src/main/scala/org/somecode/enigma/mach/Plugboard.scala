@@ -14,7 +14,7 @@ final case class Plugboard private (plugs: Map[Position, Position])
 
 object Plugboard:
 
-  val MaxPlugs = Position.Max
+  val MaxPlugs = Position.Max / 2
 
   def apply(mappings: Set[String]): Either[String,Plugboard] =
     mappings.map(_.toUpperCase).toVector match

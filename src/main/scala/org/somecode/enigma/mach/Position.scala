@@ -26,5 +26,3 @@ object Position:
       if diff < 0 then Max + diff % Max else diff % Max
   
   val zero = Position.unsafe(0)
-
-  //given Ordering[Position] = summon[Ordering[Int]]

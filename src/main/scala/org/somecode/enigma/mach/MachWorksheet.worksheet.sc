@@ -11,22 +11,33 @@ x + y
 
 Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY")
 
-//p1.toString
-//summon[Show[Position]].show(p1)
+val p1  = Position.unsafe(1)
+val p7  = Position.unsafe(7)
+val p22 = Position.unsafe(22)
 
-// 3.toString
+0 < p1
+7 > p1
+7 > p7
+7 > p22
 
-// wheel.lookup
+p1.toString
 
-// val a = Position(24)
-// val b = Position(25)
-// val p1 = Position.unsafe(3)
-// // val c = a match
-// //   case Left(s) => throw new RuntimeException("bad a")
-// //   case Right(v) => v + Value(29)
-// for
-//   va <- a
-//   vb <- b
-// yield
-//   (va + vb, va - vb)
+val a = Position(24)
+val b = Position(25)
+
+val c = Position.unsafe(24)
+val d = Position.unsafe(25)
+
+c.+(d)
+
+a
+
+// val c = a match
+//   case Left(s) => throw new RuntimeException("bad a")
+//   case Right(v) => v + Value(29)
+for
+  va: Position <- a
+  vb: Position <- b
+yield
+  (va + vb, va - vb)
 
