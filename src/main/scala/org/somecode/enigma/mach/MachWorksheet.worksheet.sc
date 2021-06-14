@@ -1,4 +1,5 @@
 import org.somecode.enigma.mach.*
+import org.somecode.enigma.mach.Position.*
 //import org.somecode.enigma.mach.Wiring
 //import cats.*
 
@@ -6,7 +7,7 @@ val wheel = Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Position.unsafe(1), Set(Position
   .toOption.getOrElse(throw new IllegalArgumentException("bad wheel"))
 
 val x = 3
-val y = 4
+val y = 5
 x + y
 
 Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY")
@@ -15,10 +16,10 @@ val p1  = Position.unsafe(1)
 val p7  = Position.unsafe(7)
 val p22 = Position.unsafe(22)
 
-0 < p1
-7 > p1
-7 > p7
-7 > p22
+// 0 < p1.toInt
+// 7 > p1.toInt
+// 7 > p7.toInt
+// 7 > p22.toInt
 
 p1.toString
 

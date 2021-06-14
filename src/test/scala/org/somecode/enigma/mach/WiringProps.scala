@@ -5,8 +5,8 @@ import scala.util.Random
 
 import org.scalacheck.Gen
 import org.scalacheck.Shrink.shrinkAny      // disable shrinking, which ignores Gen.const generator
+import org.scalatest.EitherValues.*
 import org.scalatest.propspec.AnyPropSpec
-import org.scalatest.EitherValues._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
@@ -25,7 +25,7 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
         (0 to Position.Max-1).foreach { n =>
           val forward = wiring.forward(n)
           assert(forward === v(n))
-          assert(wiring.reverse(forward) === n)
+          assert(wiring.reverse(forward.toInt) === n)
         }
       }
     }

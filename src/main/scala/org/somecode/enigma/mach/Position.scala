@@ -1,7 +1,7 @@
 package org.somecode.enigma
 package mach
 
-opaque type Position <: Int = Int
+opaque type Position = Int
 object Position:
 
   val Max = 26
@@ -17,12 +17,15 @@ object Position:
     v => v); 
 
   extension (p: Position)
-    def next: Position = (p + 1) % Max
-    def +(other: Position): Position = (p + other) % Max
+    def toInt: Int = p
+    def next: Position = Position.unsafe((p.toInt + 1) % Max)
+    def +(other: Position): Position = Position.unsafe((p + other) % Max)
     def -(other: Position): Position =
       val diff = p - other
       /* if diff is less than zero, then we must use the
          compliment of the mod to match the wheel markings */
-      if diff < 0 then Max + diff % Max else diff % Max
+      Position.unsafe(if diff < 0 then (Max + diff) % Max else diff % Max)
+  
+  //given Ordering[Position] = summon[Ordering[Int]]
   
   val zero = Position.unsafe(0)

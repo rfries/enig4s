@@ -25,13 +25,13 @@ class WiringSpec extends AnyWordSpec with should.Matchers:
 
     "translate positions according to the specified vector or letter map" in {
       val p0 = Position.zero
-      val p1 = Position(1).require
+      val p1 = Position(1).value
 
-      val wiringId = Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").require
-      assert(wiringId.forward(p0) === p0)
-      assert(wiringId.reverse(p0) === p0)
-      val wiringPlusOne = Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").require
-      assert(wiringPlusOne.forward(p0) === p1)
-      assert(wiringPlusOne.reverse(p1) === p0)
+      val wiringId = Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value
+      assert(wiringId.forward(p0.toInt) === p0)
+      assert(wiringId.reverse(p0.toInt) === p0)
+      val wiringPlusOne = Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value
+      assert(wiringPlusOne.forward(p0.toInt) === p1)
+      assert(wiringPlusOne.reverse(p1.toInt) === p0)
     }
   }
