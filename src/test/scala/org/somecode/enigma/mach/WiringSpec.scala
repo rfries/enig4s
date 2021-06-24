@@ -24,8 +24,8 @@ class WiringSpec extends AnyWordSpec with should.Matchers:
     }
 
     "translate positions according to the specified vector or letter map" in {
-      val p0 = Position.zero
-      val p1 = Position(1).value
+      val p0 = KeyCode.zero
+      val p1 = KeyCode(1).value
 
       val wiringId = Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value
       assert(wiringId.forward(p0.toInt) === p0)

@@ -1,12 +1,13 @@
 package org.somecode.enigma.mach
 
-sealed abstract case class Reflector private (wiring: Wiring) extends Machine.Bus:
+sealed abstract case class Reflector private (wiring: Wiring)
+  //extends Machine.Bus:
 
-  override def lookup(state: Machine.State, in: Position): Position =
-    wiring.forward(in.toInt)
+  // override def lookup(state: Machine.State, in: Position): Position =
+  //   wiring.forward(in.toInt)
 
-  override def reverseLookup(state: Machine.State, in: Position): Position =
-    wiring.reverse(in.toInt)
+  // override def reverseLookup(state: Machine.State, in: Position): Position =
+  //   wiring.reverse(in.toInt)
 
 object Reflector:
   def apply(wiring: Wiring): Either[String, Reflector] =
