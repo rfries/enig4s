@@ -1,11 +1,13 @@
 package org.somecode.enigma
 package mach
 
-case class Wheel(
+sealed abstract case class Wheel private (
   wiring: Wiring,
   ringSetting: KeyCode,
   notches: Set[KeyCode]):
   //extends Machine.Bus:
+
+  def size: Int = wiring.size
 
   // override def lookup(state: Machine.State, in: Position): Position =
   //   wiring.forward((in + ringSetting).toInt)
@@ -17,8 +19,14 @@ case class Wheel(
 
 object Wheel:
 
-  def apply(s: String, ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
-    Wiring.fromString(s).map(Wheel(_, ringSetting, notches))
+  // def apply(s: String, ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
+  //   Wiring.fromString(s).map(Wheel(_, ringSetting, notches))
 
-  def apply(v: Vector[KeyCode], ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
-    Wiring.fromPositions(v).map(Wheel(_, ringSetting, notches))
+  def validate(keyMap: Vector[KeyCode], ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
+    keyMap match
+      case v if v.size < 1 => Left(s"Wheel size must be > 0.")
+      case v if ringSetting.toInt >= v.size => Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${v.size}).")
+      case v => Right(new Wheel(v, ringSetting, notches))
+
+    // else if notches.
+    // Wiring(v).map(Wheel(_, ringSetting, notches))
