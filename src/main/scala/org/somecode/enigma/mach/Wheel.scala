@@ -2,12 +2,12 @@ package org.somecode.enigma
 package mach
 
 sealed abstract case class Wheel private (
-  wiring: Wiring,
+  xlate: Translation,
   ringSetting: KeyCode,
   notches: Set[KeyCode]):
   //extends Machine.Bus:
 
-  def size: Int = wiring.size
+  val size: Int = xlate.size
 
   // override def lookup(state: Machine.State, in: Position): Position =
   //   wiring.forward((in + ringSetting).toInt)
@@ -19,14 +19,8 @@ sealed abstract case class Wheel private (
 
 object Wheel:
 
-  // def apply(s: String, ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
-  //   Wiring.fromString(s).map(Wheel(_, ringSetting, notches))
-
-  def validate(keyMap: Vector[KeyCode], ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
-    keyMap match
-      case v if v.size < 1 => Left(s"Wheel size must be > 0.")
-      case v if ringSetting.toInt >= v.size => Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${v.size}).")
-      case v => Right(new Wheel(v, ringSetting, notches))
-
-    // else if notches.
-    // Wiring(v).map(Wheel(_, ringSetting, notches))
+  def validate(xlate: Translation, ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
+    if xlate.size < 1 then Left(s"Wheel size must be > 0.")
+    else if ringSetting.toInt >= xlate.size then Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${xlate.size}).")
+    else if notches.exists(k => k.toInt < 1 || k.toInt >= xlate.size) then Left(s"Notch values must be between 1 and ${xlate.size-1}.")
+    else Right(new Wheel(xlate, ringSetting, notches))

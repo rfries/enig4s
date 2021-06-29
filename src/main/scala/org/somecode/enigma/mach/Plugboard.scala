@@ -1,10 +1,11 @@
 package org.somecode.enigma
 package mach
 
-final case class Plugboard private (plugs: Map[KeyCode, KeyCode]):
+final case class Plugboard private (size: Int, plugs: Map[KeyCode, KeyCode]):
   //extends Machine.Bus:
 
   val reverse = plugs.toList.map((k, v) => (v, k)).toMap
+  val maxPlugs = size / 2
 
   // override def lookup(state: Machine.State, key: Position): Position =
   //   plugs.get(key).getOrElse(key)
@@ -14,9 +15,9 @@ final case class Plugboard private (plugs: Map[KeyCode, KeyCode]):
 
 object Plugboard:
 
-  val MaxPlugs = KeyCode.Max / 2
-
-  def apply(mappings: Set[String]): Either[String,Plugboard] =
+  //def maxPlugs(size: Int)
+  
+  def apply(size: Int, mappings: Set[String]): Either[String,Plugboard] =
     mappings.map(_.toUpperCase).toVector match
       case pairs if pairs.length > MaxPlugs =>
         Left(s"A plugboard may only have up to ${MaxPlugs} plugs specified.")

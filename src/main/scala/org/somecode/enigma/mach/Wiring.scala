@@ -1,7 +1,7 @@
 package org.somecode.enigma
 package mach
 
-sealed abstract case class Wiring private (forward: Vector[KeyCode]):
+sealed abstract case class Wiring private (sz: Int, forward: Vector[KeyCode]):
   val reverse: Vector[KeyCode] = forward
     .zipWithIndex
     .sortBy(_._1.toInt)
@@ -23,7 +23,8 @@ object Wiring:
   //   case v => Right(new Wiring(v.map(KeyCode.unsafe(_))) {} )
 
   /** Create Wiring from a vector of offsets  */
-  def apply(keyCodes: Vector[KeyCode]): Either[String, Wiring] = keyCodes match
-    case v if v.length != KeyCode.Max => Left(s"Wiring vectors must contain exactly ${KeyCode.Max} values.")
+  def apply(max: Int, keyCodes: Vector[KeyCode]): Either[String, Wiring] = keyCodes match
+    case v if v.length != max => Left(s"Wiring vectors must contain exactly $max values.")
     case v if v.length != v.distinct.length => Left(s"Wiring vectors must not contain duplicate values.")
-    case v => Right(new Wiring(v) {})
+    case v if v.exists(n => n.toInt < 0 || n.toInt >= max) => Left(s"Wiring vectors must contain only values from 0 to $max, inclusive.")
+    case v => Right(new Wiring(max, v) {})
