@@ -36,4 +36,6 @@ object Translation:
     case v if v.exists(n => n.toInt < 0 || n.toInt >= size) => Left(s"Translation vectors must contain only values from 0 to ${size-1}, inclusive.")
     case v => Right(new Translation(size = size, forward = v) {})
 
+  def unsafe(s: String): Translation = ???
+
 class ValidKeys(sz: Int, codes: Vector[KeyCode])
