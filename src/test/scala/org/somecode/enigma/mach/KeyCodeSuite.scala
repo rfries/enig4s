@@ -6,7 +6,7 @@ import org.scalacheck.Prop._
 import org.scalacheck.Gen
 import org.scalatest.EitherValues._
 
-class PositionSuite extends ScalaCheckSuite:
+class KeyCodeSuite extends ScalaCheckSuite:
 
   def maxGen(max: Int): Gen[KeyCode] = Gen.chooseNum(0, max-1).map(KeyCode.unsafe)
 

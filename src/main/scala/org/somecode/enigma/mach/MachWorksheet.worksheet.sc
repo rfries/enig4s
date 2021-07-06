@@ -3,14 +3,25 @@ import org.somecode.enigma.mach.KeyCode.*
 //import org.somecode.enigma.mach.Wiring
 //import cats.*
 
-val wheel = Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", KeyCode.unsafe(1), Set(KeyCode.unsafe(5)))
-  .toOption.getOrElse(throw new IllegalArgumentException("bad wheel"))
+Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").map {
+  wiring =>
+    val wheel = Wheel(wiring, KeyCode.unsafe(1), Set(KeyCode.unsafe(5)))
+      .getOrElse(throw new IllegalArgumentException("bad wheel"))
+    wheel
+}
+
+val k1: KeyCode = KeyCode.unsafe(3)
+val k2: KeyCode = KeyCode.unsafe(0)
+
+val v1 = k1
+val v2: KeyCode = k1
+val v3: Int = k1
 
 val x = 3
 val y = 5
 x + y
 
-Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY")
+//val wiring = Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY")
 
 val p1  = KeyCode.unsafe(1)
 val p7  = KeyCode.unsafe(7)
