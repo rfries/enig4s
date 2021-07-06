@@ -6,30 +6,32 @@ import org.scalacheck.Prop._
 import org.scalacheck.Gen
 import org.scalatest.EitherValues._
 
-val posValGen: Gen[Int] = Gen.chooseNum(0, KeyCode.Max-1)
-given posGen: Gen[KeyCode] = posValGen.map(KeyCode.unsafe)
-
 class PositionSuite extends ScalaCheckSuite:
 
+  def maxGen(max: Int): Gen[KeyCode] = Gen.chooseNum(0, max-1).map(KeyCode.unsafe)
+
   test("Position creation") {
+    val Max = 26
     assert(KeyCode(0).isInstanceOf[Right[String, KeyCode]])
     assert(KeyCode(2).isInstanceOf[Right[String, KeyCode]])
-    assert(KeyCode(KeyCode.Max-1).isInstanceOf[Right[String, KeyCode]])
-    assert(KeyCode(KeyCode.Max).isInstanceOf[Left[String, KeyCode]])
+    assert(KeyCode(Max-1).isInstanceOf[Right[String, KeyCode]])
+    assert(KeyCode(Max).isInstanceOf[Left[String, KeyCode]])
     intercept[java.lang.IllegalArgumentException] {
-      KeyCode.unsafe(KeyCode.Max)
+      KeyCode.unsafe(Max)
     }
-    assert(KeyCode.unsafe(KeyCode.Max-1).toInt == KeyCode.Max - 1)
+    assert(KeyCode.unsafe(Max-1).toInt == Max - 1)
   }
 
   test("Position.next should advance/wrap over size boundry") {
-    assert(KeyCode(0).value.next.toInt == 1)
-    assert(KeyCode(1).value.next.toInt == 2)
+    assert(KeyCode.unsafe(0).next == 1)
+    assert(KeyCode.unsafe(1).next == 2)
     assert(KeyCode(KeyCode.Max-1).value.next.toInt == 0)
   }
 
   property("Position Addition Property") {
-    forAll (posGen, posGen) { (p1: KeyCode, p2: KeyCode) =>
-      assert( (p1 + p2).toInt == (p1.toInt + p2.toInt) % KeyCode.Max)
+    val max = 26
+    val gen = maxGen(max)
+    forAll (gen, gen) { (p1: KeyCode, p2: KeyCode) =>
+      assert( (p1.plusMod(p2, max)).toInt == (p1.toInt + p2.toInt) % max)
     }
   }
