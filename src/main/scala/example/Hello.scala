@@ -14,10 +14,11 @@ trait Greeting {
 
 trait Run:
   def run: Unit =
-    Wheel.validate(Translation.unsafe("ZABCDEFGHIJKLMNOPQRSTUVWXY"), KeyCode.unsafe(1), Set(KeyCode.unsafe(5))) match
-    case Left(s) => throw new RuntimeException(s)
-    case Right(wheel) =>
-      println(wheel.toString)
-      println(wheel.ringSetting)
+    println("Hello!")
+    // Wheel.validate(Wiring.unsafe("ZABCDEFGHIJKLMNOPQRSTUVWXY"), KeyCode.unsafe(1), Set(KeyCode.unsafe(5))) match
+    // case Left(s) => throw new RuntimeException(s)
+    // case Right(wheel) =>
+    //   println(wheel.toString)
+    //   println(wheel.ringSetting)
       //summon[Show[Position]].show(rotor.ringSetting)
 end Run

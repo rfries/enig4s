@@ -10,9 +10,11 @@ import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
+
+  val Max = 26
   // note: adding a type annotation here causes compiler crash w/ scala 3.0.0
   // i.e. val genPosVector: Gen[Vector[Position]] =
-  val genMappings = Gen.const((0 to KeyCode.Max-1).toVector).map(Random.shuffle)
+  val genMappings = Gen.const((0 to Max-1).toVector).map(Random.shuffle)
 
   // reflectors cannot have any straight-through mappings
   val genReflectorMappings: Gen[Vector[Int]] = genMappings suchThat
@@ -20,9 +22,9 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
   property("Wiring translation (properties)") {
     forAll(genMappings) { (v: Vector[Int]) =>
-      whenever(v.length === KeyCode.Max) {
-        val wiring = Wiring.fromPositions(v.map(KeyCode.unsafe)).value
-        (0 to KeyCode.Max-1).foreach { n =>
+      whenever(v.length === Max) {
+        val wiring = Wiring.fromVector(v.map(KeyCode.unsafe)).value
+        (0 to Max-1).foreach { n =>
           val forward = wiring.forward(n)
           assert(forward === v(n))
           assert(wiring.reverse(forward.toInt) === n)
