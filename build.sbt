@@ -4,6 +4,9 @@ ThisBuild / version          := "0.2.0-SNAPSHOT"
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "enig4s"
 
+ThisBuild / Test / testOptions += Tests.Argument("-oD")
+
+
 val v = new {
   val cats                  = "2.6.1"
   val munit                 = "0.7.26"

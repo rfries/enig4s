@@ -6,21 +6,46 @@ import scala.util.Left
 import org.scalatest.EitherValues.*
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.AppendedClues
 
-class WiringSpec extends AnyWordSpec with should.Matchers:
+object WiringSpecFixtures:
+  val goodWiring: Vector[Wiring] = Vector(
+    Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").value,
+    Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
+    Wiring.fromString("ABCDE").value,
+    Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
+    Wiring.fromString("ABCDZ").value,
+  )
+
+  val goodWiringStrings: Vector[String] = Vector(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "abCDfeGHIJKLMNpoQRSTUVWXYZ",
+    "ZABCDEFGHIJKLMNOPQRSTUVWXY",
+  )
+
+  val badWiringStrings: Vector[String] = Vector(
+    "ADEFGHIJKLMNOPQRSTUVWXYZ",
+    "ABCDZ",
+    "ABBDEFGHIJKLMNOPQRSTUVWXYZ",
+    "ZABCDEFGHIJKLMNOPQRSTUVWXY12345",
+    "ABCDEFGHIJKL-MNOPQRSTUVWXY",
+    ""
+  )
+
+class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
 
   "Wiring" should {
     "allow creation with well-formed letter maps" in {
-      Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value shouldBe a [Wiring]
-      Wiring.fromString("abCDfeGHIJKLMNpoQRSTUVWXYZ").value shouldBe a [Wiring]
-      Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").value shouldBe a [Wiring]
+      WiringSpecFixtures.goodWiringStrings.foreach {
+        wstr =>
+         Wiring.fromString(wstr).value shouldBe a [Wiring] withClue(wstr)
+      }
     }
 
     "fail creation with badly-formed letter maps" in {
-      assert(Wiring.fromString("ABBDEFGHIJKLMNOPQRSTUVWXYZ").isLeft)
-      assert(Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY12345").isLeft)
-      assert(Wiring.fromString("ABCDEFGHIJKL-MNOPQRSTUVWXY").isLeft)
-      assert(Wiring.fromString("").isLeft)
+      WiringSpecFixtures.badWiringStrings.foreach {
+        wstr => assert(Wiring.fromString(wstr).isLeft, wstr)
+      }
     }
 
     "translate positions according to the specified vector or letter map" in {

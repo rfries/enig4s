@@ -9,6 +9,12 @@ sealed abstract case class Wheel private (
 
   val size: Int = wiring.size
 
+  def copy(
+    wiring: Wiring = wiring,
+    ringSetting: KeyCode = ringSetting,
+    notches: Set[KeyCode] = notches): Either[String, Wheel] =
+      Wheel.apply(wiring, ringSetting, notches)
+
   // override def lookup(state: Machine.State, in: Position): Position =
   //   wiring.forward((in + ringSetting).toInt)
 
