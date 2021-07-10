@@ -3,12 +3,10 @@ import org.somecode.enigma.mach.KeyCode.*
 //import org.somecode.enigma.mach.Wiring
 //import cats.*
 
-Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").map {
-  wiring =>
-    val wheel = Wheel(wiring, KeyCode.unsafe(1), Set(KeyCode.unsafe(5)))
-      .getOrElse(throw new IllegalArgumentException("bad wheel"))
-    wheel
-}
+Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", KeyCode.unsafe(0), Set("E")) match
+  case Left(msg) => println("*** bad wheel")
+  case Right(wheel) => println(">>> good wheel")
+
 
 val k1: KeyCode = KeyCode.unsafe(3)
 val k2: KeyCode = KeyCode.unsafe(0)

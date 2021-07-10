@@ -12,15 +12,14 @@ object WiringSpecFixtures:
   val goodWiring: Vector[Wiring] = Vector(
     Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").value,
     Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
-    Wiring.fromString("ABCDE").value,
-    Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
-    Wiring.fromString("ABCDZ").value,
+    Wiring.fromString("ABCDE").value
   )
 
   val goodWiringStrings: Vector[String] = Vector(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "abCDfeGHIJKLMNpoQRSTUVWXYZ",
     "ZABCDEFGHIJKLMNOPQRSTUVWXY",
+    "Q"
   )
 
   val badWiringStrings: Vector[String] = Vector(
@@ -38,7 +37,7 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
     "allow creation with well-formed letter maps" in {
       WiringSpecFixtures.goodWiringStrings.foreach {
         wstr =>
-         Wiring.fromString(wstr).value shouldBe a [Wiring] withClue(wstr)
+         Wiring.fromString(wstr).value shouldBe a [Wiring]
       }
     }
 
