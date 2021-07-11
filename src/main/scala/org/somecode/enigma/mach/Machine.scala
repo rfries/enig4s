@@ -15,8 +15,7 @@ object Machine:
   final case class MState(wheelPositions: Vector[KeyCode])
   final case class WState(position: KeyCode)
 
-  // trait Bus:
-  //   def advance: WState, ]
-  // def lookup(state: MState, key: Position): Position
-  // def reverseLookup(state: MState, key: Position): Position
-
+  trait Bus:
+    def size: Int
+    def translate(state: WState, key: KeyCode): KeyCode
+    def cotranslate(state: WState, key: KeyCode): KeyCode

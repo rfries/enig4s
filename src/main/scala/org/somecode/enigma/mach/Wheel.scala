@@ -1,9 +1,26 @@
 package org.somecode.enigma
 package mach
 
+import Machine.*
+
+sealed case class ConfiguredWheel(
+  val ringSetting: KeyCode,
+  val wheel: Wheel) extends Machine.Bus:
+
+  val size: Int = wheel.size
+
+  def translate(state: WState, key: KeyCode): KeyCode =
+    KeyCode.unsafe(
+      wheel.wiring.forward((key + state.position + ringSetting) % size)
+    )
+
+  def cotranslate(state: WState, key: KeyCode): KeyCode =
+    KeyCode.unsafe(
+      (wheel.wiring.reverse(key) - state.position - ringSetting) % size
+    )
+
 sealed abstract case class Wheel private (
   wiring: Wiring,
-  ringSetting: KeyCode,
   notches: Set[KeyCode]):
   //extends Machine.Bus:
 
@@ -11,9 +28,13 @@ sealed abstract case class Wheel private (
 
   def copy(
     wiring: Wiring = wiring,
-    ringSetting: KeyCode = ringSetting,
     notches: Set[KeyCode] = notches): Either[String, Wheel] =
-      Wheel.apply(wiring, ringSetting, notches)
+      Wheel.apply(wiring, notches)
+
+  def configure(setting: KeyCode): Either[String, ConfiguredWheel] =
+    Either.cond(setting < size,
+      new ConfiguredWheel(setting, this) {},
+      s"Ring setting ($setting) must be between 0 and ${size-1}")
 
   // override def lookup(state: Machine.State, in: Position): Position =
   //   wiring.forward((in + ringSetting).toInt)
@@ -21,25 +42,25 @@ sealed abstract case class Wheel private (
   // override def reverseLookup(state: Machine.State, in: Position): Position =
   //   wiring.reverse((in - ringSetting).toInt)
 
-  def notchedAt(p: KeyCode): Boolean = notches.contains(p)
+  // def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
 object Wheel:
 
-  def apply(wiring: Wiring, ringSetting: KeyCode, notches: Set[KeyCode]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: Set[KeyCode]): Either[String, Wheel] =
     if (wiring.size < 1)
       Left(s"Wheel size must be > 0.")
-    else if (ringSetting.toInt >= wiring.size)
-      Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${wiring.size}).")
+    // else if (ringSetting.toInt >= wiring.size)
+    //   Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${wiring.size}).")
     else if (notches.exists(_ >= wiring.size))
       Left(s"Notch values must be between 0 and ${wiring.size-1}.")
     else
-      Right(new Wheel(wiring, ringSetting, notches) {})
+      Right(new Wheel(wiring, notches) {})
 
-  def apply(letterMap: String, ringSetting: KeyCode, notches: Set[String]): Either[String, Wheel] =
+  def apply(letterMap: String, notches: Set[String]): Either[String, Wheel] =
     for
       wiring <- Wiring.fromString(letterMap)
       notchCodes <- validateNotches(wiring.size, notches)
-      wheel <- Wheel(wiring, ringSetting, notchCodes)
+      wheel <- Wheel(wiring, notchCodes)
     yield
       wheel
 

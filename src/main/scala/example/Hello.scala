@@ -14,7 +14,8 @@ trait Greeting {
 
 trait Run:
   def run: Unit =
-    Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", KeyCode.unsafe(1), Set("A", "N")) match
+    Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Set("A", "N"))
+      .flatMap(_.configure(KeyCode.unsafe(1))) match
       case Left(s) => throw new RuntimeException(s)
       case Right(wheel) =>
         println(wheel.toString)
