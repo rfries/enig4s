@@ -1,12 +1,34 @@
+
+
 import org.somecode.enigma.mach.*
 import org.somecode.enigma.mach.KeyCode.*
+import org.somecode.enigma.mach.Machine.*
 //import org.somecode.enigma.mach.Wiring
-//import cats.*
+import cats.*
+import cats.data.*
 
-Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", KeyCode.unsafe(0), Set("E")) match
-  case Left(msg) => println("*** bad wheel")
-  case Right(wheel) => println(">>> good wheel")
+val wheel: Either[String, ConfiguredWheel] =
+  Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Set("E"))
+    .flatMap(_.configure(KeyCode.unsafe(0)))
 
+wheel match
+  case Left(msg) =>
+    println("*** bad wheel")
+  case Right(wheel) =>
+    println(">>> good wheel")
+
+    val pos = KeyCode.unsafe(0)
+    val in = KeyCode.unsafe(20)
+
+    type WState = State[WheelState, Unit]
+    val adv: WState = State { wstate =>
+      if (wstate.atNotch || wstate.rightNotch)
+        (wstate.copy(position = wstate.position.next(wheel.size)), ())
+      else
+        (wstate, ())
+    }
+
+/*
 
 val k1: KeyCode = KeyCode.unsafe(3)
 val k2: KeyCode = KeyCode.unsafe(0)
@@ -21,33 +43,15 @@ x + y
 
 //val wiring = Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY")
 
-val p1  = KeyCode.unsafe(1)
-val p7  = KeyCode.unsafe(7)
-val p22 = KeyCode.unsafe(22)
-
-// 0 < p1.toInt
-// 7 > p1.toInt
-// 7 > p7.toInt
-// 7 > p22.toInt
-
-p1.toString
-
 val a = KeyCode(24)
 val b = KeyCode(25)
 
 val c = KeyCode.unsafe(24)
 val d = KeyCode.unsafe(25)
 
-c.+(d)
-
-a
-
-// val c = a match
-//   case Left(s) => throw new RuntimeException("bad a")
-//   case Right(v) => v + Value(29)
 for
   va: KeyCode <- a
   vb: KeyCode <- b
 yield
   (va + vb, va - vb)
-
+*/

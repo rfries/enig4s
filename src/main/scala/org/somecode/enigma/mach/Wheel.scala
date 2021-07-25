@@ -5,19 +5,15 @@ import Machine.*
 
 sealed case class ConfiguredWheel(
   val ringSetting: KeyCode,
-  val wheel: Wheel) extends Machine.Bus:
+  val wheel: Wheel) extends Rotor:
 
   val size: Int = wheel.size
 
-  def translate(state: WState, key: KeyCode): KeyCode =
-    KeyCode.unsafe(
-      wheel.wiring.forward((key + state.position + ringSetting) % size)
-    )
+  def translate(state: WheelState, key: KeyCode): KeyCode =
+    wheel.wiring.forward(key.plusMod(size, state.position, ringSetting))
 
-  def cotranslate(state: WState, key: KeyCode): KeyCode =
-    KeyCode.unsafe(
-      (wheel.wiring.reverse(key) - state.position - ringSetting) % size
-    )
+  def cotranslate(state: WheelState, key: KeyCode): KeyCode =
+    wheel.wiring.reverse(key.minusMod(size, state.position, ringSetting))
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
