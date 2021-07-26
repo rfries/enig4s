@@ -1,12 +1,13 @@
 package org.somecode.enigma
 package mach
 
-import munit.ScalaCheckSuite
-import org.scalacheck.Prop._
 import org.scalacheck.Gen
-import org.scalatest.EitherValues._
+import org.scalacheck.Shrink.shrinkAny      // disable shrinking, which ignores Gen.const generator
+import org.scalatest.EitherValues.*
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class KeyCodeSuite extends ScalaCheckSuite:
+class KeyCodeProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
   def maxGen(max: Int): Gen[KeyCode] = Gen.chooseNum(0, max-1).map(KeyCode.unsafe)
 

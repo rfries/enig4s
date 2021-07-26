@@ -3,10 +3,10 @@ package mach
 
 import scala.util.Left
 
+import org.scalatest.AppendedClues
 import org.scalatest.EitherValues.*
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.AppendedClues
 
 object WiringSpecFixtures:
   val goodWiring: Vector[Wiring] = Vector(
