@@ -9,16 +9,17 @@ sealed case class ConfiguredWheel(
 
   val size: Int = wheel.size
 
-  def translate(state: WheelState, key: KeyCode): KeyCode =
+  override def advance(pos: KeyCode): KeyCode = pos.plusMod(size, KeyCode.one)
+
+  override def translate(state: WheelState, key: KeyCode): KeyCode =
     wheel.wiring.forward(key.plusMod(size, state.position, ringSetting))
 
-  def cotranslate(state: WheelState, key: KeyCode): KeyCode =
+  override def cotranslate(state: WheelState, key: KeyCode): KeyCode =
     wheel.wiring.reverse(key.minusMod(size, state.position, ringSetting))
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
   notches: Set[KeyCode]):
-  //extends Machine.Bus:
 
   val size: Int = wiring.size
 
@@ -32,21 +33,13 @@ sealed abstract case class Wheel private (
       new ConfiguredWheel(setting, this) {},
       s"Ring setting ($setting) must be between 0 and ${size-1}")
 
-  // override def lookup(state: Machine.State, in: Position): Position =
-  //   wiring.forward((in + ringSetting).toInt)
-
-  // override def reverseLookup(state: Machine.State, in: Position): Position =
-  //   wiring.reverse((in - ringSetting).toInt)
-
-  // def notchedAt(p: KeyCode): Boolean = notches.contains(p)
+  def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
 object Wheel:
 
   def apply(wiring: Wiring, notches: Set[KeyCode]): Either[String, Wheel] =
     if (wiring.size < 1)
       Left(s"Wheel size must be > 0.")
-    // else if (ringSetting.toInt >= wiring.size)
-    //   Left(s"Ring setting ($ringSetting) must be lower than the wiring size (${wiring.size}).")
     else if (notches.exists(_ >= wiring.size))
       Left(s"Notch values must be between 0 and ${wiring.size-1}.")
     else

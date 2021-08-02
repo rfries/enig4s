@@ -3,17 +3,22 @@ package mach
 
 import cats.data.State
 
-case class Machine(
+case class Machine private (
   wheels: Vector[Wheel],
   ringSettings: Vector[KeyCode],
   reflector: Wheel,
-  advance: Vector[State[Machine.WheelState, KeyCode]],
   initialSettings: Machine.MachineState)
 
 object Machine:
 
+  def apply (
+    wheels: Vector[Wheel],
+    ringSettings: Vector[KeyCode],
+    reflector: Wheel,
+    initialSettings: MachineState): Either[String, Machine] = ???
+
   final case class MachineState(wheelState: Vector[WheelState])
-  final case class WheelState(position: KeyCode, atNotch: Boolean, rightNotch: Boolean)
+  final case class WheelState(position: KeyCode)
 
   trait Bus:
     def size: Int
@@ -21,3 +26,4 @@ object Machine:
 
   trait Rotor extends Bus:
     def cotranslate(state: WheelState, key: KeyCode): KeyCode
+    def advance(pos: KeyCode): KeyCode

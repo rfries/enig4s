@@ -1,4 +1,5 @@
-package org.somecode.enigma.mach
+package org.somecode.enigma
+package mach
 
 sealed abstract case class Reflector private (wiring: Wiring)
   extends Machine.Bus:

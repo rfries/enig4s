@@ -5,13 +5,14 @@ opaque type KeyCode <: Int = Int
 object KeyCode:
 
   val zero = unsafe(0)
+  val one = unsafe(1)
 
-  def apply(c: Int): Either[String, KeyCode] =    
+  def apply(c: Int): Either[String, KeyCode] =
     Either.cond(c >= 0, c, s"KeyCode ($c) must be >= 0.")
 
   def unsafe(n: Int): KeyCode = apply(n).fold(
     s => throw new IllegalArgumentException(s),
-    v => v); 
+    v => v);
 
   extension (k: KeyCode)
     //   def toInt: Int = p
