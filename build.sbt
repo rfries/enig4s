@@ -6,7 +6,7 @@ ThisBuild / organizationName := "enig4s"
 
 val v = new {
   val cats                  = "2.6.1"
-  val catsEffect            = "3.2.0"
+  val catsEffect            = "3.2.1"
   val scalatest             = "3.2.9"
   val scalatest_scalacheck  = "3.2.9.0"
 }

@@ -9,7 +9,7 @@ sealed case class ConfiguredWheel(
 
   val size: Int = wheel.size
 
-  override def advance(pos: KeyCode): KeyCode = pos.plusMod(size, KeyCode.one)
+  //override def advance(pos: KeyCode): KeyCode = pos.plusMod(size, KeyCode.one)
 
   override def translate(state: WheelState, key: KeyCode): KeyCode =
     wheel.wiring.forward(key.plusMod(size, state.position, ringSetting))
