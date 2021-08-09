@@ -1,8 +1,16 @@
 package org.somecode.enigma
 package mach
 
-sealed abstract case class Wiring private (forward: Vector[KeyCode], reverse: Vector[KeyCode]):
+import Machine.Bus
+
+sealed abstract case class Wiring private (
+  forward: Vector[KeyCode],
+  reverse: Vector[KeyCode]) extends Bus:
+
   def size: Int = forward.size
+  
+  override def translate(in: KeyCode): KeyCode = forward(in.toInt)
+  override def cotranslate(in: KeyCode): KeyCode = reverse(in.toInt)
 
 object Wiring:
   def fromString(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match

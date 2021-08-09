@@ -6,13 +6,14 @@ import Machine.{MachineState, Rotor, WheelState}
 
 case class Machine private (
   wheels: Vector[ConfiguredWheel],
-  reflector: Rotor):
+  reflector: Rotor,
+  kb: Wiring):
 
   def size: Int = reflector.size
 
   def advance(start: MachineState): MachineState =
 
-    def advanceIf(cond: Boolean, idx: Int): KeyCode =
+    def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
         start.wheelState(idx).position.plusMod(KeyCode.one)
       else
@@ -24,37 +25,39 @@ case class Machine private (
       .map { (pos, wheel) =>
         wheel.wheel.notches.contains(pos)
       }
-
     MachineState(
       Vector(
-        WheelState(advanceIf(true, 0)),
-        WheelState(advanceIf(atNotch(0) || atNotch(1), 1)),
-        WheelState(advanceIf(atNotch(1), 2))
+        WheelState(advanceIf(0, true)),
+        WheelState(advanceIf(1, atNotch(0) || atNotch(1))),
+        WheelState(advanceIf(2, atNotch(1)))
       )
     )
 
-  def translate(state: MachineState, in: ValidKeys): Either[String, ValidKeys] = ???
+  def translate(state: MachineState, in: ValidKeys): Either[String, (MachineState, ValidKeys)] = ???
 
 object Machine:
 
-  def apply (wheels: Vector[ConfiguredWheel],
-             reflector: Rotor): Either[String, Machine] =
+  def apply (
+    wheels: Vector[ConfiguredWheel],
+    reflector: Rotor,
+    kb: Wiring
+  ): Either[String, Machine] =
     if wheels.exists(_.size != reflector.size) then
       Left("Wheel sizes must match reflector size.")
+    else if kb.size != reflector.size then
+      Left(s"Keyboard wiring size (${kb.size}) must match the reflector size (${reflector.size}).")
     else
-      Right(new Machine(wheels, reflector))
-
-//    else if wheels.size != init.wheelState.size then
-//      Left(s"Initial state vector size (${init.wheelState.size}) must match the wheel vector size (${wheels.size}).")
-//    else if init.wheelState.exists(_.position >= reflector.size) then
-//      Left(s"Initial state vector must contain only values less than ${reflector.size}.")
+      Right(new Machine(wheels, reflector, kb))
 
   final case class MachineState(wheelState: Vector[WheelState])
   final case class WheelState(position: KeyCode)
 
   trait Bus:
     def size: Int
-    def translate(state: WheelState, key: KeyCode): KeyCode
+    def translate(key: KeyCode): KeyCode
+    def cotranslate(key: KeyCode): KeyCode
 
-  trait Rotor extends Bus:
+  trait Rotor:
+    def size: Int
+    def translate(state: WheelState, key: KeyCode): KeyCode
     def cotranslate(state: WheelState, key: KeyCode): KeyCode

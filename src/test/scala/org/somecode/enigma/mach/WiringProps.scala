@@ -2,28 +2,25 @@ package org.somecode.enigma
 package mach
 
 import scala.util.Random
-
 import org.scalacheck.Gen
-import org.scalacheck.Shrink.shrinkAny      // disable shrinking, which ignores Gen.const generator
+import org.scalacheck.Shrink.shrinkAny
 import org.scalatest.EitherValues.*
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
-  val Max = 26
+  import WiringProps._
   // note: adding a type annotation here causes compiler crash w/ scala 3.0.0
   // i.e. val genPosVector: Gen[Vector[Position]] =
-  val genMappings = Gen.const((0 to Max-1).toVector).map(Random.shuffle)
-
-  // reflectors cannot have any straight-through mappings
-  val genReflectorMappings: Gen[Vector[Int]] = genMappings suchThat
-    (v => !v.zipWithIndex.exists((p, idx) => p == idx))
 
   property("Wiring translation (properties)") {
-    forAll(genMappings) { (v: Vector[Int]) =>
+
+    // reflectors cannot have any straight-through mappings
+
+    forAll(genMappings) { (v: Vector[KeyCode]) =>
       whenever(v.length === Max) {
-        val wiring = Wiring.fromVector(v.map(KeyCode.unsafe)).value
+        val wiring = Wiring.fromVector(v).value
         (0 to Max-1).foreach { n =>
           val forward = wiring.forward(n)
           assert(forward === v(n))
@@ -33,3 +30,10 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
     }
   }
 
+object WiringProps:
+  val Max = 26
+  val genMappings: Gen[Vector[KeyCode]] = Gen.const(
+    (0 to Max-1).map(KeyCode.unsafe).toVector
+  ).map(Random.shuffle)
+  val genReflectorMappings: Gen[Vector[KeyCode]] = genMappings suchThat
+    (v => !v.zipWithIndex.exists((p, idx) => p == idx))
