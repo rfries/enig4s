@@ -6,7 +6,7 @@ import Machine.{MachineState, Rotor, WheelState}
 
 case class Machine private (
   wheels: Vector[ConfiguredWheel],
-  reflector: Rotor,
+  reflector: Reflector,
   kb: Wiring):
 
   def size: Int = reflector.size
@@ -39,7 +39,7 @@ object Machine:
 
   def apply (
     wheels: Vector[ConfiguredWheel],
-    reflector: Rotor,
+    reflector: Reflector,
     kb: Wiring
   ): Either[String, Machine] =
     if wheels.exists(_.size != reflector.size) then
