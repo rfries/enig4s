@@ -1,7 +1,7 @@
 package org.somecode.enigma
 package mach
 
-sealed abstract class ValidKeys private (max: Int, codes: Vector[KeyCode])
+sealed abstract case class ValidKeys private (max: Int, codes: Vector[KeyCode])
 
 object ValidKeys:
   def apply(max: Int, codes: Vector[KeyCode]): Either[String, ValidKeys] =

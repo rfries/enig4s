@@ -15,7 +15,7 @@ object KeyCode:
     v => v);
 
   extension (k: KeyCode)
-    //   def toInt: Int = p
+
     def next(mod: Int): KeyCode = KeyCode.unsafe((k + 1) % mod)
 
     def plusMod(mod: Int, others: KeyCode*): KeyCode =
