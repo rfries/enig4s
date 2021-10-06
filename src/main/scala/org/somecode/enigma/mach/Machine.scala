@@ -35,6 +35,7 @@ case class Machine private (
     )
 
   private def translateKeyCode(state: MachineState, in: KeyCode): KeyCode =
+    // recursive, but not tailrec since reverse translation must happen after recursive call
     def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
       if wheelNum >= wheels.size then
         reflector.translate(state.reflectorState, in)
@@ -59,8 +60,8 @@ case class Machine private (
   def crypt(state: MachineState, in: ValidKeys): Either[String, (MachineState, ValidKeys)] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
-    else if (in.max >= size)
-      Left(s"KeyCode max (${in.max}) not in range of rotor size ($size).")
+    else if (in.numCodes != size)
+      Left(s"ValidKeys code size (${in.numCodes}) does not match rotor size ($size).")
     else
       ???
 

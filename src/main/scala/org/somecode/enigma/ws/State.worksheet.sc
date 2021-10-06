@@ -10,21 +10,21 @@ val addOne: SomeState => (SomeState, Unit) = (s: SomeState) =>
   val nn = s.n + 1
   (SomeState(s.n + 1), ())
 
-def crypt(state: SomeState, c: Char): Char = (c ^ state.n).toChar
-def crypt(init: SomeState, text: Vector[Char]): Vector[(SomeState, Char)] =
+def cryptChar(state: SomeState, c: Char): Char = (c ^ state.n).toChar
+def cryptChars(init: SomeState, text: Vector[Char]): Vector[(SomeState, Char)] =
   @tailrec
   def next(state: SomeState, in: Vector[Char], out: Vector[(SomeState, Char)]): Vector[(SomeState, Char)] =
     in match
       case c +: remaining =>
           val (newState, _) = addOne(state)
-          next(newState, remaining, out :+ (newState, crypt(newState, c)))
+          next(newState, remaining, out :+ (newState, cryptChar(newState, c)))
       case _ => out
   next(init, text, Vector.empty)
 
 def crypt(state: SomeState, text: String): String =
-  String(crypt(state, text.toVector).toArray.map(_._2))
+  String(cryptChars(state, text.toVector).toArray.map(_._2))
 
-crypt(SomeState(0), crypt(SomeState(0), "Hello There!"))
+crypt(SomeState(23), crypt(SomeState(23), "Hello There!"))
 
 
 // val addOne: State[SomeState, Int] = State { (s: SomeState) =>
