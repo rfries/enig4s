@@ -6,9 +6,9 @@ import org.somecode.enigma.mach.KeyCode
 case class SomeState(n: Int)
 
 
-val addOne: SomeState => (SomeState, Unit) = (s: SomeState) =>
+val addOne: SomeState => (SomeState, Int) = (s: SomeState) =>
   val nn = s.n + 1
-  (SomeState(s.n + 1), ())
+  (SomeState(s.n + 1), nn)
 
 def cryptChar(state: SomeState, c: Char): Char = (c ^ state.n).toChar
 def cryptChars(init: SomeState, text: Vector[Char]): Vector[(SomeState, Char)] =
@@ -34,7 +34,7 @@ crypt(SomeState(23), crypt(SomeState(23), "Hello There!"))
 
 val ls = List(3,100,1000)
 
-State[SomeState,Unit].apply(addOne)
+State[SomeState,Int].apply(addOne)
 State.apply(addOne)
 
 ls.map(SomeState.apply).map(addOne)

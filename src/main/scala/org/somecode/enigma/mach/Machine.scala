@@ -3,6 +3,7 @@ package mach
 
 import cats.data.State
 import Machine.{MachineState, Rotor, WheelState}
+import scala.annotation.tailrec
 
 case class Machine private (
   wheels: Vector[ConfiguredWheel],
@@ -63,9 +64,17 @@ case class Machine private (
     else if (in.numCodes != size)
       Left(s"ValidKeys code size (${in.numCodes}) does not match rotor size ($size).")
     else
-      ???
-
-
+      @tailrec
+      def next(state: MachineState, in: Vector[KeyCode], out: Vector[(MachineState, KeyCode)]): Vector[(MachineState, KeyCode)] =
+        in match
+          case k +: remaining =>
+            val newState = advance(state)
+            val crypted = translateKeyCode(newState, k)
+            next(newState, remaining, out :+ newState -> crypted)
+          case _ => out
+      val res = next(state, in.codes, Vector.empty)
+      val newState = res.lastOption.map(_._1).getOrElse(state)
+      ValidKeys(in.numCodes, res.map(_._2)).map(keys => newState -> keys)
 
 object Machine:
 

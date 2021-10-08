@@ -1,3 +1,4 @@
+import org.somecode.enigma
 
 
 import org.somecode.enigma.mach.*
@@ -11,22 +12,26 @@ val wheel: Either[String, ConfiguredWheel] =
   Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Set("E"))
     .flatMap(_.configure(KeyCode.unsafe(0)))
 
-wheel match
-  case Left(msg) =>
-    println("*** bad wheel")
-  case Right(wheel) =>
-    println(">>> good wheel")
+val wheels: Vector[ConfiguredWheel] = Vector(
+  //Wheels.wheels.get("III").get
+)
 
-    val pos = KeyCode.unsafe(0)
-    val in = KeyCode.unsafe(20)
+// wheel match
+//   case Left(msg) =>
+//     println("*** bad wheel")
+//   case Right(wheel) =>
+//     println(">>> good wheel")
 
-    type WState = State[WheelState, Unit]
-    val adv: WState = State { wstate =>
-      if (wstate.atNotch || wstate.rightNotch)
-        (wstate.copy(position = wstate.position.next(wheel.size)), ())
-      else
-        (wstate, ())
-    }
+//     val pos = KeyCode.unsafe(0)
+//     val in = KeyCode.unsafe(20)
+
+//     type WState = State[WheelState, Unit]
+//     val adv: WState = State { wstate =>
+//       if (wstate.atNotch || wstate.rightNotch)
+//         (wstate.copy(position = wstate.position.next(wheel.size)), ())
+//       else
+//         (wstate, ())
+//     }
 
 /*
 
