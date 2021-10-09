@@ -24,7 +24,7 @@ sealed abstract case class Wheel private (
   def copy(
     wiring: Wiring = wiring,
     notches: Set[KeyCode] = notches): Either[String, Wheel] =
-      Wheel.apply(wiring, notches)
+      Wheel.apply(wiring, Notches(notches))
 
   def configure(setting: KeyCode): Either[String, ConfiguredWheel] =
     Either.cond(setting < size,
@@ -35,19 +35,19 @@ sealed abstract case class Wheel private (
 
 object Wheel:
 
-  def apply(wiring: Wiring, notches: Set[KeyCode]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: Notches): Either[String, Wheel] =
     if (wiring.size < 1)
       Left(s"Wheel size must be > 0.")
-    else if (notches.exists(_ >= wiring.size))
+    else if (notches.notches.exists(_ >= wiring.size))
       Left(s"Notch values must be between 0 and ${wiring.size-1}.")
     else
-      Right(new Wheel(wiring, notches) {})
+      Right(new Wheel(wiring, notches.notches) {})
 
   def apply(letterMap: String, notches: Set[String]): Either[String, Wheel] =
     for
       wiring <- Wiring.fromString(letterMap)
       notchCodes <- validateNotches(wiring.size, notches)
-      wheel <- Wheel(wiring, notchCodes)
+      wheel <- Wheel(wiring, Notches(notchCodes))
     yield
       wheel
 

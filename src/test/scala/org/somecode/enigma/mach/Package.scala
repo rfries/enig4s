@@ -1,4 +1,4 @@
-package org.somecode.enigma
+package org.somecode.enigma.mach
 
 // Common package-level definitions (formally in the package object)
 
