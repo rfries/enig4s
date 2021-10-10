@@ -10,13 +10,12 @@ object KeyCode:
   def apply(c: Int): Either[String, KeyCode] =
     Either.cond(c >= 0, c, s"KeyCode ($c) must be >= 0.")
 
-  def apply(c: Char): Either[String, KeyCode] = apply(c.toInt)
+  /** Chars are unsigned, and so are always positive (or zero) */
+  def apply(c: Char): KeyCode = c.toInt
 
   def unsafe(n: Int): KeyCode = apply(n).fold(
     s => throw new IllegalArgumentException(s),
     v => v);
-  
-  def unsafe(c: Char): KeyCode = unsafe(c.toInt)
 
   extension (k: KeyCode)
 

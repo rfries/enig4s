@@ -2,7 +2,7 @@ package org.somecode.enigma
 package mach
 
 sealed abstract case class ValidKeys private (numCodes: Int, codes: Vector[KeyCode]):
-  override def toString: String = String(codes.map(_.toChar).toArray)
+  override def toString: String = String(codes.map(k => (k + 'A').toChar).toArray)
 
 object ValidKeys:
   // Currently supports only 26 letters (upper case ASCII)
@@ -20,7 +20,8 @@ object ValidKeys:
   //   apply(numCodes, text.map(_.toChar))
 
   def apply(text: String): Either[String, ValidKeys] =
-    if (text.exists(_ >= NumCodesBasic))
-      Left(s"All characters must be between 0 and ${NumCodesBasic-1}.")
+    val uppered = text.toUpperCase
+    if (uppered.exists(c => c < 'A'|| c > 'Z'))
+      Left(s"All characters must be between A and Z ($uppered).")
     else
-      Right(new ValidKeys(NumCodesBasic, text.map(KeyCode.unsafe).toVector) {})
+      Right(new ValidKeys(NumCodesBasic, uppered.map(c => KeyCode.apply((c - 'A').toChar)).toVector) {})

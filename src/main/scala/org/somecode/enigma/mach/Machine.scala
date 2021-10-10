@@ -16,7 +16,7 @@ case class Machine private (
 
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
-        start.wheelState(idx).position.plusMod(KeyCode.one)
+        start.wheelState(idx).position.plusMod(size, KeyCode.one)
       else
         start.wheelState(idx).position
 
@@ -39,13 +39,13 @@ case class Machine private (
     // recursive, but not tailrec since reverse translation must happen after recursive call
     def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
       if wheelNum >= wheels.size then
-        reflector.translate(state.reflectorState, in)
+        reflector.translate(state.reflectorState, k)
       else
         val wheel = wheels(wheelNum)
         val wheelState = state.wheelState(wheelNum)
         wheel.cotranslate(
           wheelState,
-          translateRotor(wheelNum + 1, wheel.translate(wheelState, in))
+          translateRotor(wheelNum + 1, wheel.translate(wheelState, k))
         )
     kb.cotranslate(translateRotor(0, kb.translate(in)))
 

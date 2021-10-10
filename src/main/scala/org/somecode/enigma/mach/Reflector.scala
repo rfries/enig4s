@@ -10,10 +10,12 @@ sealed abstract case class Reflector private (wiring: Wiring)
   override def size: Int = wiring.size
 
   override def translate(state: WheelState, in: KeyCode): KeyCode =
-    wiring.forward(in.plusMod(state.position))
+    val out = wiring.forward(in.plusMod(size, state.position))
+    println(s"[${state.position}] $in --> $out")
+    out
 
   override def cotranslate(state: WheelState, in: KeyCode): KeyCode =
-    wiring.reverse(in).minusMod(state.position)
+    throw new RuntimeException("Cotranslation unsupported in reflectors.")
 
 object Reflector:
   def apply(wiring: Wiring): Either[String, Reflector] =
