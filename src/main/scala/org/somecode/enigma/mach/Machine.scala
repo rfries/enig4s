@@ -8,6 +8,7 @@ import scala.annotation.tailrec
 case class Machine private (
   wheels: Vector[ConfiguredWheel],
   reflector: Reflector,
+  plugboard: Plugboard,
   kb: Wiring):
 
   def size: Int = reflector.size
@@ -48,8 +49,8 @@ case class Machine private (
           wheelState,
           translateRotor(wheelNum + 1, wheel.translate(wheelNum, wheelState, k))
         )
-    val out = kb.cotranslate(translateRotor(0, kb.translate(in)))
-    println(f"[$in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})]")
+    val out = plugboard.cotranslate(kb.cotranslate(translateRotor(0, kb.translate(plugboard.translate(in)))))
+    println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
     out
 
   def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
@@ -84,6 +85,7 @@ object Machine:
   def apply (
     wheels: Vector[ConfiguredWheel],
     reflector: Reflector,
+    plugboard: Plugboard,
     kb: Wiring
   ): Either[String, Machine] =
     if wheels.exists(_.size != reflector.size) then
@@ -91,7 +93,7 @@ object Machine:
     else if kb.size != reflector.size then
       Left(s"Keyboard wiring size (${kb.size}) must match the reflector size (${reflector.size}).")
     else
-      Right(new Machine(wheels, reflector, kb))
+      Right(new Machine(wheels, reflector, plugboard, kb))
 
   final case class WheelState(position: KeyCode)
   final case class MachineState(wheelState: Vector[WheelState], reflectorState: WheelState)

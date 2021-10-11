@@ -29,10 +29,24 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val reflector = Reflector(Wirings.B).require
       val in = ValidKeys("AAAAA").require
 
-      Machine(wheels, reflector, Wirings.ETW) match
+      Machine(wheels, reflector, Plugboard.empty,  Wirings.ETW) match
         case Right(mach) =>
           val (newState, out) = mach.crypt(simpleInitState, in).require
           out.toString shouldBe "BDZGO"
+          info(s"$in => $out")
+        case Left(msg) => fail("Failed to initialize Machine: $msg")
+    }
+
+    "encrypt a valid string with basic settings and plugs" in {
+      val wheels = simpleWheels(KeyCode.zero, KeyCode.zero, KeyCode.zero)
+      val reflector = Reflector(Wirings.B).require
+      val in = ValidKeys("AAAAA").require
+      val plugboard = Plugboard(26, Set("AZ", "SO", "FB")).require
+
+      Machine(wheels, reflector, plugboard, Wirings.ETW) match
+        case Right(mach) =>
+          val (newState, out) = mach.crypt(simpleInitState, in).require
+          out.toString shouldBe "UTZJY"
           info(s"$in => $out")
         case Left(msg) => fail("Failed to initialize Machine: $msg")
     }
@@ -42,7 +56,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val reflector = Reflector(Wirings.B).require
       val in = ValidKeys("AAAAA").require
 
-      Machine(wheels, reflector, Wirings.ETW) match
+      Machine(wheels, reflector, Plugboard.empty, Wirings.ETW) match
         case Right(mach) =>
           val (newState, out) = mach.crypt(simpleInitState, in).require
           out.toString shouldBe "EWTYX"

@@ -1,14 +1,28 @@
 package org.somecode.enigma
 package mach
 
-final case class Plugboard private (size: Int, forward: Map[KeyCode, KeyCode]):
+final case class Plugboard private (size: Int, map: Map[KeyCode, KeyCode]):
 
-  val reverse = forward.toList.map((k, v) => (v, k)).toMap
   val maxPlugs = size / 2
+
+  def translate(in: KeyCode): KeyCode =
+    val out = map.get(in).getOrElse(in)
+    println(f"p:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
+    out
+
+  /**
+   * This method is only distinct from translate for debugging and tracing (it is functionally identical.
+   */
+  def cotranslate(in: KeyCode): KeyCode =
+    val out = map.get(in).getOrElse(in)
+    println(f"p:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
+    out
 
 object Plugboard:
 
   def maxSize = 26
+
+  def empty = new Plugboard(maxSize, Map.empty)
 
   private def validSize(size: Int): Either[String, Int] =
     if (size < 1) then Left(s"Plugboard size ($size) must be greater than 0.")
@@ -37,14 +51,14 @@ object Plugboard:
         case map if map.keySet.exists(badKeys) || values.exists(badKeys) =>
           Left(s"Key mappings must be >= 0 and < $size")
         case map =>
-          // Since we already know that the map keys are distinct, we
-          // only need tocheck the values for distinctness.
-          if values.size != values.distinct.size then
-            Left("Pairings can not share sources or targets.")
+          val allVals = values ++ pairings.keySet
+          // this check also covers pairings that map to themselves (since that requires duplicates)
+          if allVals.size != allVals.distinct.size then
+            Left("Key codes cannot be duplicated in either source or target of pairings.")
           else if map.exists((k, v) => k.toInt == v.toInt) then
             Left("Pairings cannot map to themselves.")
           else
-            Right(map)
+            Right(map ++ map.toList.map((k, v) => (v, k)).toMap)
 
   def apply(size: Int, pairings: Map[KeyCode, KeyCode]): Either[String, Plugboard] =
     for

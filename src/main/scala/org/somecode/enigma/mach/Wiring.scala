@@ -8,9 +8,16 @@ sealed abstract case class Wiring private (
   reverse: Vector[KeyCode]) extends Bus:
 
   def size: Int = forward.size
-  
-  override def translate(in: KeyCode): KeyCode = forward(in.toInt)
-  override def cotranslate(in: KeyCode): KeyCode = reverse(in.toInt)
+
+  override def translate(in: KeyCode): KeyCode =
+    val out = forward(in.toInt)
+    //println(f"w:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
+    out
+
+  override def cotranslate(in: KeyCode): KeyCode =
+    val out = reverse(in.toInt)
+    //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
+    out
 
 object Wiring:
   def fromString(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match

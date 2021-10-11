@@ -19,7 +19,7 @@ sealed case class ConfiguredWheel(
       .minusMod(size, state.position)
       .plusMod(size, ringSetting)
 
-    println(f"$wheelNum: [${state.position}] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
+    println(f"$wheelNum: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
   override def cotranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
@@ -29,7 +29,7 @@ sealed case class ConfiguredWheel(
       .minusMod(size, state.position)
       .plusMod(size, ringSetting)
 
-    println(f"$wheelNum: [${state.position}] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
+    println(f"$wheelNum: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
 sealed abstract case class Wheel private (
