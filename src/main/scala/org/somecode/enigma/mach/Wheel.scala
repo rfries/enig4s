@@ -11,26 +11,25 @@ sealed case class ConfiguredWheel(
 
   override def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
 
-    val out = wheel.wiring.translate(
-      in.plusMod(size, state.position, ringSetting)
-    ).minusMod(size, state.position)
-
+    val out = wheel
+      .wiring
+      .translate(
+        in.plusMod(size, state.position).minusMod(size, ringSetting)
+      )
+      .minusMod(size, state.position)
+      .plusMod(size, ringSetting)
 
     println(f"$wheelNum: [${state.position}] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-
     out
-    // wheel.wiring.translate(
-    //   in.plusMod(size, state.position, ringSetting)
-    // ).minusMod(size, state.position)
 
   override def cotranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out = wheel
       .wiring
-      .cotranslate(in.plusMod(size, state.position, ringSetting))
-      .minusMod(size, state.position, ringSetting)
+      .cotranslate(in.plusMod(size, state.position).minusMod(size, ringSetting))
+      .minusMod(size, state.position)
+      .plusMod(size, ringSetting)
 
     println(f"$wheelNum: [${state.position}] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
-
     out
 
 sealed abstract case class Wheel private (

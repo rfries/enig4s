@@ -6,71 +6,47 @@ import org.somecode.enigma.mach.Machine.MachineState
 import org.somecode.enigma.mach.Machine.WheelState
 
 final class MachineSpec extends AnyWordSpec with should.Matchers:
+
+  def simpleWheels(ringSetting1: KeyCode, ringSetting2: KeyCode, ringSetting3: KeyCode): Vector[ConfiguredWheel] =
+    Vector(
+        Wheels.III.configure(ringSetting3).require,
+        Wheels.II.configure(ringSetting2).require,
+        Wheels.I.configure(ringSetting1).require
+      )
+
+  def simpleInitState: MachineState = MachineState(
+      Vector(
+        WheelState(KeyCode.zero),
+        WheelState(KeyCode.zero),
+        WheelState(KeyCode.zero)
+      ),
+      WheelState(KeyCode.zero)
+    )
+
   "Machine" should {
     "encrypt a valid string with basic settings" in {
-      val wheels = Vector(
-        //Wheels.III.configure(KeyCode.unsafe(2)).require,
-        Wheels.III.configure(KeyCode.zero).require,
-        Wheels.II.configure(KeyCode.zero).require,
-        Wheels.I.configure(KeyCode.zero).require
-      )
-
+      val wheels = simpleWheels(KeyCode.zero, KeyCode.zero, KeyCode.zero)
       val reflector = Reflector(Wirings.B).require
-      val mstate = MachineState(
-        Vector(
-          WheelState(KeyCode.zero),
-          WheelState(KeyCode.zero),
-          WheelState(KeyCode.zero)
-        ),
-        WheelState(KeyCode.zero)
-      )
-
       val in = ValidKeys("AAAAA").require
 
       Machine(wheels, reflector, Wirings.ETW) match
         case Right(mach) =>
-          val (newState, out) = mach.crypt(mstate, in).require
+          val (newState, out) = mach.crypt(simpleInitState, in).require
           out.toString shouldBe "BDZGO"
           info(s"$in => $out")
         case Left(msg) => fail("Failed to initialize Machine: $msg")
     }
 
     "encrypt a valid string with basic settings plus ring settings" in {
-      val wheels = Vector(
-        //Wheels.III.configure(KeyCode.unsafe(2)).require,
-        Wheels.III.configure(KeyCode.one).require,
-        Wheels.II.configure(KeyCode.one).require,
-        Wheels.I.configure(KeyCode.one).require
-      )
-
+      val wheels = simpleWheels(KeyCode.one, KeyCode.one, KeyCode.one)
       val reflector = Reflector(Wirings.B).require
-      val mstate = MachineState(
-        Vector(
-          WheelState(KeyCode.zero),
-          WheelState(KeyCode.zero),
-          WheelState(KeyCode.zero)
-        ),
-        WheelState(KeyCode.zero)
-      )
-
       val in = ValidKeys("AAAAA").require
 
       Machine(wheels, reflector, Wirings.ETW) match
         case Right(mach) =>
-          val (newState, out) = mach.crypt(mstate, in).require
+          val (newState, out) = mach.crypt(simpleInitState, in).require
           out.toString shouldBe "EWTYX"
           info(s"$in => $out")
         case Left(msg) => fail("Failed to initialize Machine: $msg")
     }
   }
-
-trait Run:
-  def run: Unit =
-    Wheel("ZABCDEFGHIJKLMNOPQRSTUVWXY", Set("A", "N"))
-      .flatMap(_.configure(KeyCode.unsafe(1))) match
-      case Left(s) => throw new RuntimeException(s)
-      case Right(wheel) =>
-        println(wheel.toString)
-        println(wheel.ringSetting)
-      //summon[Show[Position]].show(rotor.ringSetting)
-end Run
