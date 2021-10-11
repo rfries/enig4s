@@ -44,10 +44,13 @@ case class Machine private (
         val wheel = wheels(wheelNum)
         val wheelState = state.wheelState(wheelNum)
         wheel.cotranslate(
+          wheelNum,
           wheelState,
-          translateRotor(wheelNum + 1, wheel.translate(wheelState, k))
+          translateRotor(wheelNum + 1, wheel.translate(wheelNum, wheelState, k))
         )
-    kb.cotranslate(translateRotor(0, kb.translate(in)))
+    val out = kb.cotranslate(translateRotor(0, kb.translate(in)))
+    println(f"[$in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})]")
+    out
 
   def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
     if (state.wheelState.size != wheels.size)
@@ -109,5 +112,5 @@ object Machine:
     */
   trait Rotor:
     def size: Int
-    def translate(state: WheelState, key: KeyCode): KeyCode
-    def cotranslate(state: WheelState, key: KeyCode): KeyCode
+    def translate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
+    def cotranslate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode

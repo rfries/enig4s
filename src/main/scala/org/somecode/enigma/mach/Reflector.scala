@@ -4,18 +4,15 @@ package mach
 import cats.implicits.*
 import org.somecode.enigma.mach.Machine.{MachineState, WheelState}
 
-sealed abstract case class Reflector private (wiring: Wiring)
-  extends Machine.Rotor:
+sealed abstract case class Reflector private (wiring: Wiring):
 
-  override def size: Int = wiring.size
+  def size: Int = wiring.size
 
-  override def translate(state: WheelState, in: KeyCode): KeyCode =
+  def translate(state: WheelState, in: KeyCode): KeyCode =
     val out = wiring.forward(in.plusMod(size, state.position))
-    println(s"[${state.position}] $in --> $out")
+    //println(s"r: [${state.position}] $in (${(in + 'A').toChar}) --> $out (${(out + 'A').toChar})")
+    println(f"r: [${state.position}] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
     out
-
-  override def cotranslate(state: WheelState, in: KeyCode): KeyCode =
-    throw new RuntimeException("Cotranslation unsupported in reflectors.")
 
 object Reflector:
   def apply(wiring: Wiring): Either[String, Reflector] =
