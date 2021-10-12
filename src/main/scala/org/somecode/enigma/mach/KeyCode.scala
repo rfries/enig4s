@@ -1,6 +1,11 @@
 package org.somecode.enigma
 package mach
 
+import scala.util.FromDigits
+import scala.util.FromDigits.WithRadix
+import scala.util.FromDigits.FromDigitsException
+import scala.util.FromDigits.NumberTooSmall
+
 opaque type KeyCode <: Int = Int
 object KeyCode:
 
@@ -16,6 +21,13 @@ object KeyCode:
   def unsafe(n: Int): KeyCode = apply(n).fold(
     s => throw new IllegalArgumentException(s),
     v => v);
+
+  given FromDigits.WithRadix[KeyCode] with
+    override def fromDigits(s: String, radix: Int): KeyCode =
+      FromDigits.intFromDigits(s, radix) match
+        case n if n > 0 => n
+        case n => throw new NumberTooSmall("KeyCodes must be positive.")
+
 
   extension (k: KeyCode)
 

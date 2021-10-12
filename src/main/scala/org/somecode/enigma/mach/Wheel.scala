@@ -10,7 +10,6 @@ sealed case class ConfiguredWheel(
   val size: Int = wheel.size
 
   override def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
-
     val out = wheel
       .wiring
       .translate(
@@ -25,7 +24,9 @@ sealed case class ConfiguredWheel(
   override def cotranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out = wheel
       .wiring
-      .cotranslate(in.plusMod(size, state.position).minusMod(size, ringSetting))
+      .cotranslate(
+        in.plusMod(size, state.position).minusMod(size, ringSetting)
+      )
       .minusMod(size, state.position)
       .plusMod(size, ringSetting)
 
