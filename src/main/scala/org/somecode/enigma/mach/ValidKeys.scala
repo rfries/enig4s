@@ -10,18 +10,15 @@ object ValidKeys:
 
   def apply(numCodes: Int, text: Vector[KeyCode]): Either[String, ValidKeys] =
     if (numCodes < 1)
-      Left("ValidKeys max ($max) must be positive.")
+      Left(s"ValidKeys numCodes ($numCodes) must be positive.")
     else if (text.exists(k => k < 0 || k >= numCodes))
       Left(s"All KeyCodes must be between 0 and ${numCodes-1}.")
     else
       Right(new ValidKeys(numCodes, text) {})
 
-  // def apply(numCodes: Int, text: Vector[Char]): Either[String, ValidKeys] =
-  //   apply(numCodes, text.map(_.toChar))
-
   def apply(text: String): Either[String, ValidKeys] =
     val uppered = text.toUpperCase
     if (uppered.exists(c => c < 'A'|| c > 'Z'))
-      Left(s"All characters must be between A and Z ($uppered).")
+      Left("All characters must be between A and Z.")
     else
       Right(new ValidKeys(NumCodesBasic, uppered.map(c => KeyCode.apply((c - 'A').toChar)).toVector) {})

@@ -9,7 +9,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
 
   "Machine" should {
     "encrypt a string with basic wheel settings" in {
-      val wheels = configureWheels(Wheels.I -> 0, Wheels.II -> 0, Wheels.III -> 0)
+      val wheels = configureWheels(Wheels.I -> 'A', Wheels.II -> 'A', Wheels.III -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
       val in = ValidKeys("AAAAA").require
@@ -20,7 +20,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
 
     "encrypt a string with basic wheel settings plus ring settings" in {
-      val wheels = configureWheels(Wheels.I -> 1, Wheels.II -> 1, Wheels.III -> 1)
+      val wheels = configureWheels(Wheels.I -> 'B', Wheels.II -> 'B', Wheels.III -> 'B')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
       val in = ValidKeys("AAAAA").require
@@ -31,7 +31,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
 
     "encrypt a valid string with basic wheel settings and plugs" in {
-      val wheels = configureWheels(Wheels.I -> 0, Wheels.II -> 0, Wheels.III -> 0)
+      val wheels = configureWheels(Wheels.I -> 'A', Wheels.II -> 'A', Wheels.III -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
       val in = ValidKeys("AAAAA").require
@@ -43,7 +43,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
 
     "encrypt a valid string with more complex settings" in {
-      val wheels = configureWheels(Wheels.I -> 14, Wheels.II -> 2, Wheels.III -> 22) // OCW
+      val wheels = configureWheels(Wheels.I -> 'O', Wheels.II -> 'C', Wheels.III -> 'W')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('D', 'H', 'X'))
       val in = ValidKeys("ZELDA").require
@@ -55,7 +55,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
 
     "encrypt a valid string through a double-step sequence" in {
-      val wheels = configureWheels(Wheels.III -> 0, Wheels.II -> 0, Wheels.I -> 0)
+      val wheels = configureWheels(Wheels.III -> 'A', Wheels.II -> 'A', Wheels.I -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('K', 'D', 'O'))
       val in = ValidKeys("AAAAA").require
@@ -68,8 +68,8 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
   }
 
-  def configureWheels(wheelConfigs: (Wheel, Int)*): Seq[ConfiguredWheel] =
-    wheelConfigs.reverse.map((wheel, setting) => wheel.configure(KeyCode.unsafe(setting)).require)
+  def configureWheels(wheelConfigs: (Wheel, Char)*): Seq[ConfiguredWheel] =
+    wheelConfigs.reverse.map((wheel, setting) => wheel.configure(KeyCode.unsafe(setting - 'A')).require)
 
   def machineState(wheelState: Vector[Char], reflectorState: Char = '\u0000'): MachineState =
     MachineState(

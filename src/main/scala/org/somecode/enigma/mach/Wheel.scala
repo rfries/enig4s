@@ -1,6 +1,7 @@
 package org.somecode.enigma
 package mach
 
+import cats.implicits.*
 import Machine.*
 
 sealed case class ConfiguredWheel(
@@ -80,3 +81,12 @@ object Wheel:
         Left("Notch specifications must be between 'A' and 'Z'.")
       else
         Right(notchCodes.map(KeyCode.unsafe))
+
+  def configureWheels(wheelConfigs: (Wheel, Char)*): Either[String, Seq[ConfiguredWheel]] =
+    wheelConfigs.reverse.map { (wheel, setting) =>
+      if setting < 1 || setting >= wheel.size then
+        Left(s"Wheel setting (${setting.toInt}) must be between 0 and ${wheel.size-1}.")
+      else
+        wheel.configure(KeyCode.unsafe(setting - 'A'))
+    }.sequence
+
