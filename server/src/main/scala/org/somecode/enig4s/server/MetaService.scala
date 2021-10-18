@@ -1,20 +1,28 @@
 package org.somecode.enig4s.server
 
 import cats.effect._
+import cats.implicits._
+import org.http4s.HttpRoutes
+import org.http4s.dsl.*
+import fs2.concurrent.SignallingRef
 import fs2.Stream
-import org.http4s._
-import org.http4s.dsl._
-import scala.concurrent.duration._
 
-object MetaService {
+import scala.concurrent.duration.*
 
-  def routes[F[_]: Async]: HttpRoutes[F] = {
+object MetaService:
+
+  def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean]): HttpRoutes[F] = {
     val dsl = new Http4sDsl[F]{}
     import dsl._
     HttpRoutes.of[F] {
-      case GET -> Root / "ok" => Ok("enig4s http ok\n")
+      case GET -> Root / "ok" =>
+        Ok(s"${BuildInfo.name} ${BuildInfo.version} ok\n")
       case GET -> Root / "stream" => Ok(produce(1.second, 5){ case (d, i) => s"$i: $d\n"})
-      case GET -> Root / "seconds" => Status.Ok(seconds.map(_.toString))
+      case POST -> Root / "shutdown" =>
+        for
+          _ <- shutdown.set(true)
+          res <- Ok()
+        yield res
     }
   }
 
@@ -26,6 +34,3 @@ object MetaService {
       }
       .map(f)
       .take(count)
-
-  def seconds[F[_]: Temporal]: Stream[F, FiniteDuration] = Stream.awakeEvery[F](1.second)
-}

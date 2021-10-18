@@ -58,7 +58,6 @@ lazy val jsLibs = Seq(
 )
 
 lazy val root = project.in(file("."))
-  .enablePlugins(BuildInfoPlugin)
   .aggregate(enig4s.js, enig4s.jvm)
   .settings(
     publish := {},
@@ -70,13 +69,13 @@ lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
   .settings(
     name := "enig4s",
     scalaVersion := "3.0.2",
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "org.somecode.enig4s.server",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
     commonLibs
   )
-  .jvmConfigure(_.in(file("server")))
+  .jvmConfigure(_.in(file("server")).enablePlugins(BuildInfoPlugin))
   .jvmSettings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "org.somecode.enig4s.server",
     jvmLibs
   )
   .jsConfigure(_.in(file("client")).enablePlugins(ScalaJSBundlerPlugin))
