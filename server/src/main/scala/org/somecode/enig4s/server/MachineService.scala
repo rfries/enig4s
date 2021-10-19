@@ -4,7 +4,7 @@ import cats.effect.Concurrent
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
-object MachineService {
+object MachineService:
   def routes[F[_]: Concurrent]: HttpRoutes[F] = {
     val dsl = new Http4sDsl[F] {}
     import dsl.*
@@ -12,4 +12,3 @@ object MachineService {
       case GET -> Root / "mach" => Ok("Ok")
     }
   }
-}

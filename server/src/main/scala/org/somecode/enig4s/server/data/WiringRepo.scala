@@ -1,0 +1,44 @@
+package org.somecode.enig4s
+package server
+package data
+
+import org.somecode.enigma.mach.Wiring
+
+object WiringRepo:
+  def getWiring(name: String): Either[String, Wiring] =
+    nameMap
+      .get(name)
+      .toRight(s"$name not found.")
+      .flatMap(Wiring.fromString)
+
+  private val nameMap: Map[String,String] = Map(
+    "IC"      -> "DMTWSILRUYQNKFEJCAZBPGXOHV",
+    "IIC"     -> "HQZGPJTMOBLNCIFDYAWVEUSRKX",
+    "IIIC"    -> "UQNTLSZFMREHDPXKIBVYGJCWOA",
+    "IR"      -> "JGDQOXUSCAMIFRVTPNEWKBLZYH",
+    "IIR"     -> "NTZPSFBOKMWRCJDIVLAEYUXHGQ",
+    "IIIR"    -> "JVIUBHTCDYAKEQZPOSGXNRMWFL",
+    "UKWR"    -> "QYHOGNECVPUZTFDJAXWMKISRBL",
+    "ETWR"    -> "QWERTZUIOASDFGHJKPYXCVBNML",
+    "IK"      -> "PEZUOHXSCVFMTBGLRINQJWAYDK",
+    "IIK"     -> "ZOUESYDKFWPCIQXHMVBLGNJRAT",
+    "IIIK"    -> "EHRVXGAOBQUSIMZFLYNWKTPDJC",
+    "UKWK"    -> "IMETCGFRAYSQBZXWLHKDVUPOJN",
+    "ETWK"    -> "QWERTZUIOASDFGHJKPYXCVBNML",
+    "I"       -> "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
+    "II"      -> "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+    "III"     -> "BDFHJLCPRTXVZNYEIWGAKMUSQO",
+    "IV"      -> "ESOVPZJAYQUIRHXLNFTGKDCMWB",
+    "V"       -> "VZBRGITYUPSDNHLXAWMJQOFECK",
+    "VI"      -> "JPGVOUMFYQBENHZRDKASXLICTW",
+    "VII"     -> "NZJHGRCXMYSWBOUFAIVLPEKQDT",
+    "VIII"    -> "FKQHTLXOCBJSPDZRAMEWNIUYGV",
+    "BETA"    -> "LEYJVCNIXWPBQMDRTAKZGFUHOS",
+    "GAMMA"   -> "FSOKANUERHMBTIYCWLQPZXVGJD",
+    "A"       -> "EJMZALYXVBWFCRQUONTSPIKHGD",
+    "B"       -> "YRUHQSLDPXNGOKMIEBFZCWVJAT",
+    "C"       -> "FVPJIAOYEDRZXWGCTKUQSBNMHL",
+    "B_THIN"  -> "ENKQAUYWJICOPBLMDXZVFTHRGS",
+    "C_THIN"  -> "RDOBJNTKVEHMLFCWZAXGYIPSUQ",
+    "ETW"     -> "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  )

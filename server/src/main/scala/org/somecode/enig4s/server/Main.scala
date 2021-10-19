@@ -19,18 +19,19 @@ object Main extends IOApp:
 
   private[server] def serverStream[F[_]: Async]: Stream[F, ExitCode] =
     for
-      shutdown <- Stream.eval(SignallingRef[F, Boolean](false))
-      exitCode <- Stream.eval(Ref[F].of(ExitCode.Success))
-      ret <-  BlazeServerBuilder[F]
-                .bindHttp(8080, "0.0.0.0")
-                .withHttpApp(routes[F](shutdown).orNotFound)
-                .serveWhile(shutdown, exitCode)
-    yield
-      ret
+      // create the shutdown signal and exit status ref (success if not changed)
+      shutdown  <- Stream.eval(SignallingRef[F, Boolean](false))
+      exitCode  <- Stream.eval(Ref[F].of(ExitCode.Success))
+      // create the server
+      ret       <- BlazeServerBuilder[F]
+                    .bindHttp(8080, "0.0.0.0")
+                    .withHttpApp(routes[F](shutdown).orNotFound)
+                    .serveWhile(shutdown, exitCode)
+    yield ret
 
   private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean]): HttpRoutes[F] =
     Router(
-      "files"     ->    fileService[F](FileService.Config[F]("./static")),
-      "mach"      ->    MachineService.routes,
-      "meta"      ->    MetaService.routes(shutdown)
+      "files"   ->  fileService[F](FileService.Config[F]("./static")),
+      "mach"    ->  MachineService.routes,
+      "meta"    ->  MetaService.routes(shutdown)
     )
