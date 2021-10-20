@@ -64,7 +64,7 @@ object Wheel:
 
   def apply(letterMap: String, notches: Set[String]): Either[String, Wheel] =
     for
-      wiring <- Wiring.fromString(letterMap)
+      wiring <- Wiring(letterMap)
       notchCodes <- validateNotches(wiring.size, notches)
       wheel <- Wheel(wiring, Notches(notchCodes))
     yield

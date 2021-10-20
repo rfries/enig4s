@@ -9,6 +9,9 @@ object MachineService:
     val dsl = new Http4sDsl[F] {}
     import dsl.*
     HttpRoutes.of[F] {
-      case GET -> Root / "mach" => Ok("Ok")
+      case GET -> Root / "wheels" =>
+        case class WheelDesc(name: String, mapping: String, notches: Vector[String])
+
+        Ok("Ok")
     }
   }

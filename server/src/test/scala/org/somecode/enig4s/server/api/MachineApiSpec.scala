@@ -11,7 +11,7 @@ object MachineApiSpec:
     "wheels": [
       { "wheelName": "I" },
       { "wheelName": "II" },
-      { "wheel": "YZABCDEFGHIJKLMNOPQRSTUVWX" }
+      { "wheel": "YZABCDEFGHIJKLMNOPQRSTUVWX", "notches": ["C", "J"] }
     ],
     "reflectorName": "UKW-B",
     "ringSettings": "PQL",
@@ -19,4 +19,4 @@ object MachineApiSpec:
     "plugs": ["AN", "ST", "ZG", "UH", "KP", "YM"],
     "text": "THIS IS A TEST MESSAGE"
   }
-  """
+"""

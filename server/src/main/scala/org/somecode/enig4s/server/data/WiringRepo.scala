@@ -2,14 +2,19 @@ package org.somecode.enig4s
 package server
 package data
 
+import cats.implicits._
 import org.somecode.enigma.mach.Wiring
 
 object WiringRepo:
-  def getWiring(name: String): Either[String, Wiring] =
-    nameMap
-      .get(name)
-      .toRight(s"$name not found.")
-      .flatMap(Wiring.fromString)
+  def getWiring(name: String): Either[String, Option[Wiring]] = nameMap
+    .get(name) match
+      //case s @ Some(_) => s.map(mapping => Wiring(mapping)).sequence
+      case Some(mapping) => Wiring(mapping).map(Some.apply)
+      case None => Right(None)
+
+  def getAllWirings: Map[String, Wiring] = nameMap
+    .map((name, mapping) => name -> Wiring(mapping))
+    .collect{ case (name, Right(wiring)) => name -> wiring }
 
   private val nameMap: Map[String,String] = Map(
     "IC"      -> "DMTWSILRUYQNKFEJCAZBPGXOHV",

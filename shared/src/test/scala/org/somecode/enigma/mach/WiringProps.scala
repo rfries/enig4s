@@ -20,7 +20,7 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
     forAll(genMappings) { (v: Vector[KeyCode]) =>
       whenever(v.length === Max) {
-        val wiring = Wiring.fromVector(v).value
+        val wiring = Wiring(v).value
         (0 to Max-1).foreach { n =>
           val forward = wiring.forward(n)
           assert(forward === v(n))

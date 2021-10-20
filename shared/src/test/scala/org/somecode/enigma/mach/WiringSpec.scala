@@ -10,9 +10,9 @@ import org.scalatest.wordspec.AnyWordSpec
 
 object WiringSpecFixtures:
   val goodWiring: Vector[Wiring] = Vector(
-    Wiring.fromString("ZABCDEFGHIJKLMNOPQRSTUVWXY").value,
-    Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
-    Wiring.fromString("ABCDE").value
+    Wiring("ZABCDEFGHIJKLMNOPQRSTUVWXY").value,
+    Wiring("BCDEFGHIJKLMNOPQRSTUVWXYZA").value,
+    Wiring("ABCDE").value
   )
 
   val goodWiringStrings: Vector[String] = Vector(
@@ -37,13 +37,13 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
     "allow creation with well-formed letter maps" in {
       WiringSpecFixtures.goodWiringStrings.foreach {
         wstr =>
-         Wiring.fromString(wstr).value shouldBe a [Wiring]
+         Wiring(wstr).value shouldBe a [Wiring]
       }
     }
 
     "fail creation with badly-formed letter maps" in {
       WiringSpecFixtures.badWiringStrings.foreach {
-        wstr => assert(Wiring.fromString(wstr).isLeft, wstr)
+        wstr => assert(Wiring(wstr).isLeft, wstr)
       }
     }
 
@@ -51,10 +51,10 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
       val p0 = KeyCode.zero
       val p1 = KeyCode(1).value
 
-      val wiringId = Wiring.fromString("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value
+      val wiringId = Wiring("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value
       assert(wiringId.forward(p0.toInt) === p0)
       assert(wiringId.reverse(p0.toInt) === p0)
-      val wiringPlusOne = Wiring.fromString("BCDEFGHIJKLMNOPQRSTUVWXYZA").value
+      val wiringPlusOne = Wiring("BCDEFGHIJKLMNOPQRSTUVWXYZA").value
       assert(wiringPlusOne.forward(p0.toInt) === p1)
       assert(wiringPlusOne.reverse(p1.toInt) === p0)
     }
