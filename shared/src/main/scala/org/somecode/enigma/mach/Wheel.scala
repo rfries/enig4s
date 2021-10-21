@@ -43,7 +43,7 @@ sealed abstract case class Wheel private (
   def copy(
     wiring: Wiring = wiring,
     notches: Set[KeyCode] = notches): Either[String, Wheel] =
-      Wheel.apply(wiring, Notches(notches))
+      Wheel.apply(wiring, notches)
 
   def configure(setting: KeyCode): Either[String, ConfiguredWheel] =
     Either.cond(setting < size,
@@ -54,31 +54,40 @@ sealed abstract case class Wheel private (
 
 object Wheel:
 
-  def apply(wiring: Wiring, notches: Notches): Either[String, Wheel] =
-    if (wiring.size < 1)
+  def apply(wiring: Wiring, notches: Set[KeyCode]): Either[String, Wheel] =
+    if wiring.size < 1 then
       Left(s"Wheel size must be > 0.")
-    else if (notches.notches.exists(_ >= wiring.size))
+    else if notches.exists(_ >= wiring.size) then
       Left(s"Notch values must be between 0 and ${wiring.size-1}.")
     else
-      Right(new Wheel(wiring, notches.notches) {})
+      Right(new Wheel(wiring, notches) {})
 
-  def apply(letterMap: String, notches: Set[String]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: String): Either[String, Wheel] =
     for
-      wiring <- Wiring(letterMap)
       notchCodes <- validateNotches(wiring.size, notches)
-      wheel <- Wheel(wiring, Notches(notchCodes))
+      wheel <- Wheel(wiring, notchCodes)
     yield
       wheel
 
-  def validateNotches(wheelSize: Int, notches: Set[String]): Either[String, Set[KeyCode]] =
-    if (wheelSize < 1 || wheelSize > 26)
+  def apply(letterMap: String, notches: String): Either[String, Wheel] =
+    for
+      wiring <- Wiring(letterMap)
+      notchCodes <- validateNotches(wiring.size, notches)
+      wheel <- Wheel(wiring, notchCodes)
+    yield
+      wheel
+
+  def validateNotches(wheelSize: Int, notches: String): Either[String, Set[KeyCode]] =
+    if wheelSize < 1 || wheelSize > 26 then
       Left("Notch specifier strings only supported for wheel sizes up to 26.")
-    else if (notches.exists(_.size != 1))
-      Left("All notch strings must have a length of 1.")
+    else if notches.size != notches.distinct.size then
+      Left("Notch specifier cannot contain duplicate symbols.")
+    else if notches.size > wheelSize then
+      Left(s"Notch specifier length (${notches.size}) cannot be greater than wheel size ($wheelSize).")
     else
-      val notchCodes = notches.map(s => s(0) - 'A')
-      if (notchCodes.exists(n => n < 0 || n >= wheelSize))
-        Left("Notch specifications must be between 'A' and 'Z'.")
+      val notchCodes = notches.map(_ - 'A').toSet
+      if notchCodes.exists(n => n < 0 || n >= wheelSize) then
+        Left(s"Notch specifications must be between 0 and $wheelSize.")
       else
         Right(notchCodes.map(KeyCode.unsafe))
 

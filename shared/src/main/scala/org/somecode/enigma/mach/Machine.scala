@@ -37,7 +37,10 @@ case class Machine private (
     )
 
   private def translateKeyCode(state: MachineState, in: KeyCode): KeyCode =
-    // recursive, but not tailrec since reverse translation must happen after recursive call
+
+    // Recursive, but not tailrec since reverse translation must happen after recursive call.
+    // This should really use something that trampolines instead of full recursion.
+
     def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
       if wheelNum >= wheels.size then
         reflector.translate(state.reflectorState, k)
@@ -49,6 +52,7 @@ case class Machine private (
           wheelState,
           translateRotor(wheelNum + 1, wheel.translate(wheelNum, wheelState, k))
         )
+
     val out = plugboard.cotranslate(kb.cotranslate(translateRotor(0, kb.translate(plugboard.translate(in)))))
     println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
     out
