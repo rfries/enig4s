@@ -1,4 +1,6 @@
-package org.somecode.enig4s.server
+package org.somecode.enig4s
+package server
+package service
 
 import cats.effect.Concurrent
 import org.http4s.HttpRoutes
@@ -10,8 +12,6 @@ object MachineService:
     import dsl.*
     HttpRoutes.of[F] {
       case GET -> Root / "wheels" =>
-        case class WheelDesc(name: String, mapping: String, notches: Vector[String])
-
         Ok("Ok")
     }
   }

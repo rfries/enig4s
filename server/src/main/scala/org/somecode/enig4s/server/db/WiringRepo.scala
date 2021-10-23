@@ -1,6 +1,6 @@
 package org.somecode.enig4s
 package server
-package data
+package db
 
 import cats.implicits._
 import org.somecode.enigma.mach.Wiring

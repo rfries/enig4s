@@ -1,5 +1,8 @@
-package org.somecode.enig4s.server.api
+package org.somecode.enig4s
+package server
+package api
 
+import io.circe.parser.*
 class MachineApiSpec {
 
 }
@@ -11,7 +14,7 @@ object MachineApiSpec:
     "wheels": [
       { "wheelName": "I" },
       { "wheelName": "II" },
-      { "wheel": "YZABCDEFGHIJKLMNOPQRSTUVWX", "notches": ["C", "J"] }
+      { "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX", "notches": "CJ" }
     ],
     "reflectorName": "UKW-B",
     "ringSettings": "PQL",
