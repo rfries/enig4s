@@ -11,6 +11,7 @@ import org.http4s.server.websocket.WebSocketBuilder2
 
 import scala.concurrent.ExecutionContext.global
 import fs2.concurrent.SignallingRef
+import org.somecode.enig4s.server.service.MachineService
 
 object Main extends IOApp:
 
