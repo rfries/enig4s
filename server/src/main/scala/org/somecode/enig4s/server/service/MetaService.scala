@@ -16,7 +16,7 @@ object MetaService:
     import dsl._
     HttpRoutes.of[F] {
       case GET -> Root / "ok" =>
-        Ok(s"${BuildInfo.name} ${BuildInfo.version} ok\n")
+        Ok(s"OK ${BuildInfo.name} ${BuildInfo.version}\n")
       case GET -> Root / "stream" => Ok(produce(1.second, 5){ case (d, i) => s"$i: $d\n"})
       case POST -> Root / "shutdown" =>
         for

@@ -33,6 +33,6 @@ object Main extends IOApp:
   private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean]): HttpRoutes[F] =
     Router(
       "files"   ->  fileService[F](FileService.Config[F]("./static")),
-      "mach"    ->  MachineService.routes,
+      "mach"    ->  MachineService().routes,
       "meta"    ->  MetaService.routes(shutdown)
     )

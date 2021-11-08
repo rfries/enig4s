@@ -15,5 +15,5 @@ final case class MachineRequest(
   text: String
 )
 
-object MachineRequest:
-  given Decoder[MachineRequest] = deriveDecoder[MachineRequest]
+//object MachineRequest:
+  //given Decoder[MachineRequest] = deriveDecoder[MachineRequest]
