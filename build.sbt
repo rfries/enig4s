@@ -11,13 +11,13 @@ val v = new {
   val scalatest_scalacheck  = "3.2.10.0"
 
   val circe                 = "0.14.1"
-  val http4s                = "0.23.6"
+  val http4s                = "1.0.0-M29"
   val fs2                   = "3.1.5"
   val monocle               = "3.1.0"
   val scalajs               = "1.7.1" // not used directly
-  val scalajsCss            = "0.8.0-RC1"
-  val scalajsDom            = "1.2.0"
-  val scalajsReact          = "2.0.0-RC3"
+  val scalajsCss            = "1.0.0"
+  val scalajsDom            = "2.0.0"
+  val scalajsReact          = "2.0.0"
 }
 
 lazy val commonLibs = Seq(
@@ -53,7 +53,7 @@ lazy val jsLibs = Seq(
     "com.github.japgolly.scalajs-react"   %%% "extra"         % v.scalajsReact,
     "com.github.japgolly.scalacss"        %%% "core"          % v.scalajsCss,
     "com.github.japgolly.scalacss"        %%% "ext-react"     % v.scalajsCss,
-    ("org.scala-js" %%% "scalajs-dom" % v.scalajsDom).cross(CrossVersion.for3Use2_13)
+    "org.scala-js"                        %%% "scalajs-dom"   % v.scalajsDom
   )
 )
 
@@ -68,7 +68,7 @@ lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
   .in(file("."))
   .settings(
     name := "enig4s",
-    scalaVersion := "3.0.2",
+    scalaVersion := "3.1.0",
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
     commonLibs
   )
