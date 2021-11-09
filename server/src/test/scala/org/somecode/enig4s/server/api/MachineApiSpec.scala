@@ -12,13 +12,24 @@ object MachineApiSpec:
   {
     "machineType": "M3",
     "wheels": [
-      { "wheelName": "I" },
-      { "wheelName": "II" },
-      { "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX", "notches": "CJ" }
+      {
+        "wheelName": "I",
+        "position": "A",
+        "ringSetting": "P"
+      },
+      {
+        "wheelName": "II"
+        "position": "Q",
+        "ringSetting": "E"
+      },
+      {
+        "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
+        "notches": "CJ",
+        "position": "M",
+        "ringSetting": "C"
+      }
     ],
     "reflectorName": "UKW-B",
-    "ringSettings": "PQL",
-    "wheelPositions": "AHM",
     "plugs": ["AN", "ST", "ZG", "UH", "KP", "YM"],
     "text": "THIS IS A TEST MESSAGE"
   }

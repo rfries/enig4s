@@ -26,8 +26,7 @@ object KeyCode:
     override def fromDigits(s: String, radix: Int): KeyCode =
       FromDigits.intFromDigits(s, radix) match
         case n if n > 0 => n
-        case n => throw new NumberTooSmall("KeyCodes must be positive.")
-
+        case n => throw new NumberTooSmall("KeyCodes cannot be negative.")
 
   extension (k: KeyCode)
 

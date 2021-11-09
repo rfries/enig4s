@@ -114,7 +114,7 @@ object Machine:
     * A stateful translation using wheels (modulo position).  Only the caller
     * of translate/cotranslate knows the aggregate wheel state (machine state)
     * and can make decisions about advancement, so the wheel state is passed in
-    * as a parameter as opposed to having its own [State].
+    * as a parameter as opposed to having its own state.
     */
   trait Rotor:
     def size: Int

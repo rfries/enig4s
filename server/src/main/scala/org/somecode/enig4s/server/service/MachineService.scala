@@ -22,7 +22,6 @@ class MachineService[F[_]](using F: Async[F]) extends Http4sDsl[F]:
         for
           mreq <- req.as[MachineRequest]
           resp <- Ok(MachineResponse("AAA", "SENDMORECHUCKBERRY").asJson)
-          //resp <- Ok(json"""{ "hello": "there" }""")
         yield resp
 
       case GET -> Root / "wheels" =>
