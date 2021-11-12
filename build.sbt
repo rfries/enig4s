@@ -1,8 +1,8 @@
 
-ThisBuild / scalaVersion     := "3.0.2"
-ThisBuild / version          := "0.2.0-SNAPSHOT"
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "enig4s"
+ThisBuild / scalaVersion     := "3.1.0"
+ThisBuild / version          := "0.2.0-SNAPSHOT"
 
 val v = new {
   val cats                  = "2.6.1"
@@ -57,28 +57,68 @@ lazy val jsLibs = Seq(
   )
 )
 
+
 lazy val root = project.in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(enig4s.js, enig4s.jvm)
+  .aggregate(rootJVM, rootJS)
 
-lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
-  .in(file("."))
+lazy val rootJVM = project
+  .enablePlugins(NoPublishPlugin)
+  .aggregate(core.jvm, jsapi.jvm, server)
+
+lazy val rootJS = project
+  .enablePlugins(NoPublishPlugin)
+  .aggregate(core.js, jsapi.js, client)
+
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("core"))
+  .enablePlugins(NoPublishPlugin)
   .settings(
-    name := "enig4s",
-    scalaVersion := "3.1.0",
+    name := "enig4s-core",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "org.somecode.enig4s.server",
+    commonLibs
+  )
+  .enablePlugins(BuildInfoPlugin)
+  .jvmSettings(jvmLibs)
+  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
+  .jsSettings(jsLibs)
+
+lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("jsapi"))
+  .dependsOn(core)
+  .settings(
+    name := "enig4s-jsapi",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "org.somecode.enig4s.server",
+    commonLibs
+  )
+  .enablePlugins(BuildInfoPlugin)
+  .jvmSettings(jvmLibs)
+  .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
+  .jsSettings(jsLibs)
+
+lazy val server = project.in(file("server"))
+  .settings(
+    name := "enig4s-server",
+    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "org.somecode.enig4s.server",
+    commonLibs
+  )
+  .dependsOn(core.jvm, jsapi.jvm)
+
+lazy val client = project.in(file("client"))
+  .enablePlugins(ScalaJSPlugin)
+  .settings(
+    name := "enig4s-client",
+    scalaJSUseMainModuleInitializer := true,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
     commonLibs
   )
-  .enablePlugins(NoPublishPlugin)
-  .jvmConfigure(_.in(file("server")).enablePlugins(BuildInfoPlugin))
-  .jvmSettings(
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "org.somecode.enig4s.server",
-    jvmLibs
-  )
-  .jsConfigure(_.in(file("client")).enablePlugins(ScalaJSBundlerPlugin))
-  .jsSettings(
-    //scalaVersion := "2.13.6", // scala 2 for now
-    scalaJSUseMainModuleInitializer := true,
-    jsLibs
-  )
+  .dependsOn(core.js, jsapi.js)
+

@@ -12,7 +12,7 @@ import org.http4s.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
-import org.somecode.enig4s.server.api.{MachineRequest, MachineResponse}
+import org.somecode.enig4s.jsapi.{MachineRequest, MachineResponse}
 
 class MachineService[F[_]](using F: Async[F]) extends Http4sDsl[F]:
 

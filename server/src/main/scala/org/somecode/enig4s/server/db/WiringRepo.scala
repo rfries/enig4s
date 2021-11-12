@@ -3,7 +3,7 @@ package server
 package db
 
 import cats.implicits._
-import org.somecode.enigma.mach.Wiring
+import org.somecode.enig4s.mach.Wiring
 
 object WiringRepo:
   def getWiring(name: String): Either[String, Option[Wiring]] = nameMap
