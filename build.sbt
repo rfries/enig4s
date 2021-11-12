@@ -12,7 +12,7 @@ val v = new {
 
   val circe                 = "0.14.1"
   val http4s                = "1.0.0-M29"
-  val fs2                   = "3.1.5"
+  val fs2                   = "3.2.2"
   val monocle               = "3.1.0"
   val scalajs               = "1.7.1" // not used directly
   val scalajsCss            = "1.0.0"
@@ -58,11 +58,8 @@ lazy val jsLibs = Seq(
 )
 
 lazy val root = project.in(file("."))
+  .enablePlugins(NoPublishPlugin)
   .aggregate(enig4s.js, enig4s.jvm)
-  .settings(
-    publish := {},
-    publishLocal := {},
-  )
 
 lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
   .in(file("."))
@@ -72,6 +69,7 @@ lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
     commonLibs
   )
+  .enablePlugins(NoPublishPlugin)
   .jvmConfigure(_.in(file("server")).enablePlugins(BuildInfoPlugin))
   .jvmSettings(
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
@@ -84,7 +82,3 @@ lazy val enig4s = crossProject(JSPlatform, JVMPlatform)
     scalaJSUseMainModuleInitializer := true,
     jsLibs
   )
-
-lazy val server = enig4s.jvm
-
-lazy val client = enig4s.js
