@@ -2,10 +2,11 @@ package org.somecode.enig4s.server
 
 import cats.effect._
 import cats.implicits._
-import org.http4s.HttpRoutes
-import org.http4s.dsl.*
 import fs2.concurrent.SignallingRef
 import fs2.Stream
+import org.http4s.HttpRoutes
+import org.http4s.dsl.*
+import org.http4s.implicits.*
 
 import scala.concurrent.duration.*
 

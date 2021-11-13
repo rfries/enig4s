@@ -1,8 +1,12 @@
 
 ThisBuild / organization     := "org.somecode"
-ThisBuild / organizationName := "enig4s"
+ThisBuild / organizationName := "Some Code"
 ThisBuild / scalaVersion     := "3.1.0"
 ThisBuild / version          := "0.2.0-SNAPSHOT"
+
+ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
+
+ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
 val v = new {
   val cats                  = "2.6.1"
@@ -14,7 +18,7 @@ val v = new {
   val http4s                = "1.0.0-M29"
   val fs2                   = "3.2.2"
   val monocle               = "3.1.0"
-  val scalajs               = "1.7.1" // not used directly
+  val scalajs               = "1.7.1" // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
   val scalajsDom            = "2.0.0"
   val scalajsReact          = "2.0.0"
@@ -43,7 +47,7 @@ lazy val jvmLibs = Seq(
     "org.http4s"                  %% "http4s-blaze-server"  % v.http4s,
     "org.http4s"                  %% "http4s-blaze-client"  % v.http4s,
     "org.http4s"                  %% "http4s-circe"         % v.http4s,
-    "org.http4s"                  %% "http4s-dsl"           % v.http4s,
+    "org.http4s"                  %% "http4s-dsl"           % v.http4s
   )
 )
 
@@ -73,15 +77,12 @@ lazy val rootJS = project
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("core"))
-  .enablePlugins(NoPublishPlugin)
+  .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
   .settings(
     name := "enig4s-core",
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "org.somecode.enig4s.server",
+    buildInfoPackage := "org.somecode.enig4s",
     commonLibs
   )
-  .enablePlugins(BuildInfoPlugin)
   .jvmSettings(jvmLibs)
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(jsLibs)
@@ -89,24 +90,21 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("jsapi"))
+  .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
   .dependsOn(core)
   .settings(
     name := "enig4s-jsapi",
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
-    buildInfoPackage := "org.somecode.enig4s.server",
+    buildInfoPackage := "org.somecode.enig4s.jsapi",
     commonLibs
   )
-  .enablePlugins(BuildInfoPlugin)
   .jvmSettings(jvmLibs)
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
   .jsSettings(jsLibs)
 
 lazy val server = project.in(file("server"))
+  .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
   .settings(
     name := "enig4s-server",
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
-    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "org.somecode.enig4s.server",
     commonLibs
   )
@@ -117,8 +115,6 @@ lazy val client = project.in(file("client"))
   .settings(
     name := "enig4s-client",
     scalaJSUseMainModuleInitializer := true,
-    Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS"),
     commonLibs
   )
   .dependsOn(core.js, jsapi.js)
-
