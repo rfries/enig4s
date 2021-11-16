@@ -15,15 +15,13 @@ class CharacterMap private (mapping: String):
 
   def size: Int = forward.size
 
-  def toKeyCodes(in: String): Either[String, ValidKeys] =
+  def stringtoKeyCodes(in: String): Either[String, Vector[KeyCode]] =
     in.map(forward.get).toVector.sequence match {
-      case Some(out) =>
-        println(s">>>> in >>>> $out")
-        ValidKeys(size, out)
+      case Some(out) => Right(out)
       case None => Left("CharacterMap: invalid character in input.")
     }
 
-  def fromKeyCodes(in: Vector[KeyCode]): Either[String, String] =
+  def keyCodesToString(in: Vector[KeyCode]): Either[String, String] =
     in.map(reversed.get).sequence match {
       case Some(out) => Right(String(out.toArray))
       case None => Left("Key code not found in character map.")

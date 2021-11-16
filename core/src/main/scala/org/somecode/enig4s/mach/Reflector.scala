@@ -10,7 +10,6 @@ sealed abstract case class Reflector private (wiring: Wiring):
 
   def translate(state: WheelState, in: KeyCode): KeyCode =
     val out = wiring.forward(in.plusMod(size, state.position))
-    //println(s"r: [${state.position}] $in (${(in + 'A').toChar}) --> $out (${(out + 'A').toChar})")
     println(f"r: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
     out
 
