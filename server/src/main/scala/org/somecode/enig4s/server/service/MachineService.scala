@@ -3,7 +3,6 @@ package server
 package service
 
 import cats.effect.Concurrent
-import cats.effect.Async
 import cats.implicits.*
 import io.circe.*
 import io.circe.syntax.*
@@ -14,14 +13,14 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.implicits.*
 import org.somecode.enig4s.jsapi.{MachineRequest, MachineResponse}
 
-class MachineService[F[_]](using F: Async[F]) extends Http4sDsl[F]:
+class MachineService[F[_]](using F: Concurrent[F]) extends Http4sDsl[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req @ POST -> Root =>
         for
           mreq <- req.as[MachineRequest]
-          resp <- Ok(MachineResponse("AAA", "SENDMORECHUCKBERRY").asJson)
+          resp <- machineRequest(mreq)
         yield resp
 
       case GET -> Root / "wheels" =>
@@ -30,4 +29,4 @@ class MachineService[F[_]](using F: Async[F]) extends Http4sDsl[F]:
   }
 
   def machineRequest(mreq: MachineRequest): F[Response[F]] =
-    Ok()
+    Ok(MachineResponse("AAA", "SENDMORECHUCKBERRY").asJson)
