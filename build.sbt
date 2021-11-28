@@ -77,7 +77,7 @@ lazy val rootJS = project
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("core"))
-  .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
+  .enablePlugins(BuildInfoPlugin)
   .settings(
     name := "enig4s-core",
     buildInfoPackage := "org.somecode.enig4s",
@@ -90,7 +90,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .in(file("jsapi"))
-  .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
+  .enablePlugins(BuildInfoPlugin)
   .dependsOn(core)
   .settings(
     name := "enig4s-jsapi",
@@ -111,7 +111,7 @@ lazy val server = project.in(file("server"))
   .dependsOn(core.jvm, jsapi.jvm)
 
 lazy val client = project.in(file("client"))
-  .enablePlugins(ScalaJSPlugin)
+  .enablePlugins(NoPublishPlugin,ScalaJSPlugin)
   .settings(
     name := "enig4s-client",
     scalaJSUseMainModuleInitializer := true,
