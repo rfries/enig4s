@@ -1,6 +1,14 @@
 package org.somecode.enig4s
 package mach
 
+/**
+  * Represents an Enigma-style plugboard, in which each patch represents two
+  * characters which are swapped.
+  *
+  * @param size   bus size
+  * @param map    set of character to character mappings which represent the
+  *               patch pairs
+  */
 final case class Plugboard private (size: Int, map: Map[KeyCode, KeyCode]):
 
   val maxPlugs = size / 2
@@ -13,7 +21,7 @@ final case class Plugboard private (size: Int, map: Map[KeyCode, KeyCode]):
   /**
    * This method is only distinct from translate for debugging and tracing (it is functionally identical.
    */
-  def cotranslate(in: KeyCode): KeyCode =
+  def reverseTranslate(in: KeyCode): KeyCode =
     val out = map.get(in).getOrElse(in)
     println(f"p:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out

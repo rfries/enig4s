@@ -2,15 +2,15 @@
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "Some Code"
 ThisBuild / scalaVersion     := "3.1.0"
-ThisBuild / version          := "0.2.0-SNAPSHOT"
+ThisBuild / version          := "0.2.1-SNAPSHOT"
 
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
 ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
 val v = new {
-  val cats                  = "2.6.1"
-  val catsEffect            = "3.2.9"
+  val cats                  = "2.7.0"
+  val catsEffect            = "3.3.0"
   val scalatest             = "3.2.10"
   val scalatest_scalacheck  = "3.2.10.0"
 

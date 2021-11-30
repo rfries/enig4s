@@ -22,10 +22,10 @@ sealed case class ConfiguredWheel(
     println(f"$wheelNum: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
-  override def cotranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
+  override def reverseTranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out = wheel
       .wiring
-      .cotranslate(
+      .reverseTranslate(
         in.plusMod(size, state.position).minusMod(size, ringSetting)
       )
       .minusMod(size, state.position)

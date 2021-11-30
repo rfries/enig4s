@@ -9,8 +9,8 @@ case class Machine private (
   wheels: Seq[ConfiguredWheel],
   reflector: Reflector,
   plugboard: Plugboard,
-  kb: Wiring):
-
+  kb: Wiring
+):
   def size: Int = reflector.size
 
   def advance(start: MachineState): MachineState =
@@ -47,13 +47,18 @@ case class Machine private (
       else
         val wheel = wheels(wheelNum)
         val wheelState = state.wheelState(wheelNum)
-        wheel.cotranslate(
+        wheel.reverseTranslate(
           wheelNum,
           wheelState,
           translateRotor(wheelNum + 1, wheel.translate(wheelNum, wheelState, k))
         )
 
-    val out = plugboard.cotranslate(kb.cotranslate(translateRotor(0, kb.translate(plugboard.translate(in)))))
+    val out =
+      plugboard.reverseTranslate(
+        kb.reverseTranslate(
+          translateRotor(0, kb.translate(plugboard.translate(in)))
+        )
+      )
     println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
     out
 
@@ -84,6 +89,8 @@ case class Machine private (
       val newState = res.lastOption.map(_._1).getOrElse(state)
       ValidKeys(in.numCodes, res.map(_._2)).map(keys => newState -> keys)
 
+end Machine
+
 object Machine:
 
   def apply (
@@ -108,15 +115,17 @@ object Machine:
   trait Bus:
     def size: Int
     def translate(key: KeyCode): KeyCode
-    def cotranslate(key: KeyCode): KeyCode
+    def reverseTranslate(key: KeyCode): KeyCode
 
   /**
     * A stateful translation using wheels (modulo position).  Only the caller
-    * of translate/cotranslate knows the aggregate wheel state (machine state)
+    * of translate/reverseTranslate knows the aggregate wheel state (machine state)
     * and can make decisions about advancement, so the wheel state is passed in
     * as a parameter as opposed to having its own state.
     */
   trait Rotor:
     def size: Int
     def translate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
-    def cotranslate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
+    def reverseTranslate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
+
+end Machine

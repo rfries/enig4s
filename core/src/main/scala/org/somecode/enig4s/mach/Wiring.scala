@@ -5,7 +5,8 @@ import Machine.Bus
 
 sealed abstract case class Wiring private (
   forward: Vector[KeyCode],
-  reverse: Vector[KeyCode]) extends Bus:
+  reverse: Vector[KeyCode]
+) extends Bus:
 
   def size: Int = forward.size
 
@@ -14,12 +15,15 @@ sealed abstract case class Wiring private (
     //println(f"w:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
-  override def cotranslate(in: KeyCode): KeyCode =
+  override def reverseTranslate(in: KeyCode): KeyCode =
     val out = reverse(in.toInt)
     //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
+end Wiring
+
 object Wiring:
+
   def apply(letterMap: String): Either[String, Wiring] = letterMap.toUpperCase match
     case s if s.isEmpty => Left(s"Letter maps must not be zero length.")
     case s if s.length != s.distinct.length => Left(s"Letter maps must not contain duplicate characters.")
@@ -40,3 +44,5 @@ object Wiring:
       Left("Wiring vector must be continuous.")
     else
       Right(new Wiring(v, rev.map((_, idx) => KeyCode.unsafe(idx))) {})
+
+end Wiring
