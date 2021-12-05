@@ -6,12 +6,13 @@ import Machine.{MachineState, Rotor, WheelState}
 import scala.annotation.tailrec
 
 case class Machine private (
-  wheels: Seq[ConfiguredWheel],
+  characterMap: CharacterMap,
+  wheels: Seq[Wheel],
   reflector: Reflector,
   plugboard: Plugboard,
   kb: Wiring
 ):
-  def size: Int = reflector.size
+  def size: Int = characterMap.size
 
   def advance(start: MachineState): MachineState =
 
@@ -25,7 +26,7 @@ case class Machine private (
       .map(_.position)
       .zip(wheels)
       .map { (pos, wheel) =>
-        wheel.wheel.notches.contains(pos)
+        wheel.notches.contains(pos)
       }
     MachineState(
       Vector(
@@ -38,8 +39,12 @@ case class Machine private (
 
   private def translateKeyCode(state: MachineState, in: KeyCode): KeyCode =
 
-    // Recursive, but not tailrec since reverse translation must happen after recursive call.
-    // This should really use something that trampolines instead of full recursion.
+
+    // Recursive, but not tailrec since the return path translation happens after the
+    // recursive call (i.e. after hitting the reflector, which is the bottom of the call stack)
+    //
+    // This should really use something that trampolines instead of full recursion, but it
+    // shouldn't matter much as long as the number of wheels is a smallish integer.
 
     def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
       if wheelNum >= wheels.size then
@@ -94,7 +99,8 @@ end Machine
 object Machine:
 
   def apply (
-    wheels: Seq[ConfiguredWheel],
+    characterMap: CharacterMap,
+    wheels: Seq[Wheel],
     reflector: Reflector,
     plugboard: Plugboard,
     kb: Wiring
@@ -104,7 +110,7 @@ object Machine:
     else if kb.size != reflector.size then
       Left(s"Keyboard wiring size (${kb.size}) must match the reflector size (${reflector.size}).")
     else
-      Right(new Machine(wheels, reflector, plugboard, kb))
+      Right(new Machine(characterMap, wheels, reflector, plugboard, kb))
 
   final case class WheelState(position: KeyCode)
   final case class MachineState(wheelState: Vector[WheelState], reflectorState: WheelState)

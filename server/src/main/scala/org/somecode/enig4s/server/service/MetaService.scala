@@ -1,4 +1,6 @@
-package org.somecode.enig4s.server
+package org.somecode.enig4s
+package server
+package service
 
 import cats.effect._
 import cats.implicits._

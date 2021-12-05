@@ -16,9 +16,9 @@ object ValidKeys:
     else
       Right(new ValidKeys(numCodes, text) {})
 
-  def apply(text: String): Either[String, ValidKeys] =
-    val uppered = text.toUpperCase
-    if (uppered.exists(c => c < 'A'|| c > 'Z'))
-      Left("All characters must be between A and Z.")
-    else
-      Right(new ValidKeys(NumCodesBasic, uppered.map(c => KeyCode.apply((c - 'A').toChar)).toVector) {})
+  // def apply(text: String): Either[String, ValidKeys] =
+  //   val uppered = text.toUpperCase
+  //   if (uppered.exists(c => c < 'A'|| c > 'Z'))
+  //     Left("All characters must be between A and Z.")
+  //   else
+  //     Right(new ValidKeys(NumCodesBasic, uppered.map(KeyCode.apply).toVector) {})

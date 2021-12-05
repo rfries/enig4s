@@ -1,5 +1,4 @@
-package org.somecode.enig4s
-package mach
+package org.somecode.enig4s.mach
 
 import org.scalacheck.Gen
 import org.scalacheck.Shrink.shrinkAny      // disable shrinking, which ignores Gen.const generator
