@@ -6,7 +6,7 @@ import Machine.{MachineState, Rotor, WheelState}
 import scala.annotation.tailrec
 
 case class Machine private (
-  characterMap: CharacterMap,
+  characterMap: CharMap,
   wheels: Seq[Wheel],
   reflector: Reflector,
   plugboard: Plugboard,
@@ -99,7 +99,7 @@ end Machine
 object Machine:
 
   def apply (
-    characterMap: CharacterMap,
+    characterMap: CharMap,
     wheels: Seq[Wheel],
     reflector: Reflector,
     plugboard: Plugboard,

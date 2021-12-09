@@ -4,7 +4,7 @@ package mach
 import cats.*
 import cats.implicits.*
 
-class CharacterMap private (mapping: String):
+class CharMap private (mapping: String):
 
   val forward: Map[Char, KeyCode] = mapping
     .zipWithIndex
@@ -30,16 +30,16 @@ class CharacterMap private (mapping: String):
       case None => Left("Key code not found in character map.")
     }
 
-end CharacterMap
+end CharMap
 
-object CharacterMap:
+object CharMap:
 
-  def apply(mapping: String): Either[String, CharacterMap] =
+  def apply(mapping: String): Either[String, CharMap] =
     if (mapping.size != mapping.distinct.size)
       Left("Character maps must not contain duplicate values.")
     else
-      Right(new CharacterMap(mapping))
+      Right(new CharMap(mapping))
 
-  val AZ: CharacterMap = CharacterMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ").getOrElse(throw RuntimeException("Character Map: Bad Init"));
+  val AZ: CharMap = CharMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ").getOrElse(throw RuntimeException("Character Map: Bad Init"));
 
-end CharacterMap
+end CharMap

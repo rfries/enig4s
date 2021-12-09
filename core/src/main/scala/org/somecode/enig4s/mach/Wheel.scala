@@ -60,13 +60,13 @@ object Wheel:
     yield
       wheel
 
-  def apply(letterMap: String, notches: String, ringSetting: KeyCode): Either[String, Wheel] =
-    for
-      wiring <- Wiring(letterMap)
-      notchCodes <- validateNotches(wiring.size, notches)
-      wheel <- apply(wiring, notchCodes, ringSetting)
-    yield
-      wheel
+  // def apply(letterMap: String, notches: String, ringSetting: KeyCode): Either[String, Wheel] =
+  //   for
+  //     wiring <- Wiring(letterMap)
+  //     notchCodes <- validateNotches(wiring.size, notches)
+  //     wheel <- apply(wiring, notchCodes, ringSetting)
+  //   yield
+  //     wheel
 
   def validateNotches(wheelSize: Int, notches: String): Either[String, Set[KeyCode]] =
     if (wheelSize < 1 || wheelSize > 26)
