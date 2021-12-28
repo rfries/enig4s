@@ -12,7 +12,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val wheels = configureWheels(Wheels.I -> 'A', Wheels.II -> 'A', Wheels.III -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
-      val in = CharMap.AZ.stringToValidKeys("AAAAA").require
+      val in = "AAAAA"
 
       Machine(CharMap.AZ, wheels, reflector, Plugboard.empty,  Wirings.ETW) match
         case Right(mach) => verifyText(mach, machState, in, "BDZGO")
@@ -23,7 +23,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val wheels = configureWheels(Wheels.I -> 'B', Wheels.II -> 'B', Wheels.III -> 'B')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
-      val in = CharMap.AZ.stringToValidKeys("AAAAA").require
+      val in = "AAAAA"
 
       Machine(CharMap.AZ, wheels, reflector, Plugboard.empty, Wirings.ETW) match
         case Right(mach) => verifyText(mach, machState, in, "EWTYX")
@@ -34,7 +34,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val wheels = configureWheels(Wheels.I -> 'A', Wheels.II -> 'A', Wheels.III -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A', 'A', 'A'))
-      val in = CharMap.AZ.stringToValidKeys("AAAAA").require
+      val in = "AAAAA"
       val plugboard = Plugboard(26, Set("AZ", "SO", "FB")).require
 
       Machine(CharMap.AZ, wheels, reflector, plugboard, Wirings.ETW) match
@@ -46,7 +46,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val wheels = configureWheels(Wheels.I -> 'O', Wheels.II -> 'C', Wheels.III -> 'W')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('D', 'H', 'X'))
-      val in = CharMap.AZ.stringToValidKeys("ZELDA").require
+      val in = "ZELDA"
       val plugboard = Plugboard(26, Set("SD", "FG", "HJ", "QY", "EC", "RV", "TB", "ZN", "UM")).require
 
       Machine(CharMap.AZ, wheels, reflector, plugboard, Wirings.ETW) match
@@ -58,7 +58,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val wheels = configureWheels(Wheels.III -> 'A', Wheels.II -> 'A', Wheels.I -> 'A')
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('K', 'D', 'O'))
-      val in = CharMap.AZ.stringToValidKeys("AAAAA").require
+      val in = "AAAAA"
 
       Machine(CharMap.AZ, wheels, reflector, Plugboard.empty, Wirings.ETW) match
         case Right(mach) =>
@@ -77,7 +77,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       WheelState(KeyCode.unsafe(reflectorState))
     )
 
-  def verifyText(mach: Machine, state: MachineState, in: ValidKeys, expected: String): MachineState =
+  def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
     val (newState, out) = mach.crypt(state, in).require
     out.toString shouldBe expected
     info(s"$in => $out")

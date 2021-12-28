@@ -1,7 +1,7 @@
 package org.somecode.enig4s
 package mach
 
-import Machine.Bus
+import org.somecode.enig4s.mach.Machine.Bus
 
 sealed abstract case class Wiring private (
   forward: Vector[KeyCode],

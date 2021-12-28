@@ -15,13 +15,12 @@ class CharMap private (mapping: String):
 
   def size: Int = forward.size
 
-  def stringToValidKeys(in: String): Either[String, ValidKeys] =
-    stringToKeyCodes(in).flatMap(vk => ValidKeys(size, vk))
-
   def stringToKeyCodes(in: String): Either[String, Vector[KeyCode]] =
     in.map(forward.get).toVector.sequence match {
       case Some(out) => Right(out)
-      case None => Left("CharacterMap: invalid character in input.")
+      case None =>
+        val bad = in.filterNot(forward.isDefinedAt).map(c => f"'$c%c (${c.toInt}%#04x)").mkString(",")
+        Left(s"Invalid character(s) for character map: $bad")
     }
 
   def keyCodesToString(in: Vector[KeyCode]): Either[String, String] =
@@ -40,6 +39,7 @@ object CharMap:
     else
       Right(new CharMap(mapping))
 
-  val AZ: CharMap = CharMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ").getOrElse(throw RuntimeException("Character Map: Bad Init"));
+  val AZ: CharMap = CharMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    .getOrElse(throw RuntimeException("Character Map: Bad Init"));
 
 end CharMap

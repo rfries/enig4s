@@ -17,9 +17,9 @@ object WiringSpecFixtures:
 
   val goodWiringStrings: Vector[String] = Vector(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    "abCDfeGHIJKLMNpoQRSTUVWXYZ",
+    "ABCDFEGHIJKLMNPOQRSTUVWXYZ",
     "ZABCDEFGHIJKLMNOPQRSTUVWXY",
-    "Q"
+    "A"
   )
 
   val badWiringStrings: Vector[String] = Vector(

@@ -2,7 +2,7 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
-import Machine.*
+import org.somecode.enig4s.mach.Machine.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
@@ -89,4 +89,3 @@ object Wheel:
   //     else
   //       wheel.configure(KeyCode.unsafe(setting - 'A'))
   //   }.sequence
-
