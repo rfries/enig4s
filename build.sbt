@@ -1,3 +1,4 @@
+Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "Some Code"
