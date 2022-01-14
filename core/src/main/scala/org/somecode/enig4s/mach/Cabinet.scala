@@ -95,7 +95,7 @@ object Cabinet:
   val wiringInit: Vector[WiringInit] = Vector(
     WiringInit("IC",      "AZ",   "DMTWSILRUYQNKFEJCAZBPGXOHV"),
     WiringInit("IIC",     "AZ",   "HQZGPJTMOBLNCIFDYAWVEUSRKX"),
-    WiringInit("IIIC",    "AZ",   "UQxNTLSZFMREHDPXKIBVYGJCWOA"),
+    WiringInit("IIIC",    "AZ",   "UQNTLSZFMREHDPXKIBVYGJCWOA"),
     WiringInit("IR",      "AZ",   "JGDQOXUSCAMIFRVTPNEWKBLZYH"),
     WiringInit("IIR",     "AZ",   "NTZPSFBOKMWRCJDIVLAEYUXHGQ"),
     WiringInit("IIIR",    "AZ",   "JVIUBHTCDYAKEQZPOSGXNRMWFL"),

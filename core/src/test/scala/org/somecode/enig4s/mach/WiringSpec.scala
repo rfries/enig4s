@@ -25,10 +25,7 @@ object WiringSpecFixtures:
   val badWiringStrings: Vector[String] = Vector(
     "ADEFGHIJKLMNOPQRSTUVWXYZ",
     "ABCDZ",
-    "ABBDEFGHIJKLMNOPQRSTUVWXYZ",
-    "ZABCDEFGHIJKLMNOPQRSTUVWXY12345",
-    "ABCDEFGHIJKL-MNOPQRSTUVWXY",
-    ""
+    "ABBDEFGHIJKLMNOPQRSTUVWXYZ"
   )
 
 class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
@@ -43,7 +40,7 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
 
     "fail creation with badly-formed letter maps" in {
       WiringSpecFixtures.badWiringStrings.foreach {
-        wstr => assert(CharMap.AZ.stringToKeyCodes(wstr).isLeft, wstr)
+        wstr => Wiring(CharMap.AZ.stringToKeyCodes(wstr).value).isLeft shouldBe true
       }
     }
 

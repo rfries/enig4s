@@ -19,7 +19,7 @@ class CharMap private (mapping: String):
     in.map(forward.get).toVector.sequence match {
       case Some(out) => Right(out)
       case None =>
-        val bad = in.filterNot(forward.isDefinedAt).map(c => f"'$c%c (${c.toInt}%#04x)").mkString(",")
+        val bad = in.filterNot(forward.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
         Left(s"Invalid character(s) for character map: $bad")
     }
 
