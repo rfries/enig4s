@@ -29,9 +29,8 @@ object Wiring:
     case v if v.length == 0 => Left("Wiring vectors have at least one entry.")
     case v if v.length != v.distinct.length => Left(s"Wiring vectors must not contain duplicate values.")
     case v if v.exists(_ >= v.length) => Left(s"Wiring vectors must contain only values from 0 (inclusive) to ${v.length} (exclusive).")
-    case v =>
-      Right(
-        new Wiring( v, v.zipWithIndex.sortBy(_._1).map((_, idx) => KeyCode.unsafe(idx)) ) {}
-      )
+    case v => Right(
+      new Wiring( v, v.zipWithIndex.sortBy(_._1).map((_, idx) => KeyCode.unsafe(idx)) ) {}
+    )
 
 end Wiring

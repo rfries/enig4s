@@ -1,7 +1,8 @@
 package org.somecode.enig4s
 package jsapi
 
-import org.somecode.enig4s.mach.Wheel
+import io.circe.generic.semiauto._
+import io.circe.Codec
 
 final case class MachineRequest(
   machineType: Option[String],
@@ -13,3 +14,6 @@ final case class MachineRequest(
   plugs: Vector[String],
   text: String
 )
+
+object MachineRequest:
+  given Codec[MachineRequest] = deriveCodec[MachineRequest]

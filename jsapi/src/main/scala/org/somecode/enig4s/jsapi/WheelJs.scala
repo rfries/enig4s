@@ -1,6 +1,9 @@
 package org.somecode.enig4s
 package jsapi
 
+import io.circe.generic.semiauto._
+import io.circe.Codec
+
 final case class WheelJs(
   name: Option[String],
   mapping: Option[String],
@@ -8,3 +11,6 @@ final case class WheelJs(
   position: String,
   ringSetting: String
 )
+
+object WheelJs:
+  given Codec[WheelJs] = deriveCodec[WheelJs]
