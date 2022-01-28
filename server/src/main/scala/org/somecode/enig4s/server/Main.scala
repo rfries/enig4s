@@ -30,13 +30,13 @@ object Main extends IOApp:
       // create the server
       ret       <- BlazeServerBuilder[F]
                     .bindHttp(8080, "0.0.0.0")
-                    .withHttpApp(routes[F](shutdown).orNotFound)
+                    .withHttpApp(routes[F](shutdown, cabinet).orNotFound)
                     .serveWhile(shutdown, exitCode)
     yield ret
 
-  private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean]): HttpRoutes[F] =
+  private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean], cabinet: Cabinet): HttpRoutes[F] =
     Router(
       "files"   ->  fileService[F](FileService.Config[F]("./static")),
-      "mach"    ->  MachineService().routes,
+      "mach"    ->  MachineService(cabinet).routes,
       "meta"    ->  MetaService.routes(shutdown)
     )

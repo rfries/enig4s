@@ -4,16 +4,17 @@ package service
 
 import cats.effect.Concurrent
 import cats.implicits.*
-import io.circe.*
-import io.circe.syntax.*
 import io.circe.generic.auto.*
-import org.http4s.*
+import io.circe.syntax.*
 import org.http4s.circe.CirceEntityCodec.*
 import org.http4s.dsl.Http4sDsl
-import org.http4s.implicits.*
-import org.somecode.enig4s.jsapi.{MachineRequest, MachineResponse}
+import org.somecode.enig4s.jsapi.MachineRequest
+import org.somecode.enig4s.jsapi.MachineResponse
+import org.somecode.enig4s.mach.Cabinet
+import org.http4s.HttpRoutes
+import org.http4s.Response
 
-class MachineService[F[_]](using F: Concurrent[F]) extends Http4sDsl[F]:
+class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Http4sDsl[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
@@ -24,6 +25,7 @@ class MachineService[F[_]](using F: Concurrent[F]) extends Http4sDsl[F]:
         yield resp
 
       case GET -> Root / "wheels" =>
+        //Ok(cabinet.wheels.asJson)
         Ok("Ok")
     }
   }

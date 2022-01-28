@@ -11,18 +11,18 @@ ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtV
 
 val v = new {
   val cats                  = "2.7.0"
-  val catsEffect            = "3.3.0"
+  val catsEffect            = "3.3.4"
   val scalatest             = "3.2.10"
   val scalatest_scalacheck  = "3.2.10.0"
 
   val circe                 = "0.14.1"
-  val http4s                = "1.0.0-M29"
-  val fs2                   = "3.2.2"
+  val http4s                = "1.0.0-M30"
+  val fs2                   = "3.2.4"
   val monocle               = "3.1.0"
   val scalajs               = "1.7.1" // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
   val scalajsDom            = "2.0.0"
-  val scalajsReact          = "2.0.0"
+  val scalajsReact          = "2.0.1"
 }
 
 lazy val commonLibs = Seq(

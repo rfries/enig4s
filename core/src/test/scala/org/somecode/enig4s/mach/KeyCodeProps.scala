@@ -22,7 +22,7 @@ class KeyCodeProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
   //   assert(KeyCode.unsafe(Max-1).toInt == Max - 1)
   // }
 
-  // test("Position.next should advance/wrap over size boundry") {
+  // test("Position.next should advance/wrap over size boundary") {
   //   assert(KeyCode.unsafe(0).next == 1)
   //   assert(KeyCode.unsafe(1).next == 2)
   //   assert(KeyCode(KeyCode.Max-1).value.next.toInt == 0)

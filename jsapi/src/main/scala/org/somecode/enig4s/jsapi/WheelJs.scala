@@ -9,8 +9,11 @@ final case class WheelJs(
   mapping: Option[String],
   notches: Option[String],
   position: String,
-  ringSetting: String
-)
+  ringSetting: String)
 
 object WheelJs:
+  // def fromWheel(name: String, wheel: Wheel): WheelJs = WheelJs(
+  //   name,
+  //   wheel.wiring.
+  // )
   given Codec[WheelJs] = deriveCodec[WheelJs]

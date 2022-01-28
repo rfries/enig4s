@@ -68,14 +68,14 @@ case class Machine private (
     out
   end translateKeyCode
 
-  // def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
-  //   if (state.wheelState.size != wheels.size)
-  //     Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-  //   else if (in < 0 || in >= size)
-  //     Left(s"KeyCode ($in) not in range of rotor size ($size).")
-  //   else
-  //     val newState = advance(state)
-  //     Right(newState, translateKeyCode(newState, in))
+  def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
+    if (state.wheelState.size != wheels.size)
+      Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
+    else if (in < 0 || in >= size)
+      Left(s"KeyCode ($in) not in range of rotor size ($size).")
+    else
+      val newState = advance(state)
+      Right(newState, translateKeyCode(newState, in))
 
   // def crypt(state: MachineState, in: ValidKeys): Either[String, (MachineState, ValidKeys)] =
   //   if (state.wheelState.size != wheels.size)
