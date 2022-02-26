@@ -5,7 +5,7 @@ import cats.implicits.*
 
 type Wirings  = Map[String, Wiring]
 type Wheels   = Map[String, Wheel]
-type CharMaps = Map[String, CharMap]
+type CharMaps = Map[String, SymbolMap]
 
 case class Cabinet(
   wirings: Wirings,
@@ -29,24 +29,7 @@ object Cabinet:
 
   def initCharMaps: Either[String, CharMaps] =
     charMapInit
-      .map(cmi => CharMap(cmi.mapping).map(cm => (cmi.name, cm)))
-      .sequence
-      .map(_.toMap)
-
-  def oldInitWirings(charMaps: CharMaps): Either[String, Wirings] =
-    wiringInit
-      .map( wi =>
-        charMaps
-          .get(wi.charMap)
-          .toRight(s"Character map '${wi.charMap}' not defined.")
-          .flatMap ( charMap =>
-            charMap
-              .stringToKeyCodes(wi.mapping)
-              .flatMap( keyCodes =>
-                Wiring(keyCodes).map(w => (wi.name, w))
-              )
-          )
-      )
+      .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
       .sequence
       .map(_.toMap)
 

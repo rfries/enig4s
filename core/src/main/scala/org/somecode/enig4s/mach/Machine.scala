@@ -6,13 +6,13 @@ import Machine.{MachineState, Rotor, WheelState}
 import scala.annotation.tailrec
 
 case class Machine private (
-  charMap: CharMap,
-  wheels: Seq[Wheel],
+  symbols: SymbolMap,
+  kb: Wiring,
+  wheels: IndexedSeq[Wheel],
   reflector: Reflector,
-  plugboard: Plugboard,
-  kb: Wiring
+  plugboard: Plugboard
 ):
-  def size: Int = charMap.size
+  def size: Int = symbols.size
 
   def advance(start: MachineState): MachineState =
 
@@ -102,7 +102,7 @@ case class Machine private (
     else
 
       @tailrec
-      def next(state: MachineState, in: Vector[KeyCode], out: Vector[(MachineState, KeyCode)]): Vector[(MachineState, KeyCode)] =
+      def next(state: MachineState, in: IndexedSeq[KeyCode], out: IndexedSeq[(MachineState, KeyCode)]): IndexedSeq[(MachineState, KeyCode)] =
         in match
           case k +: remaining =>
             val newState = advance(state)
@@ -114,20 +114,20 @@ case class Machine private (
       stringToValidKeys(in).flatMap {validKeys =>
         val res = next(state, validKeys.codes, Vector.empty)
         val newState = res.lastOption.map(_._1).getOrElse(state)
-        charMap.keyCodesToString(res.map(_._2)).map(out => (newState, out))
+        symbols.keyCodesToString(res.map(_._2)).map(out => (newState, out))
       }
 
   end crypt
 
   def stringToValidKeys(in: String): Either[String, ValidKeys] =
-    charMap.stringToKeyCodes(in).flatMap(ValidKeys.apply)
+    symbols.stringToKeyCodes(in).flatMap(ValidKeys.apply)
 
-  sealed abstract case class ValidKeys private (codes: Vector[KeyCode]):
-    override def toString: String = charMap.keyCodesToString(codes).getOrElse("<invalid>")
+  sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
+    override def toString: String = symbols.keyCodesToString(codes).getOrElse("<invalid>")
 
   object ValidKeys:
 
-    def apply(codes: Vector[KeyCode]): Either[String, ValidKeys] =
+    def apply(codes: IndexedSeq[KeyCode]): Either[String, ValidKeys] =
       if (codes.exists(k => k >= size))
         Left(s"All KeyCodes must be between 0 and ${size-1}.")
       else
@@ -138,20 +138,20 @@ end Machine
 object Machine:
 
   def apply (
-    charMap: CharMap,
-    wheels: Seq[Wheel],
+    symbolMap: SymbolMap,
+    kb: Wiring,
+    wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugboard: Plugboard,
-    kb: Wiring
+    plugboard: Plugboard
   ): Either[String, Machine] =
-    if wheels.exists(_.size != charMap.size) then
-      Left(s"Wheel sizes do not match the character map size (${charMap.size}).")
-    else if kb.size != charMap.size then
-      Left(s"Keyboard wiring size (${kb.size}) must match the character map size (${charMap.size}).")
-    else if reflector.size != charMap.size then
-      Left(s"Reflector size (${reflector.size}) must match the character map size (${charMap.size}).")
+    if wheels.exists(_.size != symbolMap.size) then
+      Left(s"Wheel sizes do not match the character map size (${symbolMap.size}).")
+    else if kb.size != symbolMap.size then
+      Left(s"Keyboard wiring size (${kb.size}) must match the character map size (${symbolMap.size}).")
+    else if reflector.size != symbolMap.size then
+      Left(s"Reflector size (${reflector.size}) must match the character map size (${symbolMap.size}).")
     else
-      Right(new Machine(charMap, wheels, reflector, plugboard, kb))
+      Right(new Machine(symbolMap, kb, wheels, reflector, plugboard))
 
   final case class WheelState(position: KeyCode)
   final case class MachineState(wheelState: Vector[WheelState], reflectorState: WheelState)

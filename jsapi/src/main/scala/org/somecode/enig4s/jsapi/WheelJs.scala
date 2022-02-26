@@ -1,19 +1,15 @@
 package org.somecode.enig4s
 package jsapi
 
-import io.circe.generic.semiauto._
+import cats.implicits.*
 import io.circe.Codec
+import io.circe.generic.semiauto.*
 
 final case class WheelJs(
   name: Option[String],
-  mapping: Option[String],
-  notches: Option[String],
-  position: String,
-  ringSetting: String)
+  mapping: Option[CodesJs],
+  notches: Option[CodesJs]
+)
 
 object WheelJs:
-  // def fromWheel(name: String, wheel: Wheel): WheelJs = WheelJs(
-  //   name,
-  //   wheel.wiring.
-  // )
   given Codec[WheelJs] = deriveCodec[WheelJs]

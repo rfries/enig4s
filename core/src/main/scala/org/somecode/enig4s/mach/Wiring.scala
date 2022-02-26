@@ -4,8 +4,8 @@ package mach
 import org.somecode.enig4s.mach.Machine.Bus
 
 sealed abstract case class Wiring private (
-  forward: Vector[KeyCode],
-  reverse: Vector[KeyCode]
+  forward: IndexedSeq[KeyCode],
+  reverse: IndexedSeq[KeyCode]
 ) extends Bus:
 
   def size: Int = forward.size
@@ -25,7 +25,7 @@ end Wiring
 object Wiring:
 
   /** Create Wiring from a vector of key codes  */
-  def apply(keyCodes: Vector[KeyCode]): Either[String, Wiring] = keyCodes match
+  def apply(keyCodes: IndexedSeq[KeyCode]): Either[String, Wiring] = keyCodes match
     case v if v.length == 0 => Left("Wiring vectors have at least one entry.")
     case v if v.length != v.distinct.length => Left(s"Wiring vectors must not contain duplicate values.")
     case v if v.exists(_ >= v.length) => Left(s"Wiring vectors must contain only values from 0 (inclusive) to ${v.length} (exclusive).")

@@ -5,14 +5,12 @@ import io.circe.Codec
 import io.circe.generic.semiauto._
 
 final case class MachineRequest(
-  machineType: Option[String],
+  symbolMap: Option[SymbolMapJs],
+  keyboard: Option[KeyboardJs],
   wheels: Vector[WheelJs],
-  ringSettings: String,
-  wheelPositions: String,
-  reflectorName: String,
-  reflectorPosition: Option[String],
-  plugs: Vector[String],
-  text: String
+  reflector: ReflectorJs,
+  settings: SettingsJs,
+  text: Option[String]
 )
 
 object MachineRequest:

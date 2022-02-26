@@ -2,7 +2,7 @@ package org.somecode.enig4s
 package mach
 
 object Wirings:
-  val chars = CharMap.AZ
+  val chars = SymbolMap.AZ
   val IC:     Wiring =  Wiring(chars.stringToKeyCodes("DMTWSILRUYQNKFEJCAZBPGXOHV").require).require
   val IIC:    Wiring =  Wiring(chars.stringToKeyCodes("HQZGPJTMOBLNCIFDYAWVEUSRKX").require).require
   val IIIC:   Wiring =  Wiring(chars.stringToKeyCodes("UQNTLSZFMREHDPXKIBVYGJCWOA").require).require
