@@ -7,7 +7,7 @@ import org.scalatest.EitherValues.*
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
 
-class PlugboardSpec extends AnyWordSpec with should.Matchers:
+class PlugBoardSpec extends AnyWordSpec with should.Matchers:
 
   "Plugboard" should {
     "allow creation with valid mapping pairs" in {

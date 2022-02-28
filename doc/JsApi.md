@@ -11,15 +11,15 @@
     },
     "keyboard": {
       "name": "AZ",
-      "mapping": {
+      "wiring": {
         "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
         "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-      },
+      }
     },
     "wheels": [
       {
         "name": "I",
-        "mapping": {
+        "wiring": {
           "symbols": "YZABCDEFGHIJKLMNOPQRSTUVWX",
           "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1]
         },
@@ -28,7 +28,7 @@
     ],
     "reflector": {
       "name": "UKW-B",
-      "mapping": {
+      "wiring": {
         "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
         "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
       }

@@ -9,12 +9,12 @@ package mach
   * @param map    set of character to character mappings which represent the
   *               patch pairs
   */
-final case class Plugboard private (size: Int, map: Map[KeyCode, KeyCode]):
+final case class PlugBoard private (size: Int, map: Map[KeyCode, KeyCode]):
 
-  val maxPlugs = size / 2
+  val maxPlugs: Int = size / 2
 
   def translate(in: KeyCode): KeyCode =
-    val out = map.get(in).getOrElse(in)
+    val out = map.getOrElse(in, in)
     println(f"p:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
@@ -22,20 +22,20 @@ final case class Plugboard private (size: Int, map: Map[KeyCode, KeyCode]):
    * This method is only distinct from translate for debugging and tracing (it is functionally identical.
    */
   def reverseTranslate(in: KeyCode): KeyCode =
-    val out = map.get(in).getOrElse(in)
+    val out = map.getOrElse(in, in)
     println(f"p:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
-object Plugboard:
+object PlugBoard:
 
-  def maxSize = 26
+  def maxSize: Int = 26
 
-  def empty = new Plugboard(maxSize, Map.empty)
+  def empty = new PlugBoard(maxSize, Map.empty)
 
   private def validSize(size: Int): Either[String, Int] =
-    if (size < 1) then Left(s"Plugboard size ($size) must be greater than 0.")
-    // else if (size != mappings.size) then Left(s"")
-    else if (size > maxSize)
+    if size < 1 then
+      Left(s"Plugboard size ($size) must be greater than 0.")
+    else if size > maxSize then
       Left(s"Plugboard size ($size) must be less than $maxSize.")
     else
       Right(size)
@@ -68,16 +68,16 @@ object Plugboard:
           else
             Right(map ++ map.toList.map((k, v) => (v, k)).toMap)
 
-  def apply(size: Int, pairings: Map[KeyCode, KeyCode]): Either[String, Plugboard] =
+  def apply(size: Int, pairings: Map[KeyCode, KeyCode]): Either[String, PlugBoard] =
     for
       sz <- validSize(size)
       map <- validPairings(size, pairings)
-    yield new Plugboard(sz, map)
+    yield new PlugBoard(sz, map)
 
-  def apply(size: Int, mappings: Set[String]): Either[String, Plugboard] =
+  def apply(size: Int, mappings: Set[String]): Either[String, PlugBoard] =
     for
       sz <- validSize(size)
       pairings <- validAscii(sz, mappings)
       map <- validPairings(sz, pairings)
     yield
-      new Plugboard(sz, map)
+      new PlugBoard(sz, map)

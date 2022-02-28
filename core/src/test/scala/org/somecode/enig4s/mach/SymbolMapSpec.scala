@@ -6,7 +6,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class SymbolMapSpec extends AnyWordSpec with should.Matchers:
 
-  "CharacterMap" should {
+  "SymbolMap" should {
     "translate a valid String into a vector of KeyCodes" in {
       val expected = Vector(0, 25, 7).map(KeyCode.unsafe)
       SymbolMap.AZ.stringToKeyCodes("AZH").value shouldBe expected

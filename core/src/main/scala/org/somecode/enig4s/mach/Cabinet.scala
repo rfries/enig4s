@@ -17,7 +17,7 @@ object Cabinet:
 
   case class WiringInit(name: String, charMap: String, mapping: String)
   case class WheelInit(name: String, wiringName: String, notches: String, ringSetting: KeyCode)
-  case class CharMapInit(name: String, mapping: String)
+  case class SymbolMapInit(name: String, mapping: String)
 
   def init: Either[String, Cabinet] =
     for
@@ -53,13 +53,13 @@ object Cabinet:
         wirings
           .get(winit.wiringName)
           .toRight(s"Wiring '${winit.wiringName}' not defined.")
-          .flatMap(wiring => Wheel(wiring, winit.notches, KeyCode.zero).map(wheel => (winit.name, wheel)))
+          .flatMap(wiring => Wheel(wiring, winit.notches).map(wheel => (winit.name, wheel)))
       )
       .sequence
       .map(_.toMap)
 
-  val charMapInit: Vector[CharMapInit] = Vector(
-    CharMapInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+  val charMapInit: Vector[SymbolMapInit] = Vector(
+    SymbolMapInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
   )
 
   val wheelInit: Vector[WheelInit] = Vector(

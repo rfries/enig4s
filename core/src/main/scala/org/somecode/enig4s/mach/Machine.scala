@@ -5,12 +5,12 @@ import cats.data.State
 import Machine.{MachineState, Rotor, WheelState}
 import scala.annotation.tailrec
 
-case class Machine private (
+final case class Machine private (
   symbols: SymbolMap,
   kb: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
-  plugboard: Plugboard
+  plugs: PlugBoard
 ):
   def size: Int = symbols.size
 
@@ -29,10 +29,11 @@ case class Machine private (
         wheel.notches.contains(pos)
       }
     MachineState(
+      // TODO: Temporary scaffolding: hard-coded to 3 wheels for now
       Vector(
-        WheelState(advanceIf(0, true)),
-        WheelState(advanceIf(1, atNotch(0) || atNotch(1))),
-        WheelState(advanceIf(2, atNotch(1)))
+        WheelState(advanceIf(0, true), start.wheelState(0).ringSetting),
+        WheelState(advanceIf(1, atNotch(0) || atNotch(1)), start.wheelState(1).ringSetting),
+        WheelState(advanceIf(2, atNotch(1)), start.wheelState(2).ringSetting)
       ),
       start.reflectorState
     )
@@ -41,9 +42,6 @@ case class Machine private (
 
     // Recursive, but not tailrec since the return path translation happens after the
     // recursive call (i.e. after hitting the reflector, which is the bottom of the call stack)
-    //
-    // This should really use something that trampolines instead of full recursion, but it
-    // shouldn't matter much as long as the number of wheels is small.
 
     def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
       if wheelNum >= wheels.size then
@@ -59,13 +57,14 @@ case class Machine private (
     end translateRotor
 
     val out =
-      plugboard.reverseTranslate(
+      plugs.reverseTranslate(
         kb.reverseTranslate(
-          translateRotor(0, kb.translate(plugboard.translate(in)))
+          translateRotor(0, kb.translate(plugs.translate(in)))
         )
       )
     println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
     out
+
   end translateKeyCode
 
   def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
@@ -142,7 +141,7 @@ object Machine:
     kb: Wiring,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugboard: Plugboard
+    plugboard: PlugBoard
   ): Either[String, Machine] =
     if wheels.exists(_.size != symbolMap.size) then
       Left(s"Wheel sizes do not match the character map size (${symbolMap.size}).")
@@ -153,7 +152,7 @@ object Machine:
     else
       Right(new Machine(symbolMap, kb, wheels, reflector, plugboard))
 
-  final case class WheelState(position: KeyCode)
+  final case class WheelState(position: KeyCode, ringSetting: KeyCode)
   final case class MachineState(wheelState: Vector[WheelState], reflectorState: WheelState)
 
   /**

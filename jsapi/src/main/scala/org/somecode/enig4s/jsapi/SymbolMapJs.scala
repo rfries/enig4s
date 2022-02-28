@@ -11,7 +11,7 @@ final case class SymbolMapJs(name: Option[String], mapping: Option[CodesJs]):
     case SymbolMapJs(Some(nm), None) =>
       cabinet.charMaps.get(nm).toRight(s"Symbol map '$nm' not found")
     case SymbolMapJs(None, Some(map)) =>
-      map.toCodes.flatMap(SymbolMap.apply)
+      map.toCodes(SymbolMap.AZ).flatMap(SymbolMap.apply)
     case _ => Left("Must specify one (and only one) of 'name' or 'mapping' in symbol map.")
 
 object SymbolMapJs:
