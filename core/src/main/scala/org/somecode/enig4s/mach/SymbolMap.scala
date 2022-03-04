@@ -24,15 +24,16 @@ class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
   def codeToPoint(key: KeyCode): Either[String, Int] =
     codePoints.lift(key).toRight(s"Key code $key not found in map.")
 
-  def stringToKeyCodes(in: String): Either[String, IndexedSeq[KeyCode]] =
-    in.codePoints.toArray.to(ArraySeq).map(pointToCode.get).sequence match {
+  def stringToCodes(in: String): Either[String, ArraySeq[KeyCode]] =
+    // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
+    in.toArray.to(ArraySeq).map(ch => pointToCode.get(ch)).sequence match {
       case Some(out) => Right(out)
       case None =>
         val bad = in.filterNot(codePoints.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
         Left(s"Invalid character(s) for character map: $bad")
     }
 
-  def keyCodesToString(in: IndexedSeq[KeyCode]): Either[String, String] =
+  def codesToString(in: IndexedSeq[KeyCode]): Either[String, String] =
     in.map(codePoints.lift).to(ArraySeq).sequence match {
       case Some(out) => Right(String(out.toArray[Int], 0, out.length))
       case None => Left("Key code not found in character map.")
@@ -50,7 +51,8 @@ object SymbolMap:
 
   def apply(mapping: String): Either[String, SymbolMap] =
     // all code points are valid KeyCodes, so unsafe is relatively safe here
-    apply(mapping.codePoints.toArray.map(KeyCode.unsafe).to(ArraySeq))
+    // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
+    apply(mapping.toArray.to(ArraySeq).map(ch => KeyCode.unsafe(ch.toInt)))
 
   val AZ: SymbolMap = SymbolMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     .getOrElse(throw RuntimeException("Symbol Map: Bad Init"))

@@ -18,7 +18,7 @@ final case class Machine private (
 
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
-        start.wheelState(idx).position.plusMod(size, KeyCode.one)
+        start.wheelState(idx).position.next(size)
       else
         start.wheelState(idx).position
 
@@ -28,13 +28,26 @@ final case class Machine private (
       .map { (pos, wheel) =>
         wheel.notches.contains(pos)
       }
+//    MachineState(
+//      // TODO: Temporary scaffolding: hard-coded to 3 wheels for now
+//      Vector(
+//        WheelState(advanceIf(0, true), start.wheelState(0).ringSetting),
+//        WheelState(advanceIf(1, atNotch(0) || atNotch(1)), start.wheelState(1).ringSetting),
+//        WheelState(advanceIf(2, atNotch(1)), start.wheelState(2).ringSetting)
+//      ),
+//      start.reflectorState
+//    )
+
     MachineState(
-      // TODO: Temporary scaffolding: hard-coded to 3 wheels for now
-      Vector(
-        WheelState(advanceIf(0, true), start.wheelState(0).ringSetting),
-        WheelState(advanceIf(1, atNotch(0) || atNotch(1)), start.wheelState(1).ringSetting),
-        WheelState(advanceIf(2, atNotch(1)), start.wheelState(2).ringSetting)
-      ),
+      wheels.indices
+        .map {
+          case n @ 0 => (n, true)
+          case n @ 1 => (n, atNotch(0) || atNotch(1))
+          case n @ 2 => (n, atNotch(1))
+          case n => (n, false)
+        }.map {
+          (idx, cond) => WheelState(advanceIf(idx, cond), start.wheelState(idx).ringSetting)
+        },
       start.reflectorState
     )
 
@@ -113,16 +126,16 @@ final case class Machine private (
       stringToValidKeys(in).flatMap {validKeys =>
         val res = next(state, validKeys.codes, Vector.empty)
         val newState = res.lastOption.map(_._1).getOrElse(state)
-        symbols.keyCodesToString(res.map(_._2)).map(out => (newState, out))
+        symbols.codesToString(res.map(_._2)).map(out => (newState, out))
       }
 
   end crypt
 
   def stringToValidKeys(in: String): Either[String, ValidKeys] =
-    symbols.stringToKeyCodes(in).flatMap(ValidKeys.apply)
+    symbols.stringToCodes(in).flatMap(ValidKeys.apply)
 
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
-    override def toString: String = symbols.keyCodesToString(codes).getOrElse("<invalid>")
+    override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
 
   object ValidKeys:
 
@@ -152,8 +165,8 @@ object Machine:
     else
       Right(new Machine(symbolMap, kb, wheels, reflector, plugboard))
 
-  final case class WheelState(position: KeyCode, ringSetting: KeyCode)
-  final case class MachineState(wheelState: Vector[WheelState], reflectorState: WheelState)
+  final case class WheelState(position: KeyCode, ringSetting: RingSetting)
+  final case class MachineState(wheelState: IndexedSeq[WheelState], reflectorState: WheelState)
 
   /**
     * A fixed, stateless translation (for example, the keyboard map)

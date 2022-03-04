@@ -10,9 +10,9 @@ import org.scalatest.wordspec.AnyWordSpec
 
 object WiringSpecFixtures:
   val goodWiring: Vector[Wiring] = Vector(
-    Wiring(SymbolMap.AZ.stringToKeyCodes("ZABCDEFGHIJKLMNOPQRSTUVWXY").value).value,
-    Wiring(SymbolMap.AZ.stringToKeyCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value,
-    Wiring(SymbolMap.AZ.stringToKeyCodes("ABCDE").value).value
+    Wiring(SymbolMap.AZ.stringToCodes("ZABCDEFGHIJKLMNOPQRSTUVWXY").value).value,
+    Wiring(SymbolMap.AZ.stringToCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value,
+    Wiring(SymbolMap.AZ.stringToCodes("ABCDE").value).value
   )
 
   val goodWiringStrings: Vector[String] = Vector(
@@ -34,13 +34,13 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
     "allow creation with well-formed letter maps" in {
       WiringSpecFixtures.goodWiringStrings.foreach {
         wstr =>
-         Wiring(SymbolMap.AZ.stringToKeyCodes(wstr).value).value shouldBe a [Wiring]
+         Wiring(SymbolMap.AZ.stringToCodes(wstr).value).value shouldBe a [Wiring]
       }
     }
 
     "fail creation with badly-formed letter maps" in {
       WiringSpecFixtures.badWiringStrings.foreach {
-        wstr => Wiring(SymbolMap.AZ.stringToKeyCodes(wstr).value).isLeft shouldBe true
+        wstr => Wiring(SymbolMap.AZ.stringToCodes(wstr).value).isLeft shouldBe true
       }
     }
 
@@ -48,10 +48,10 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
       val p0 = KeyCode.zero
       val p1 = KeyCode(1).value
 
-      val wiringId = Wiring(SymbolMap.AZ.stringToKeyCodes("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value).value
+      val wiringId = Wiring(SymbolMap.AZ.stringToCodes("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value).value
       assert(wiringId.forward(p0.toInt) === p0)
       assert(wiringId.reverse(p0.toInt) === p0)
-      val wiringPlusOne = Wiring(SymbolMap.AZ.stringToKeyCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value
+      val wiringPlusOne = Wiring(SymbolMap.AZ.stringToCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value
       assert(wiringPlusOne.forward(p0.toInt) === p1)
       assert(wiringPlusOne.reverse(p1.toInt) === p0)
     }

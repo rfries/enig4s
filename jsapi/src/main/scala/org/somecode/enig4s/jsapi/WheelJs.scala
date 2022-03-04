@@ -17,7 +17,7 @@ final case class WheelJs(
       for
         wr <- wires.toWiring(symbols, cabinet)
         nt <- notch.toCodes(symbols)
-        wh <- Wheel(wr, nt.toSet)
+        wh <- Wheel(wr, nt)
       yield wh
     case _ => Left(s"Wheels must contain either 'name' or 'mapping' and 'notches' only.")
 

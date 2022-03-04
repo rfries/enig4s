@@ -2,7 +2,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "Some Code"
-ThisBuild / scalaVersion     := "3.1.0"
+ThisBuild / scalaVersion     := "3.1.1"
 ThisBuild / version          := "0.2.1-SNAPSHOT"
 
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
@@ -11,17 +11,17 @@ ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtV
 
 val v = new {
   val cats                  = "2.7.0"
-  val catsEffect            = "3.3.4"
+  val catsEffect            = "3.3.5"
   val scalatest             = "3.2.10"
   val scalatest_scalacheck  = "3.2.10.0"
 
   val circe                 = "0.14.1"
   val http4s                = "1.0.0-M30"
-  val fs2                   = "3.2.4"
+  val fs2                   = "3.2.5"
   val monocle               = "3.1.0"
-  val scalajs               = "1.7.1" // not used directly (appears in plugins.sbt)
+  val scalajs               = "1.8.0" // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
-  val scalajsDom            = "2.0.0"
+  val scalajsDom            = "2.1.0"
   val scalajsReact          = "2.0.1"
 }
 

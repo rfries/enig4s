@@ -39,7 +39,7 @@ object Cabinet:
         wi <- wiringInit
       yield for
         charMap <- charMaps.get(wi.charMap).toRight(s"Character map '${wi.charMap}' not defined.")
-        keyCodes <- charMap.stringToKeyCodes(wi.mapping)
+        keyCodes <- charMap.stringToCodes(wi.mapping)
         wiring <- Wiring(keyCodes).map(w => (wi.name, w))
       yield wiring
     // turn inside-out and then to a map:
@@ -53,7 +53,7 @@ object Cabinet:
         wirings
           .get(winit.wiringName)
           .toRight(s"Wiring '${winit.wiringName}' not defined.")
-          .flatMap(wiring => Wheel(wiring, winit.notches).map(wheel => (winit.name, wheel)))
+          .flatMap(wiring => Wheel(wiring, winit.notches, SymbolMap.AZ).map(wheel => (winit.name, wheel)))
       )
       .sequence
       .map(_.toMap)

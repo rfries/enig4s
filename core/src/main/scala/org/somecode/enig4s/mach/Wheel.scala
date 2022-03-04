@@ -6,7 +6,7 @@ import org.somecode.enig4s.mach.Machine.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
-  notches: Set[KeyCode]
+  notches: IndexedSeq[KeyCode]
   //ringSetting: KeyCode
 ) extends Rotor:
   val size: Int = wiring.size
@@ -14,7 +14,7 @@ sealed abstract case class Wheel private (
   override def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out: KeyCode = wiring
       .translate(
-        in.plusMod(size, state.position).minusMod(size, state.ringSetting)
+        in.plusMod(size, state.position).minusMod(size, state.ringSetting: Int)
       )
       .minusMod(size, state.position)
       .plusMod(size, state.ringSetting)
@@ -35,14 +35,14 @@ sealed abstract case class Wheel private (
 
   def copy(
     wiring: Wiring = wiring,
-    notches: Set[KeyCode] = notches
+    notches: IndexedSeq[KeyCode] = notches
   ): Either[String, Wheel] = Wheel.apply(wiring, notches)
 
   def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
 object Wheel:
 
-  def apply(wiring: Wiring, notches: Set[KeyCode]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: IndexedSeq[KeyCode]): Either[String, Wheel] =
     if wiring.size < 1 then
       Left(s"Wheel size must be > 0.")
     else if notches.exists(_ >= wiring.size) then
@@ -52,10 +52,11 @@ object Wheel:
     else
       Right(new Wheel(wiring, notches) {})
 
-  def apply(wiring: Wiring, notches: String): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: String, symbols: SymbolMap): Either[String, Wheel] =
     for
-      notchCodes <- validateNotches(wiring.size, notches)
-      wheel <- Wheel(wiring, notchCodes)
+      notchCodes <- symbols.stringToCodes(notches)
+      validNotches <- validateNotches(wiring.size, notchCodes)
+      wheel <- Wheel(wiring, validNotches)
     yield
       wheel
 
@@ -67,19 +68,15 @@ object Wheel:
   //   yield
   //     wheel
 
-  def validateNotches(wheelSize: Int, notches: String): Either[String, Set[KeyCode]] =
-    if (wheelSize < 1 || wheelSize > 26)
-      Left("Notch specifier strings only supported for wheel sizes up to 26.")
-    else if (notches.length != notches.distinct.length)
+  def validateNotches(wheelSize: Int, notchCodes: IndexedSeq[KeyCode]): Either[String, IndexedSeq[KeyCode]] =
+    if notchCodes.length != notchCodes.distinct.length then
       Left("Notch specifier cannot contain duplicate symbols.")
-    else if (notches.length > wheelSize)
-      Left(s"Notch specifier length (${notches.length}) cannot be greater than wheel size ($wheelSize).")
+    else if notchCodes.length > wheelSize then
+      Left(s"Notch specifier length (${notchCodes.length}) cannot be greater than wheel size ($wheelSize).")
+    else if notchCodes.exists(_ >= wheelSize) then
+      Left(s"Notch codes must be between 0 and $wheelSize (exclusive).")
     else
-      val notchCodes = notches.map(_ - 'A').toSet
-      if notchCodes.exists(n => n < 0 || n >= wheelSize) then
-        Left(s"Notch specifications must be between 0 and $wheelSize.")
-      else
-        Right(notchCodes.map(KeyCode.unsafe))
+      Right(notchCodes.map(KeyCode.unsafe))
 
   // def configureWheels(wheelConfigs: (Wheel, Char)*): Either[String, Seq[ConfiguredWheel]] =
   //   wheelConfigs.reverse.map { (wheel, setting) =>

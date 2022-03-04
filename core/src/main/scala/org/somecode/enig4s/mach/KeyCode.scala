@@ -32,10 +32,13 @@ object KeyCode:
 
     def next(mod: Int): KeyCode = KeyCode.unsafe((k + 1) % mod)
 
-    def plusMod(mod: Int, others: KeyCode*): KeyCode =
+    def plusMod(mod: Int, others: Int *): KeyCode =
       KeyCode.unsafe((k + others.sum) % mod)
 
-    def minusMod(mod: Int, others: KeyCode*): KeyCode =
+//    def plusMod(mod: Int, others: KeyCode*): KeyCode =
+//      KeyCode.unsafe((k + others.sum) % mod)
+
+    def minusMod(mod: Int, others: Int *): KeyCode =
       val diff = k - others.sum
       /* if diff is less than zero, then we must use the
          compliment of the mod to match the wheel markings */
