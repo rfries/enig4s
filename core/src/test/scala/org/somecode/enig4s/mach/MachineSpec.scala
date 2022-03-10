@@ -3,7 +3,6 @@ package mach
 
 import org.scalatest.matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import org.somecode.enig4s.mach.Machine.{MachineState, WheelState}
 
 import scala.collection.immutable.ArraySeq
 
@@ -74,8 +73,12 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
 
   def machineState(wheelState: Vector[(Char, Char)], reflectorState: Char = '\u0000'): MachineState =
     MachineState(
-      wheelState.reverse.map((pos, rs) => WheelState(KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))),
-      WheelState(KeyCode.unsafe(reflectorState), RingSetting.zero)
+      wheelState.reverse
+        .zipWithIndex
+        .map { case ((pos, rs), idx) =>
+          WheelState(Some(idx), KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
+        },
+      WheelState(None, KeyCode.unsafe(reflectorState), RingSetting.zero)
     )
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =

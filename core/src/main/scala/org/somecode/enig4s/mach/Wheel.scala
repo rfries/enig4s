@@ -2,16 +2,29 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
-import org.somecode.enig4s.mach.Machine.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
   notches: IndexedSeq[KeyCode]
-  //ringSetting: KeyCode
-) extends Rotor:
+):
   val size: Int = wiring.size
 
-  override def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
+  def forward(state: WheelState): KeyCode => KeyCode = in =>
+    val out: KeyCode = wiring
+      .translate(in.plusMod(size, state.offset))
+      .minusMod(size, state.offset)
+    println(f"${state.wheelNum}: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
+    out
+
+  def reverse(state: WheelState): KeyCode => KeyCode = in =>
+    val out: KeyCode = wiring
+      .reverseTranslate(in.plusMod(size, state.offset))
+      .minusMod(size, state.offset)
+    println(f"${state.wheelNum}: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
+    out
+
+
+  def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out: KeyCode = wiring
       .translate(
         in.plusMod(size, state.position).minusMod(size, state.ringSetting: Int)
@@ -22,7 +35,7 @@ sealed abstract case class Wheel private (
     println(f"$wheelNum: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
-  override def reverseTranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
+  def reverseTranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out: KeyCode = wiring
       .reverseTranslate(
         in.plusMod(size, state.position).minusMod(size, state.ringSetting)

@@ -2,7 +2,6 @@ package org.somecode.enig4s
 package mach
 
 import cats.data.State
-import Machine.{MachineState, Rotor, WheelState}
 import scala.annotation.tailrec
 
 final case class Machine private (
@@ -28,15 +27,6 @@ final case class Machine private (
       .map { (pos, wheel) =>
         wheel.notches.contains(pos)
       }
-//    MachineState(
-//      // TODO: Temporary scaffolding: hard-coded to 3 wheels for now
-//      Vector(
-//        WheelState(advanceIf(0, true), start.wheelState(0).ringSetting),
-//        WheelState(advanceIf(1, atNotch(0) || atNotch(1)), start.wheelState(1).ringSetting),
-//        WheelState(advanceIf(2, atNotch(1)), start.wheelState(2).ringSetting)
-//      ),
-//      start.reflectorState
-//    )
 
     MachineState(
       wheels.indices
@@ -46,7 +36,7 @@ final case class Machine private (
           case n @ 2 => (n, atNotch(1))
           case n => (n, false)
         }.map {
-          (idx, cond) => WheelState(advanceIf(idx, cond), start.wheelState(idx).ringSetting)
+          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ringSetting)
         },
       start.reflectorState
     )
@@ -164,27 +154,5 @@ object Machine:
       Left(s"Reflector size (${reflector.size}) must match the character map size (${symbolMap.size}).")
     else
       Right(new Machine(symbolMap, kb, wheels, reflector, plugboard))
-
-  final case class WheelState(position: KeyCode, ringSetting: RingSetting)
-  final case class MachineState(wheelState: IndexedSeq[WheelState], reflectorState: WheelState)
-
-  /**
-    * A fixed, stateless translation (for example, the keyboard map)
-    */
-  trait Bus:
-    def size: Int
-    def translate(key: KeyCode): KeyCode
-    def reverseTranslate(key: KeyCode): KeyCode
-
-  /**
-    * A stateful translation using wheels (modulo position).  Only the caller
-    * of translate/reverseTranslate knows the aggregate wheel state (machine state)
-    * and can make decisions about advancement, so the wheel state is passed in
-    * as a parameter as opposed to having its own state.
-    */
-  trait Rotor:
-    def size: Int
-    def translate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
-    def reverseTranslate(wheelNum: Int, state: WheelState, key: KeyCode): KeyCode
 
 end Machine

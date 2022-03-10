@@ -3,7 +3,6 @@ package mach
 package stream
 
 import fs2.Stream
-import org.somecode.enig4s.mach.Machine.MachineState
 
 object MachineStream:
   def stream[F[_]](mach: Machine, state: MachineState, in: fs2.Stream[F, Int]): fs2.Stream[F, Int] =

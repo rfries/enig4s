@@ -49,10 +49,10 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
       val p1 = KeyCode(1).value
 
       val wiringId = Wiring(SymbolMap.AZ.stringToCodes("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value).value
-      assert(wiringId.forward(p0.toInt) === p0)
-      assert(wiringId.reverse(p0.toInt) === p0)
+      assert(wiringId.codes(p0.toInt) === p0)
+      assert(wiringId.reverseCodes(p0.toInt) === p0)
       val wiringPlusOne = Wiring(SymbolMap.AZ.stringToCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value
-      assert(wiringPlusOne.forward(p0.toInt) === p1)
-      assert(wiringPlusOne.reverse(p1.toInt) === p0)
+      assert(wiringPlusOne.codes(p0.toInt) === p1)
+      assert(wiringPlusOne.reverseCodes(p1.toInt) === p0)
     }
   }

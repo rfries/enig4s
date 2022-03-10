@@ -5,17 +5,19 @@ import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
 import org.somecode.enig4s.mach.{Cabinet, KeyCode, SymbolMap, Wheel}
+import org.somecode.enig4s.mach.Wiring
 
 final case class WheelJs(
   name: Option[String],
-  wiring: Option[WiringJs],
+  wiring: Option[CodesJs],
   notches: Option[CodesJs]
 ):
   def toWheel(symbols: SymbolMap, cabinet: Cabinet): Either[String, Wheel] = this match
     case WheelJs(Some(name), None, None) => cabinet.wheels.get(name).toRight(s"Wheel '$name' not found'")
     case WheelJs(None, Some(wires), Some(notch)) =>
       for
-        wr <- wires.toWiring(symbols, cabinet)
+        codes <- wires.toCodes(symbols)
+        wr <- Wiring(codes)
         nt <- notch.toCodes(symbols)
         wh <- Wheel(wr, nt)
       yield wh

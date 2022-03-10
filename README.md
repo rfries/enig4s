@@ -1,31 +1,24 @@
 # enig4s
-Functional scala implementation of an enigma machine.
+Implementation of a World War II era Enigma machine written in reasonably functional Scala.
 
- ## Concepts
+## Concepts
 
-### Bus (trait)
+The machine, as well as various internal components, perform transformations on values known as KeyCodes, which represent the codes produced by the keyboard and displayed by the indicator lights.
+KeyCodes are are positive integers from 0 through n-1, where n is the bus size of the machine (26 for most versions of the Enigma). The translation of symbols to key codes is done by a SymbolMap, which can be specified on Machine construction, which maps a String of unicode symbols to numeric key codes.  The default SymbolMap, "AZ", maps the characters A-Z (i.e. Unicde/ASCII 'A' through 'Z')to the key codes 0-25.
 
-The `Bus` trait indicates a sized component that provides forward and reverse mapping
-between two integer values from 0 (inclusive) to _size_ (exclusive). `Wiring`s, `Wheel`s,
-`Reflector`s, `Plugboard`s, and the keyboard entry plate are examples of `Bus` components.
+Internally, a Machine consists of several components, most of which transform key codes in various
+ways.
 
 ### Wiring
 
-A `Wiring` is a bus component that represents a static mapping of values, without rotation or
-ring settings, such as the keyboard entry plate (`Keyboard`) or a fixed reflector.
+`Wiring` is a bus component that represents a static mapping of values, such as the keyboard entry plate (`Keyboard`) or a fixed `Reflector`.
 
 ### Rotor (trait)
 
-The Rotor trait indicates a stateful bus component which, in addition to a `Wiring`,
-uses a rotor position when transforming values.
-
-### Wheel
-
-A Wheel component is a Rotor which adds a ring setting offset when transforming values,
-and a set of notch positions which can trigger an adjacent rotor to advance.
+The Rotor is a stateful bus component which utilizes a Wiring (representing the core), but which also utilizes machine state (rotor position and ring setting) to add offsets to the translation using modulo n arithmetic (where n is the bus size).
 
 ### Plugboard
 
-A `Plugboard` is a `Bus` component that allows for the swapping of specified values in pairs,
+A `PlugBoard` is a statful component that allows for the swapping of specified values in pairs,
 for example the pair "AN" specifies that all A's become 'N's, and that all 'N's become 'A's. All
 other values are passed through unchanged.
