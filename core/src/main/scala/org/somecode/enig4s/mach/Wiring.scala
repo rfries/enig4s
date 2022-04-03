@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 
 sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
 
-  val reverseCodes: IndexedSeq[KeyCode] = codes
+  protected[mach] lazy val reversedCodes: IndexedSeq[KeyCode] = codes
     .zipWithIndex
     .sortBy(_._1)
     .map((_, idx) => KeyCode.unsafe(idx))
@@ -19,7 +19,7 @@ sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
     out
 
   val reverse: KeyCode => KeyCode = in =>
-    val out = reverseCodes(in)
+    val out = reversedCodes(in)
     //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
@@ -29,7 +29,7 @@ sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
     out
 
   def reverseTranslate(in: KeyCode): KeyCode =
-    val out = reverseCodes(in)
+    val out = reversedCodes(in)
     //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 

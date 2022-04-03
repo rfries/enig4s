@@ -9,9 +9,9 @@ import org.somecode.enig4s.mach.{Cabinet, Machine, SymbolMap, Wiring}
 
 final case class MachineRequest(
   symbolMap: Option[SymbolMapJs],
-  keyboard: Option[WiringJs],
+  keyboard: Option[KeyboardJs],
   wheels: Vector[WheelJs],
-  reflector: WiringJs,
+  reflector: ReflectorJs,
   settings: SettingsJs,
   maybeText: Option[String]
 ):
@@ -27,7 +27,7 @@ final case class MachineRequest(
 
       wh <- wheels.map(_.toWheel(smap, cabinet)).sequence
 
-      rf <- reflector.toWiring(smap, cabinet)
+      //rf <- reflector.toWiring(smap, cabinet)
 
       // set <- ()
 

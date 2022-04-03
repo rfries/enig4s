@@ -2,6 +2,7 @@
 
 ```json
   {
+    "drive": "ratchet", // ratchet or gear
     "symbolMap": {
       "name": "AZ",
       "mapping": {
@@ -31,7 +32,12 @@
       "wiring": {
         "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
         "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      }
+      },
+      "positions": {
+        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
+        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
+      },
+      "advance": false
     },
     "settings": {
       "rings":      { "symbols": "ABC", "codes": [0, 1, 2] },

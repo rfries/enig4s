@@ -24,7 +24,7 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
         (0 to Max-1).foreach { n =>
           val forward = wiring.codes(n)
           assert(forward === v(n))
-          assert(wiring.reverseCodes(forward.toInt) === n)
+          assert(wiring.reversedCodes(forward.toInt) === n)
         }
       }
     }

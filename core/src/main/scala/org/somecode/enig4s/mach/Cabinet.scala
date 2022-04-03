@@ -3,42 +3,46 @@ package mach
 
 import cats.implicits.*
 
-type Wirings  = Map[String, Wiring]
-type Wheels   = Map[String, Wheel]
-type CharMaps = Map[String, SymbolMap]
+type Symbols    = Map[String, SymbolMap]
+type Wirings    = Map[String, Wiring]
+type Wheels     = Map[String, Wheel]
+type Reflectors = Map[String, Reflector]
 
 case class Cabinet(
+  symbols: Symbols,
   wirings: Wirings,
   wheels: Wheels,
-  charMaps: CharMaps
+  reflectors: Reflectors,
 )
 
 object Cabinet:
 
-  case class WiringInit(name: String, charMap: String, mapping: String)
+  case class SymbolsInit(name: String, mapping: String)
+  case class WiringInit(name: String, symbols: String, mapping: String)
   case class WheelInit(name: String, wiringName: String, notches: String, ringSetting: KeyCode)
-  case class SymbolMapInit(name: String, mapping: String)
+  case class ReflectorInit(name: String, wiringName: String, positions: String, advance: Boolean)
 
   def init: Either[String, Cabinet] =
     for
-      charMaps <- initCharMaps
-      wirings <- initWirings(charMaps)
+      symbols <- initCharMaps
+      wirings <- initWirings(symbols)
       wheels <- initWheels(wirings)
+      reflectors <- initReflectors(wirings)
     yield
-      Cabinet(wirings, wheels, charMaps)
+      Cabinet(symbols, wirings, wheels, reflectors)
 
-  def initCharMaps: Either[String, CharMaps] =
-    charMapInit
+  def initCharMaps: Either[String, Symbols] =
+    symbolsInit
       .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
       .sequence
       .map(_.toMap)
 
-  def initWirings(charMaps: CharMaps): Either[String, Wirings] =
+  def initWirings(charMaps: Symbols): Either[String, Wirings] =
     val pairs: Vector[Either[String, (String, Wiring)]] =
       for
         wi <- wiringInit
       yield for
-        charMap <- charMaps.get(wi.charMap).toRight(s"Character map '${wi.charMap}' not defined.")
+        charMap <- charMaps.get(wi.symbols).toRight(s"Character map '${wi.symbols}' not defined.")
         keyCodes <- charMap.stringToCodes(wi.mapping)
         wiring <- Wiring(keyCodes).map(w => (wi.name, w))
       yield wiring
@@ -58,9 +62,20 @@ object Cabinet:
       .sequence
       .map(_.toMap)
 
-  val charMapInit: Vector[SymbolMapInit] = Vector(
-    SymbolMapInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+  val symbolsInit: Vector[SymbolsInit] = Vector(
+    SymbolsInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
   )
+
+  def initReflectors(wirings: Wirings): Either[String, Reflectors] = ???
+    // wheelInit
+    //   .map( winit =>
+    //     wirings
+    //       .get(winit.wiringName)
+    //       .toRight(s"Wiring '${winit.wiringName}' not defined.")
+    //       .flatMap(wiring => Wheel(wiring, winit.notches, SymbolMap.AZ).map(wheel => (winit.name, wheel)))
+    //   )
+    //   .sequence
+    //   .map(_.toMap)
 
   val wheelInit: Vector[WheelInit] = Vector(
   //          name   wiring  notches ringSetting
@@ -73,6 +88,10 @@ object Cabinet:
     WheelInit("VI",   "VI",   "ZM", KeyCode.zero),
     WheelInit("VII",  "VII",  "ZM", KeyCode.zero),
     WheelInit("VIII", "VIII", "ZM", KeyCode.zero)
+  )
+
+  val reflectorInit: Vector[ReflectorInit] = Vector(
+    //ReflectorInit("")
   )
 
   val wiringInit: Vector[WiringInit] = Vector(
