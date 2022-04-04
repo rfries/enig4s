@@ -66,7 +66,7 @@ object Cabinet:
     SymbolsInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
   )
 
-  def initReflectors(wirings: Wirings): Either[String, Reflectors] = ???
+  def initReflectors(wirings: Wirings): Either[String, Reflectors] = Right(Map.empty)
     // wheelInit
     //   .map( winit =>
     //     wirings

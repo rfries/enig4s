@@ -27,11 +27,12 @@ final case class MachineRequest(
 
       wh <- wheels.map(_.toWheel(smap, cabinet)).sequence
 
-      //rf <- reflector.toWiring(smap, cabinet)
+      rf <- reflector.toReflector(smap, cabinet)
 
-      // set <- ()
+      //set <- settings
 
-    yield ???
+      mach <- Machine(smap, kb, wh, rf, ???)
+    yield mach
 
 object MachineRequest:
   given Codec[MachineRequest] = deriveCodec[MachineRequest]

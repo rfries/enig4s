@@ -5,7 +5,7 @@ import scala.collection.immutable.ArraySeq
 
 sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
 
-  protected[mach] lazy val reversedCodes: IndexedSeq[KeyCode] = codes
+  private[mach] lazy val reversedCodes: IndexedSeq[KeyCode] = codes
     .zipWithIndex
     .sortBy(_._1)
     .map((_, idx) => KeyCode.unsafe(idx))
