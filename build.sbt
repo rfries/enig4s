@@ -65,15 +65,7 @@ lazy val jsLibs = Seq(
 
 lazy val root = project.in(file("."))
   .enablePlugins(NoPublishPlugin)
-  .aggregate(rootJVM, rootJS)
-
-lazy val rootJVM = project
-  .enablePlugins(NoPublishPlugin)
-  .aggregate(core.jvm, jsapi.jvm, server)
-
-lazy val rootJS = project
-  .enablePlugins(NoPublishPlugin)
-  .aggregate(core.js, jsapi.js, client)
+  .aggregate(core.jvm, core.js, jsapi.jvm, jsapi.js, server)
 
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -111,11 +103,12 @@ lazy val server = project.in(file("server"))
   )
   .dependsOn(core.jvm, jsapi.jvm)
 
-lazy val client = project.in(file("client"))
-  .enablePlugins(NoPublishPlugin,ScalaJSPlugin)
-  .settings(
-    name := "enig4s-client",
-    scalaJSUseMainModuleInitializer := true,
-    commonLibs
-  )
-  .dependsOn(core.js, jsapi.js)
+//lazy val client = project.in(file("client"))
+//  .enablePlugins(NoPublishPlugin,ScalaJSPlugin)
+//  .settings(
+//    name := "enig4s-client",
+//    scalaJSUseMainModuleInitializer := true,
+//    commonLibs
+//  )
+//  .dependsOn(core.js, jsapi.js)
+

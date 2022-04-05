@@ -27,10 +27,10 @@ sealed abstract case class Wheel private (
   def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out: KeyCode = wiring
       .translate(
-        in.plusMod(size, state.position).minusMod(size, state.ringSetting: Int)
+        in.plusMod(size, state.position).minusMod(size, state.ring: Int)
       )
       .minusMod(size, state.position)
-      .plusMod(size, state.ringSetting)
+      .plusMod(size, state.ring)
 
     println(f"$wheelNum: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
@@ -38,10 +38,10 @@ sealed abstract case class Wheel private (
   def reverseTranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
     val out: KeyCode = wiring
       .reverseTranslate(
-        in.plusMod(size, state.position).minusMod(size, state.ringSetting)
+        in.plusMod(size, state.position).minusMod(size, state.ring)
       )
       .minusMod(size, state.position)
-      .plusMod(size, state.ringSetting)
+      .plusMod(size, state.ring)
 
     println(f"$wheelNum: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out

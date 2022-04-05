@@ -4,12 +4,12 @@ package mach
 import cats.data.State
 import scala.annotation.tailrec
 
-final case class Machine private (
+sealed abstract case class Machine(
   symbols: SymbolMap,
   kb: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
-  plugs: PlugBoard
+  plugBoard: PlugBoard
 ):
   def size: Int = symbols.size
 
@@ -36,7 +36,7 @@ final case class Machine private (
           case n @ 2 => (n, atNotch(1))
           case n => (n, false)
         }.map {
-          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ringSetting)
+          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
         },
       start.reflectorState
     )
@@ -60,9 +60,9 @@ final case class Machine private (
     end translateRotor
 
     val out =
-      plugs.reverseTranslate(
+      plugBoard.reverse(
         kb.reverseTranslate(
-          translateRotor(0, kb.translate(plugs.translate(in)))
+          translateRotor(0, kb.translate(plugBoard.forward(in)))
         )
       )
     println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
@@ -138,7 +138,6 @@ final case class Machine private (
 end Machine
 
 object Machine:
-
   def apply (
     symbolMap: SymbolMap,
     kb: Wiring,
@@ -153,6 +152,6 @@ object Machine:
     else if reflector.size != symbolMap.size then
       Left(s"Reflector size (${reflector.size}) must match the character map size (${symbolMap.size}).")
     else
-      Right(new Machine(symbolMap, kb, wheels, reflector, plugboard))
+      Right(new Machine(symbolMap, kb, wheels, reflector, plugboard) {})
 
 end Machine

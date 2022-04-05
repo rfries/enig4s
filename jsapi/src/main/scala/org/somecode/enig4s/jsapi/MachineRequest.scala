@@ -8,12 +8,13 @@ import io.circe.generic.semiauto.*
 import org.somecode.enig4s.mach.{Cabinet, Machine, SymbolMap, Wiring}
 
 final case class MachineRequest(
+  busSize: Option[Int],
   symbolMap: Option[SymbolMapJs],
   keyboard: Option[KeyboardJs],
   wheels: Vector[WheelJs],
   reflector: ReflectorJs,
   settings: SettingsJs,
-  maybeText: Option[String]
+  text: Option[String]
 ):
   def toMachine(cabinet: Cabinet): Either[String, Machine] =
     for

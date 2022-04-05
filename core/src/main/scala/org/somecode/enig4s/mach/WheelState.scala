@@ -1,5 +1,10 @@
 package org.somecode.enig4s
 package mach
 
-final case class WheelState(wheelNum: Option[Int], position: KeyCode, ringSetting: RingSetting):
-  val offset: Int = position - ringSetting
+final case class WheelState(
+  /** wheelNum is only here until logging/tracing is sorted out */
+  wheelNum: Option[Int],
+  position: KeyCode,
+  ring: RingSetting
+):
+  val offset: Int = position - ring

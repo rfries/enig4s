@@ -19,6 +19,6 @@ The Rotor is a stateful bus component which utilizes a Wiring (representing the 
 
 ### Plugboard
 
-A `PlugBoard` is a statful component that allows for the swapping of specified values in pairs,
+A `PlugBoard` is a stateful component that allows for the swapping of specified values in pairs,
 for example the pair "AN" specifies that all A's become 'N's, and that all 'N's become 'A's. All
 other values are passed through unchanged.

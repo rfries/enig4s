@@ -6,6 +6,13 @@ import cats.implicits.*
 
 import scala.collection.immutable.ArraySeq
 
+trait PlugBoard:
+  def forward: KeyCode => KeyCode
+  def reverse: KeyCode => KeyCode
+
+//object PlugBoard:
+
+
 /**
   * Represents an Enigma-style plugboard, in which each patch represents two
   * characters which are swapped.
@@ -14,9 +21,17 @@ import scala.collection.immutable.ArraySeq
   * @param map    set of character to character mappings which represent the
   *               patch pairs
   */
-final case class PlugBoard private (size: Int, map: Map[KeyCode, KeyCode]):
+final case class EnigmaPlugBoard private (
+  size: Int,
+  map: Map[KeyCode, KeyCode]
+) extends PlugBoard:
 
   val maxPlugs: Int = size / 2
+
+  // for the enigma plugboard, reciprocal mappings are always added, so forward/reverse is the same operation
+
+  def forward: KeyCode => KeyCode = key => map.getOrElse(key, key)
+  def reverse: KeyCode => KeyCode = forward
 
   def translate(in: KeyCode): KeyCode =
     val out = map.getOrElse(in, in)
@@ -31,9 +46,9 @@ final case class PlugBoard private (size: Int, map: Map[KeyCode, KeyCode]):
     println(f"p:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
-object PlugBoard:
+object EnigmaPlugBoard:
 
-  def empty(sz: Int): PlugBoard = new PlugBoard(sz, Map.empty)
+  def empty(sz: Int): PlugBoard = new EnigmaPlugBoard(sz, Map.empty)
 
   def apply(size: Int, pairings: IndexedSeq[String], symbols: SymbolMap): Either[String, PlugBoard] =
     if pairings.exists(_.length != 2) then
@@ -60,7 +75,7 @@ object PlugBoard:
       else if pairings.exists((k, v) => k == v) then
         Left("Pairings cannot map to themselves.")
       else
-        Right(new PlugBoard(size, pairings.toMap ++ pairings.map(_.swap).toMap))
+        Right(new EnigmaPlugBoard(size, pairings.toMap ++ pairings.map(_.swap).toMap))
 
   private def validSize(size: Int): Either[String, Int] =
     if size < 1 then
@@ -68,4 +83,4 @@ object PlugBoard:
     else
       Right(size)
 
-end PlugBoard
+end EnigmaPlugBoard
