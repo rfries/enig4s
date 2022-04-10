@@ -9,6 +9,7 @@ import scala.collection.immutable.ArraySeq
 trait PlugBoard:
   def forward: KeyCode => KeyCode
   def reverse: KeyCode => KeyCode
+  def size: Int
 
 //object PlugBoard:
 

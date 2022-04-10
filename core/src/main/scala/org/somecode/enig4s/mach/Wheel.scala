@@ -6,44 +6,17 @@ import cats.implicits.*
 sealed abstract case class Wheel private (
   wiring: Wiring,
   notches: IndexedSeq[KeyCode]
-):
-  val size: Int = wiring.size
+) extends Rotor:
+  val busSize: BusSize = BusSize.unsafe(wiring.size)
 
   def forward(state: WheelState): KeyCode => KeyCode = in =>
-    val out: KeyCode = wiring
-      .translate(in.plusMod(size, state.offset))
-      .minusMod(size, state.offset)
-    println(f"${state.wheelNum}: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
+    val out = minusMod(wiring.forward(plusMod(in, state)), state)
+    println(f"${state.wheelNum.getOrElse("<reflector>")}: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
     out
 
   def reverse(state: WheelState): KeyCode => KeyCode = in =>
-    val out: KeyCode = wiring
-      .reverseTranslate(in.plusMod(size, state.offset))
-      .minusMod(size, state.offset)
-    println(f"${state.wheelNum}: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
-    out
-
-
-  def translate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
-    val out: KeyCode = wiring
-      .translate(
-        in.plusMod(size, state.position).minusMod(size, state.ring: Int)
-      )
-      .minusMod(size, state.position)
-      .plusMod(size, state.ring)
-
-    println(f"$wheelNum: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-    out
-
-  def reverseTranslate(wheelNum: Int, state: WheelState, in: KeyCode): KeyCode =
-    val out: KeyCode = wiring
-      .reverseTranslate(
-        in.plusMod(size, state.position).minusMod(size, state.ring)
-      )
-      .minusMod(size, state.position)
-      .plusMod(size, state.ring)
-
-    println(f"$wheelNum: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
+    val out = minusMod(wiring.reverse(plusMod(in, state)), state)
+    println(f"${state.wheelNum.getOrElse("<reflector>")}: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
     out
 
   def copy(
@@ -53,15 +26,15 @@ sealed abstract case class Wheel private (
 
   def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
+  def isValidReflector: Boolean = wiring.codes.zipWithIndex.exists((p, idx) => p.toInt === idx)
+
 object Wheel:
 
-  def apply(wiring: Wiring, notches: IndexedSeq[KeyCode]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: IndexedSeq[KeyCode] = Vector.empty): Either[String, Wheel] =
     if wiring.size < 1 then
       Left(s"Wheel size must be > 0.")
     else if notches.exists(_ >= wiring.size) then
       Left(s"Notch values must be between 0 and ${wiring.size-1}.")
-//    else if ringSetting >= wiring.size then
-//      Left(s"Ring setting must be between 0 (inclusive) and ${wiring.size} (exclusive).")
     else
       Right(new Wheel(wiring, notches) {})
 
@@ -73,14 +46,6 @@ object Wheel:
     yield
       wheel
 
-  // def apply(letterMap: String, notches: String, ringSetting: KeyCode): Either[String, Wheel] =
-  //   for
-  //     wiring <- Wiring(letterMap)
-  //     notchCodes <- validateNotches(wiring.size, notches)
-  //     wheel <- apply(wiring, notchCodes, ringSetting)
-  //   yield
-  //     wheel
-
   def validateNotches(wheelSize: Int, notchCodes: IndexedSeq[KeyCode]): Either[String, IndexedSeq[KeyCode]] =
     if notchCodes.length != notchCodes.distinct.length then
       Left("Notch specifier cannot contain duplicate symbols.")
@@ -90,11 +55,3 @@ object Wheel:
       Left(s"Notch codes must be between 0 and $wheelSize (exclusive).")
     else
       Right(notchCodes.map(KeyCode.unsafe))
-
-  // def configureWheels(wheelConfigs: (Wheel, Char)*): Either[String, Seq[ConfiguredWheel]] =
-  //   wheelConfigs.reverse.map { (wheel, setting) =>
-  //     if setting < 1 || setting >= wheel.size then
-  //       Left(s"Wheel setting (${setting.toInt}) must be between 0 and ${wheel.size-1}.")
-  //     else
-  //       wheel.configure(KeyCode.unsafe(setting - 'A'))
-  //   }.sequence

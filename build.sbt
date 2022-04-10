@@ -2,7 +2,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "Some Code"
-ThisBuild / scalaVersion     := "3.1.1"
+ThisBuild / scalaVersion     := "3.1.2"
 ThisBuild / version          := "0.2.1-SNAPSHOT"
 
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
@@ -37,7 +37,7 @@ lazy val commonLibs = Seq(
     "co.fs2"                      %%% "fs2-core"            % v.fs2,
     "io.circe"                    %%% "circe-core"          % v.circe,
     "io.circe"                    %%% "circe-generic"       % v.circe,
-    "io.circe"                    %%% "circe-parser"        % v.circe
+    "io.circe"                    %%% "circe-parser"        % v.circe,
   )
 )
 
@@ -111,4 +111,3 @@ lazy val server = project.in(file("server"))
 //    commonLibs
 //  )
 //  .dependsOn(core.js, jsapi.js)
-

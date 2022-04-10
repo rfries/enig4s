@@ -2,10 +2,9 @@ package org.somecode.enig4s
 package jsapi
 
 import cats.implicits.*
-
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Cabinet, Machine, SymbolMap, Wiring}
+import org.somecode.enig4s.mach.{Cabinet, KeyCode, Machine, SymbolMap, Wiring}
 
 final case class MachineRequest(
   busSize: Option[Int],
@@ -32,7 +31,7 @@ final case class MachineRequest(
 
       //set <- settings
 
-      mach <- Machine(smap, kb, wh, rf, ???)
+      mach <- Machine(KeyCode.one, smap, kb, wh, rf, ???)
     yield mach
 
 object MachineRequest:

@@ -1,23 +1,25 @@
 package org.somecode.enig4s
 package mach
 
-import cats.data.State
+import cats.implicits.*
 import scala.annotation.tailrec
 
 sealed abstract case class Machine(
+  busSize: BusSize,
   symbols: SymbolMap,
   kb: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
   plugBoard: PlugBoard
 ):
-  def size: Int = symbols.size
+
+  import Machine.*
 
   def advance(start: MachineState): MachineState =
 
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
-        start.wheelState(idx).position.next(size)
+        start.wheelState(idx).position.next(busSize)
       else
         start.wheelState(idx).position
 
@@ -41,60 +43,14 @@ sealed abstract case class Machine(
       start.reflectorState
     )
 
-  private def translateKeyCode(state: MachineState, in: KeyCode): KeyCode =
-
-    // Recursive, but not tailrec since the return path translation happens after the
-    // recursive call (i.e. after hitting the reflector, which is the bottom of the call stack)
-
-    def translateRotor(wheelNum: Int, k: KeyCode): KeyCode =
-      if wheelNum >= wheels.size then
-        reflector.translate(state.reflectorState, k)
-      else
-        val wheel = wheels(wheelNum)
-        val wheelState = state.wheelState(wheelNum)
-        wheel.reverseTranslate(
-          wheelNum,
-          wheelState,
-          translateRotor(wheelNum + 1, wheel.translate(wheelNum, wheelState, k))
-        )
-    end translateRotor
-
-    val out =
-      plugBoard.reverse(
-        kb.reverseTranslate(
-          translateRotor(0, kb.translate(plugBoard.forward(in)))
-        )
-      )
-    println(f"m: $in%02d (${(in + 'A').toChar}) => $out%02d (${(out + 'A').toChar}) State: ${state.wheelState.map(_.position) :+ state.reflectorState.position}")
-    out
-
-  end translateKeyCode
-
   def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-    else if (in < 0 || in >= size)
-      Left(s"KeyCode ($in) not in range of rotor size ($size).")
+    else if (in >= busSize)
+      Left(s"KeyCode ($in) not in range of wheel size ($busSize).")
     else
-      val newState = advance(state)
-      Right(newState, translateKeyCode(newState, in))
-
-  // def crypt(state: MachineState, in: ValidKeys): Either[String, (MachineState, ValidKeys)] =
-  //   if (state.wheelState.size != wheels.size)
-  //     Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
-  //   else
-  //     @tailrec
-  //     def next(state: MachineState, in: Vector[KeyCode], out: Vector[(MachineState, KeyCode)]): Vector[(MachineState, KeyCode)] =
-  //       in match
-  //         case k +: remaining =>
-  //           val newState = advance(state)
-  //           val crypted = translateKeyCode(newState, k)
-  //           next(newState, remaining, out :+ newState -> crypted)
-  //         case _ => out
-  //     val res = next(state, in.codes, Vector.empty)
-  //     val newState = res.lastOption.map(_._1).getOrElse(state)
-  //     ValidKeys(res.map(_._2)).map(keys => newState -> keys)
-  // end crypt
+      val newState: MachineState = advance(state)
+      Right(newState, translate(newState)(in))
 
   def crypt(state: MachineState, in: String): Either[String, (MachineState, String)] =
     if state.wheelState.size != wheels.size then
@@ -107,15 +63,16 @@ sealed abstract case class Machine(
       def next(state: MachineState, in: IndexedSeq[KeyCode], out: IndexedSeq[(MachineState, KeyCode)]): IndexedSeq[(MachineState, KeyCode)] =
         in match
           case k +: remaining =>
-            val newState = advance(state)
-            val crypted = translateKeyCode(newState, k)
-            next(newState, remaining, out :+ newState -> crypted)
+            val newState: MachineState = advance(state)
+            //val crypted: KeyCode = translateKeyCode(newState, k)
+            val crypted: KeyCode = translate(newState)(k)
+            next(newState, remaining, out :+ ArrowAssoc(newState) -> crypted)
           case _ => out
       end next
 
       stringToValidKeys(in).flatMap {validKeys =>
-        val res = next(state, validKeys.codes, Vector.empty)
-        val newState = res.lastOption.map(_._1).getOrElse(state)
+        val res: scala.IndexedSeq[(MachineState, KeyCode)] = next(state, validKeys.codes, Vector.empty)
+        val newState: MachineState = res.lastOption.map(_._1).getOrElse(state)
         symbols.codesToString(res.map(_._2)).map(out => (newState, out))
       }
 
@@ -124,34 +81,67 @@ sealed abstract case class Machine(
   def stringToValidKeys(in: String): Either[String, ValidKeys] =
     symbols.stringToCodes(in).flatMap(ValidKeys.apply)
 
+  private def translate(state: MachineState): KeyCode => KeyCode = in =>
+      val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
+      val funs = Vector(plugBoard.forward, kb.forward)
+        ++ wheelStates.map { (wheel, state) => wheel.forward(state) }
+        ++ Vector(reflector.forward(state.reflectorState))
+        ++ wheelStates.reverse.map { (wheel, state) => wheel.reverse(state) }
+        ++ Vector(kb.reverse, plugBoard.reverse)
+      funs.reduceLeft((fall, f) => f.compose(fall))(in)
+
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
     override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
 
   object ValidKeys:
 
     def apply(codes: IndexedSeq[KeyCode]): Either[String, ValidKeys] =
-      if (codes.exists(k => k >= size))
-        Left(s"All KeyCodes must be between 0 and ${size-1}.")
+      if (codes.exists(k => k >= busSize))
+        Left(s"All KeyCodes must be between 0 and ${busSize-1}, inclusive")
       else
         Right(new ValidKeys(codes) {})
+
 
 end Machine
 
 object Machine:
+
   def apply (
+    size: Int,
     symbolMap: SymbolMap,
-    kb: Wiring,
+    keyboard: Wiring,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugboard: PlugBoard
+    plugBoard: PlugBoard
   ): Either[String, Machine] =
-    if wheels.exists(_.size != symbolMap.size) then
-      Left(s"Wheel sizes do not match the character map size (${symbolMap.size}).")
-    else if kb.size != symbolMap.size then
-      Left(s"Keyboard wiring size (${kb.size}) must match the character map size (${symbolMap.size}).")
-    else if reflector.size != symbolMap.size then
-      Left(s"Reflector size (${reflector.size}) must match the character map size (${symbolMap.size}).")
-    else
-      Right(new Machine(symbolMap, kb, wheels, reflector, plugboard) {})
+    for
+      busSize <- BusSize(size)
+      sm <- Either.cond(
+        symbolMap.size === busSize,
+        symbolMap,
+        s"Symbol map size (${symbolMap.size}) does not match the bus size ($busSize)"
+      )
+      kb <- Either.cond(
+        keyboard.size === busSize,
+        keyboard,
+        s"Keyboard wiring size (${keyboard.size}) must match the bus size ($busSize)"
+      )
+      wh <- Either.cond(
+        wheels.forall(_.busSize === busSize),
+        wheels,
+        s"Wheel sizes ${wheels.map(_.busSize).mkString("(",",",")")} do not match the bus size ($busSize)"
+      )
+      ref <- Either.cond(
+        reflector.busSize === busSize,
+        reflector,
+        s"Reflector size (${reflector.busSize}) does not match bus size ($busSize)"
+      )
+      plug <- Either.cond(
+        plugBoard.size === busSize,
+        plugBoard,
+        s"Plugboard size (${plugBoard.size}) does not match bus size ($busSize)"
+      )
+    yield
+      new Machine(busSize, sm, kb, wh, ref, plugBoard) {}
 
 end Machine

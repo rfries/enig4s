@@ -20,12 +20,6 @@ object KeyCode:
     s => throw new IllegalArgumentException(s),
     v => v)
 
-  given FromDigits.WithRadix[KeyCode] with
-    override def fromDigits(s: String, radix: Int): KeyCode =
-      FromDigits.intFromDigits(s, radix) match
-        case n if n > 0 => n
-        case n => throw new NumberTooSmall("KeyCodes cannot be negative.")
-
   given Eq[KeyCode] = summon[Eq[Int]]
 
   extension (k: KeyCode)
@@ -34,9 +28,6 @@ object KeyCode:
 
     def plusMod(mod: Int, others: Int *): KeyCode =
       KeyCode.unsafe((k + others.sum) % mod)
-
-//    def plusMod(mod: Int, others: KeyCode*): KeyCode =
-//      KeyCode.unsafe((k + others.sum) % mod)
 
     def minusMod(mod: Int, others: Int *): KeyCode =
       val diff = k - others.sum
