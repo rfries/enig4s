@@ -1,8 +1,10 @@
 package org.somecode.enig4s
 package mach
 
+import fs2.{Pure, Stream}
 import cats.implicits.*
 import scala.annotation.tailrec
+import scala.collection.immutable.ArraySeq
 
 sealed abstract case class Machine(
   busSize: BusSize,
@@ -12,7 +14,6 @@ sealed abstract case class Machine(
   reflector: Reflector,
   plugBoard: PlugBoard
 ):
-
   import Machine.*
 
   def advance(start: MachineState): MachineState =
@@ -43,16 +44,38 @@ sealed abstract case class Machine(
       start.reflectorState
     )
 
-  def crypt(state: MachineState, in: KeyCode): Either[String, (MachineState, KeyCode)] =
+  def crypt(state: MachineState, in: Int): Either[String, (MachineState, KeyCode)] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
     else if (in >= busSize)
       Left(s"KeyCode ($in) not in range of wheel size ($busSize).")
     else
-      val newState: MachineState = advance(state)
-      Right(newState, translate(newState)(in))
+      KeyCode(in).map( k =>
+        val newState: MachineState = advance(state)
+        newState -> translate(newState)(k)
+      )
+
+  private def codeStream(validKeys: ValidKeys, state: MachineState): Stream[Pure, (MachineState, KeyCode)] =
+    Stream.emits(validKeys.codes)
+      .mapAccumulate(state) { (state, ch) =>
+        val newState: MachineState = advance(state)
+        (newState, translate(newState)(ch))
+      }
 
   def crypt(state: MachineState, in: String): Either[String, (MachineState, String)] =
+    if state.wheelState.size != wheels.size then
+      Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
+    else
+      for
+        validKeys <- stringToValidKeys(in)
+        res = codeStream(validKeys, state).toVector
+        endState = res.lastOption.map(_._1).getOrElse(state)
+        out <- symbols.codesToString(res.map(_._2))
+      yield (endState, out)
+
+  end crypt
+
+  def crypt2(state: MachineState, in: String): Either[String, (MachineState, String)] =
     if state.wheelState.size != wheels.size then
       Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
     // else if in.numCodes != size then
@@ -75,19 +98,19 @@ sealed abstract case class Machine(
         val newState: MachineState = res.lastOption.map(_._1).getOrElse(state)
         symbols.codesToString(res.map(_._2)).map(out => (newState, out))
       }
-
-  end crypt
+  end crypt2
 
   def stringToValidKeys(in: String): Either[String, ValidKeys] =
     symbols.stringToCodes(in).flatMap(ValidKeys.apply)
 
   private def translate(state: MachineState): KeyCode => KeyCode = in =>
       val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
-      val funs = Vector(plugBoard.forward, kb.forward)
-        ++ wheelStates.map { (wheel, state) => wheel.forward(state) }
-        ++ Vector(reflector.forward(state.reflectorState))
-        ++ wheelStates.reverse.map { (wheel, state) => wheel.reverse(state) }
-        ++ Vector(kb.reverse, plugBoard.reverse)
+      val funs =
+         Vector(plugBoard.forward, kb.forward)
+          ++ wheelStates.map { (wheel, state) => wheel.forward(state) }
+          ++ Vector(reflector.forward(state.reflectorState))
+          ++ wheelStates.reverse.map { (wheel, state) => wheel.reverse(state) }
+          ++ Vector(kb.reverse, plugBoard.reverse)
       funs.reduceLeft((fall, f) => f.compose(fall))(in)
 
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
@@ -100,7 +123,6 @@ sealed abstract case class Machine(
         Left(s"All KeyCodes must be between 0 and ${busSize-1}, inclusive")
       else
         Right(new ValidKeys(codes) {})
-
 
 end Machine
 

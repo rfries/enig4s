@@ -20,7 +20,8 @@ object MetaService:
     HttpRoutes.of[F] {
       case GET -> Root / "ok" =>
         Ok(s"OK ${BuildInfo.name} ${BuildInfo.version}\n")
-      case GET -> Root / "stream" => Ok(produce(1.second, 5){ case (d, i) => s"$i: $d\n"})
+      case req @ GET -> Root / "stream" =>
+        Ok(produce(1.second, 5){ case (d, i) => s"$i: $d\n"})
       case POST -> Root / "shutdown" =>
         for
           _ <- shutdown.set(true)
