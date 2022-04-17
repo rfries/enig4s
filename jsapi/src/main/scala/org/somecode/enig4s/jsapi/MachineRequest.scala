@@ -31,7 +31,7 @@ final case class MachineRequest(
 
       //set <- settings
 
-      mach <- Machine(KeyCode.one, smap, kb, wh, rf, ???)
+      mach <- Machine(smap, kb, wh, rf, ???)
     yield mach
 
 object MachineRequest:

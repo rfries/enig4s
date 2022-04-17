@@ -7,7 +7,8 @@ sealed abstract case class Wheel private (
   wiring: Wiring,
   notches: IndexedSeq[KeyCode]
 ) extends Rotor:
-  val busSize: BusSize = BusSize.unsafe(wiring.size)
+
+  val size: Int = wiring.size
 
   def forward(state: WheelState): KeyCode => KeyCode = in =>
     val out = minusMod(wiring.forward(plusMod(in, state)), state)

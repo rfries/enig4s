@@ -13,6 +13,9 @@ trait PlugBoard:
 
 //object PlugBoard:
 
+final case class TypeXPlugBoard private(size: Int, wiring: Wiring) extends PlugBoard:
+  def forward: KeyCode => KeyCode = wiring.forward
+  def reverse: KeyCode => KeyCode = wiring.reverse
 
 /**
   * Represents an Enigma-style plugboard, in which each patch represents two

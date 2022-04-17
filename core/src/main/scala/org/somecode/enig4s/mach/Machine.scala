@@ -7,14 +7,13 @@ import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 
 sealed abstract case class Machine(
-  busSize: BusSize,
   symbols: SymbolMap,
-  kb: Wiring,
+  entry: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
-  plugBoard: PlugBoard
+  plugBoard: Option[PlugBoard]
 ):
-  import Machine.*
+  val busSize: Int = entry.size
 
   def advance(start: MachineState): MachineState =
 
@@ -105,14 +104,22 @@ sealed abstract case class Machine(
 
   private def translate(state: MachineState): KeyCode => KeyCode = in =>
       val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
-      val funs =
-         Vector(plugBoard.forward, kb.forward)
-          ++ wheelStates.map { (wheel, state) => wheel.forward(state) }
-          ++ Vector(reflector.forward(state.reflectorState))
-          ++ wheelStates.reverse.map { (wheel, state) => wheel.reverse(state) }
-          ++ Vector(kb.reverse, plugBoard.reverse)
-      funs.reduceLeft((fall, f) => f.compose(fall))(in)
 
+      val wheelFuns = Vector(entry.forward)
+        ++ (wheelStates.map ((wheel, state) => wheel.forward(state)))
+        .appended(reflector.forward(state.reflectorState))
+        .concat(wheelStates.reverse.map((wheel, state) => wheel.reverse(state)))
+        .appended(entry.reverse)
+
+      val allFuns = plugBoard
+        .map { pb => pb.forward +: wheelFuns :+ pb.reverse }
+        .getOrElse(wheelFuns)
+
+      allFuns.reduceLeft((fall, f) => f.compose(fall))(in)
+
+
+  /** Represents a sequence of KeyCodes that has been validated for this instance
+   *  of a Machine (path dependent type) */
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
     override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
 
@@ -129,41 +136,36 @@ end Machine
 object Machine:
 
   def apply (
-    size: Int,
     symbolMap: SymbolMap,
     keyboard: Wiring,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugBoard: PlugBoard
+    plugBoard: Option[PlugBoard],
   ): Either[String, Machine] =
     for
-      busSize <- BusSize(size)
       sm <- Either.cond(
-        symbolMap.size === busSize,
+        symbolMap.size === keyboard.size,
         symbolMap,
-        s"Symbol map size (${symbolMap.size}) does not match the bus size ($busSize)"
-      )
-      kb <- Either.cond(
-        keyboard.size === busSize,
-        keyboard,
-        s"Keyboard wiring size (${keyboard.size}) must match the bus size ($busSize)"
+        s"Symbol map size (${symbolMap.size}) does not match the bus size (${keyboard.size})"
       )
       wh <- Either.cond(
-        wheels.forall(_.busSize === busSize),
+        wheels.forall(_.size === keyboard.size),
         wheels,
-        s"Wheel sizes ${wheels.map(_.busSize).mkString("(",",",")")} do not match the bus size ($busSize)"
+        s"Wheel sizes ${wheels.map(_.size).mkString("(",",",")")} do not match the bus size (${keyboard.size})"
       )
       ref <- Either.cond(
-        reflector.busSize === busSize,
+        reflector.wiring.size === keyboard.size,
         reflector,
-        s"Reflector size (${reflector.busSize}) does not match bus size ($busSize)"
+        s"Reflector size (${reflector.size}) does not match the bus size (${keyboard.size})"
       )
-      plug <- Either.cond(
-        plugBoard.size === busSize,
-        plugBoard,
-        s"Plugboard size (${plugBoard.size}) does not match bus size ($busSize)"
-      )
+      plug <- plugBoard.map(pb =>
+        Either.cond(
+          pb.size === keyboard.size,
+          pb,
+          s"Plugboard size (${plugBoard.size}) does not match the bus size (${keyboard.size})"
+        )
+      ).getOrElse(Right(None))
     yield
-      new Machine(busSize, sm, kb, wh, ref, plugBoard) {}
+      new Machine(sm, keyboard, wh, ref, plugBoard) {}
 
 end Machine

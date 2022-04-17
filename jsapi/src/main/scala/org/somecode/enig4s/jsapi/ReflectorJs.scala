@@ -4,7 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{BusSize, Cabinet, Position, Reflector, SymbolMap, Wiring}
+import org.somecode.enig4s.mach.{Cabinet, Position, Reflector, SymbolMap, Wiring}
 
 import scala.collection.immutable.ArraySeq
 
@@ -25,9 +25,8 @@ final case class ReflectorJs(
         for
           wireCodes <- wiresJs.toCodes(symbols)
           wires <- Wiring.apply(wireCodes)
-          wsz <- BusSize(wires.size)
           pos <- posOpt.map(_.toPositions(symbols)).getOrElse(Right(ArraySeq.empty[Position]))
-          ref <- Reflector(wsz, wires, pos)
+          ref <- Reflector(wires, pos)
         yield ref
 
       case _ => Left("One of 'name' or 'wiring' must be provided for a reflector")
