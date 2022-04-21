@@ -25,7 +25,9 @@ final case class ReflectorJs(
         for
           wireCodes <- wiresJs.toCodes(symbols)
           wires <- Wiring.apply(wireCodes)
-          pos <- posOpt.map(_.toPositions(symbols)).getOrElse(Right(ArraySeq.empty[Position]))
+          pos <- posOpt match
+            case Some(js) => js.toPositions(symbols).map(Some(_))
+            case None => Right(None)
           ref <- Reflector(wires, pos)
         yield ref
 

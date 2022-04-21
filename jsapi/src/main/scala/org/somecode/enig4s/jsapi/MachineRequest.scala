@@ -4,7 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Cabinet, KeyCode, Machine, SymbolMap, Wiring}
+import org.somecode.enig4s.mach.*
 
 final case class MachineRequest(
   busSize: Option[Int],
@@ -15,7 +15,7 @@ final case class MachineRequest(
   settings: SettingsJs,
   text: Option[String]
 ):
-  def toMachine(cabinet: Cabinet): Either[String, Machine] =
+  def toMachine(cabinet: Cabinet): Either[String, Machine[MachineState]] =
     for
       smap <- symbolMap.map(_.toSymbolMap(cabinet)) match
         case Some(sm) => sm
@@ -31,8 +31,8 @@ final case class MachineRequest(
 
       //set <- settings
 
-      mach <- Machine(smap, kb, wh, rf, ???)
-    yield mach
+      machine <- EnigmaMachine(smap, kb, wh, rf, ???)
+    yield machine
 
 object MachineRequest:
   given Codec[MachineRequest] = deriveCodec[MachineRequest]

@@ -18,7 +18,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val in = "AAAAA"
 
       info(s"*** reflector size: ${reflector.size}")
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
+      EnigmaMachine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
         case Right(mach) => verifyText(mach, machState, in, "BDZGO")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -29,7 +29,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('A' -> 'B', 'A' -> 'B', 'A' -> 'B'))
       val in = "AAAAA"
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
+      EnigmaMachine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
         case Right(mach) => verifyText(mach, machState, in, "EWTYX")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -41,7 +41,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val in = "AAAAA"
       val plugboard = EnigmaPlugBoard(26, Vector("AZ", "SO", "FB"), SymbolMap.AZ).require
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
+      EnigmaMachine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
         case Right(mach) => verifyText(mach, machState, in, "UTZJY")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -53,7 +53,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val in = "ZELDA"
       val plugboard = EnigmaPlugBoard(26, Vector("SD", "FG", "HJ", "QY", "EC", "RV", "TB", "ZN", "UM"), SymbolMap.AZ).require
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
+      EnigmaMachine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
         case Right(mach) => verifyText(mach, machState, in, "NAWHM")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -64,7 +64,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('K' -> 'A', 'D' -> 'A', 'O' -> 'A'))
       val in = "AAAAA"
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
+      EnigmaMachine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(EnigmaPlugBoard.empty(reflector.size))) match
         case Right(mach) =>
           val newState = verifyText(mach, machState, in, "ULMHJ")
           newState.wheelState shouldBe machineState(Vector('L' -> 'A', 'F' -> 'A', 'T' -> 'A')).wheelState
@@ -84,7 +84,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       WheelState(None, KeyCode.unsafe(reflectorState), RingSetting.zero)
     )
 
-  def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
+  def verifyText(mach: Machine[MachineState], state: MachineState, in: String, expected: String): MachineState =
     val (newState, out) = mach.crypt(state, in).require
     out.toString shouldBe expected
     info(s"$in => $out")

@@ -27,8 +27,6 @@ sealed abstract case class Wheel private (
 
   def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
-  def isValidReflector: Boolean = wiring.codes.zipWithIndex.exists((p, idx) => p.toInt === idx)
-
 object Wheel:
 
   def apply(wiring: Wiring, notches: IndexedSeq[KeyCode] = Vector.empty): Either[String, Wheel] =

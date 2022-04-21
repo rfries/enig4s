@@ -6,42 +6,19 @@ import cats.implicits.*
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 
-sealed abstract case class Machine(
+trait Machine[S]:
+  def crypt(state: S, in: Int): Either[String, (S, Int)]
+  def crypt(state: S, in: String): Either[String, (S, String)]
+
+sealed abstract case class EnigmaMachine(
   symbols: SymbolMap,
   entry: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
   plugBoard: Option[PlugBoard]
-):
+) extends Machine[MachineState]:
   val busSize: Int = entry.size
 
-  def advance(start: MachineState): MachineState =
-
-    def advanceIf(idx: Int, cond: Boolean) =
-      if (cond)
-        start.wheelState(idx).position.next(busSize)
-      else
-        start.wheelState(idx).position
-
-    val atNotch = start.wheelState
-      .map(_.position)
-      .zip(wheels)
-      .map { (pos, wheel) =>
-        wheel.notches.contains(pos)
-      }
-
-    MachineState(
-      wheels.indices
-        .map {
-          case n @ 0 => (n, true)
-          case n @ 1 => (n, atNotch(0) || atNotch(1))
-          case n @ 2 => (n, atNotch(1))
-          case n => (n, false)
-        }.map {
-          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
-        },
-      start.reflectorState
-    )
 
   def crypt(state: MachineState, in: Int): Either[String, (MachineState, KeyCode)] =
     if (state.wheelState.size != wheels.size)
@@ -102,20 +79,47 @@ sealed abstract case class Machine(
   def stringToValidKeys(in: String): Either[String, ValidKeys] =
     symbols.stringToCodes(in).flatMap(ValidKeys.apply)
 
-  private def translate(state: MachineState): KeyCode => KeyCode = in =>
-      val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
+  private def advance(start: MachineState): MachineState =
+    def advanceIf(idx: Int, cond: Boolean) =
+      if (cond)
+        start.wheelState(idx).position.next(busSize)
+      else
+        start.wheelState(idx).position
 
-      val wheelFuns = Vector(entry.forward)
-        ++ (wheelStates.map ((wheel, state) => wheel.forward(state)))
-        .appended(reflector.forward(state.reflectorState))
-        .concat(wheelStates.reverse.map((wheel, state) => wheel.reverse(state)))
-        .appended(entry.reverse)
+    val atNotch = start.wheelState
+      .map(_.position)
+      .zip(wheels)
+      .map { (pos, wheel) =>
+        wheel.notches.contains(pos)
+      }
 
-      val allFuns = plugBoard
-        .map { pb => pb.forward +: wheelFuns :+ pb.reverse }
-        .getOrElse(wheelFuns)
+    MachineState(
+      wheels.indices
+        .map {
+          case n @ 0 => (n, true)
+          case n @ 1 => (n, atNotch(0) || atNotch(1))
+          case n @ 2 => (n, atNotch(1))
+          case n => (n, false)
+        }.map {
+          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
+        },
+      start.reflectorState
+    )
 
-      allFuns.reduceLeft((fall, f) => f.compose(fall))(in)
+  def translate(state: MachineState): KeyCode => KeyCode = in =>
+    val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
+
+    val wheelFuns = Vector(entry.forward)
+      ++ (wheelStates.map ((wheel, state) => wheel.forward(state)))
+      .appended(reflector.forward(state.reflectorState))
+      .concat(wheelStates.reverse.map((wheel, state) => wheel.reverse(state)))
+      .appended(entry.reverse)
+
+    val allFuns = plugBoard
+      .map { pb => pb.forward +: wheelFuns :+ pb.reverse }
+      .getOrElse(wheelFuns)
+
+    allFuns.reduceLeft((fall, f) => f.compose(fall))(in)
 
 
   /** Represents a sequence of KeyCodes that has been validated for this instance
@@ -131,9 +135,9 @@ sealed abstract case class Machine(
       else
         Right(new ValidKeys(codes) {})
 
-end Machine
+end EnigmaMachine
 
-object Machine:
+object EnigmaMachine:
 
   def apply (
     symbolMap: SymbolMap,
@@ -141,7 +145,7 @@ object Machine:
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
     plugBoard: Option[PlugBoard],
-  ): Either[String, Machine] =
+  ): Either[String, Machine[MachineState]] =
     for
       sm <- Either.cond(
         symbolMap.size === keyboard.size,
@@ -166,6 +170,6 @@ object Machine:
         )
       ).getOrElse(Right(None))
     yield
-      new Machine(sm, keyboard, wh, ref, plugBoard) {}
+      new EnigmaMachine(sm, keyboard, wh, ref, plugBoard) {}
 
-end Machine
+end EnigmaMachine
