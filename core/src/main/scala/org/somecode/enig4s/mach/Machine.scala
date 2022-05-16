@@ -6,19 +6,15 @@ import cats.implicits.*
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 
-trait Machine[S]:
-  def crypt(state: S, in: Int): Either[String, (S, Int)]
-  def crypt(state: S, in: String): Either[String, (S, String)]
-
-sealed abstract case class EnigmaMachine(
+sealed abstract case class Machine(
   symbols: SymbolMap,
   entry: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
   plugBoard: Option[PlugBoard]
-) extends Machine[MachineState]:
-  val busSize: Int = entry.size
+):
 
+  val busSize: Int = entry.size
 
   def crypt(state: MachineState, in: Int): Either[String, (MachineState, KeyCode)] =
     if (state.wheelState.size != wheels.size)
@@ -27,16 +23,9 @@ sealed abstract case class EnigmaMachine(
       Left(s"KeyCode ($in) not in range of wheel size ($busSize).")
     else
       KeyCode(in).map( k =>
-        val newState: MachineState = advance(state)
+        val newState = advance(state)
         newState -> translate(newState)(k)
       )
-
-  private def codeStream(validKeys: ValidKeys, state: MachineState): Stream[Pure, (MachineState, KeyCode)] =
-    Stream.emits(validKeys.codes)
-      .mapAccumulate(state) { (state, ch) =>
-        val newState: MachineState = advance(state)
-        (newState, translate(newState)(ch))
-      }
 
   def crypt(state: MachineState, in: String): Either[String, (MachineState, String)] =
     if state.wheelState.size != wheels.size then
@@ -49,35 +38,15 @@ sealed abstract case class EnigmaMachine(
         out <- symbols.codesToString(res.map(_._2))
       yield (endState, out)
 
-  end crypt
-
-  def crypt2(state: MachineState, in: String): Either[String, (MachineState, String)] =
-    if state.wheelState.size != wheels.size then
-      Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
-    // else if in.numCodes != size then
-    //   Left(s"ValidKeys code size (${in.numCodes}) does not match rotor size ($size).")
-    else
-
-      @tailrec
-      def next(state: MachineState, in: IndexedSeq[KeyCode], out: IndexedSeq[(MachineState, KeyCode)]): IndexedSeq[(MachineState, KeyCode)] =
-        in match
-          case k +: remaining =>
-            val newState: MachineState = advance(state)
-            //val crypted: KeyCode = translateKeyCode(newState, k)
-            val crypted: KeyCode = translate(newState)(k)
-            next(newState, remaining, out :+ ArrowAssoc(newState) -> crypted)
-          case _ => out
-      end next
-
-      stringToValidKeys(in).flatMap {validKeys =>
-        val res: scala.IndexedSeq[(MachineState, KeyCode)] = next(state, validKeys.codes, Vector.empty)
-        val newState: MachineState = res.lastOption.map(_._1).getOrElse(state)
-        symbols.codesToString(res.map(_._2)).map(out => (newState, out))
-      }
-  end crypt2
-
-  def stringToValidKeys(in: String): Either[String, ValidKeys] =
+  private def stringToValidKeys(in: String): Either[String, ValidKeys] =
     symbols.stringToCodes(in).flatMap(ValidKeys.apply)
+
+  private def codeStream(validKeys: ValidKeys, state: MachineState): Stream[Pure, (MachineState, KeyCode)] =
+    Stream.emits(validKeys.codes)
+      .mapAccumulate(state) ( (state, ch) =>
+        val newState: MachineState = advance(state)
+        (newState, translate(newState)(ch))
+      )
 
   private def advance(start: MachineState): MachineState =
     def advanceIf(idx: Int, cond: Boolean) =
@@ -93,7 +62,7 @@ sealed abstract case class EnigmaMachine(
         wheel.notches.contains(pos)
       }
 
-    MachineState(
+    start.copy(wheelState =
       wheels.indices
         .map {
           case n @ 0 => (n, true)
@@ -102,10 +71,21 @@ sealed abstract case class EnigmaMachine(
           case n => (n, false)
         }.map {
           (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
-        },
-      start.reflectorState
+        }
     )
-
+    // MachineState(
+    //   wheels.indices
+    //     .map {
+    //       case n @ 0 => (n, true)
+    //       case n @ 1 => (n, atNotch(0) || atNotch(1))
+    //       case n @ 2 => (n, atNotch(1))
+    //       case n => (n, false)
+    //     }.map {
+    //       (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
+    //     },
+    //   start.reflectorState,
+    //   start.plugState
+    // )
   def translate(state: MachineState): KeyCode => KeyCode = in =>
     val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
 
@@ -115,15 +95,18 @@ sealed abstract case class EnigmaMachine(
       .concat(wheelStates.reverse.map((wheel, state) => wheel.reverse(state)))
       .appended(entry.reverse)
 
-    val allFuns = plugBoard
-      .map { pb => pb.forward +: wheelFuns :+ pb.reverse }
+    val all = plugBoard
+      .map(pb => pb.forward +: wheelFuns :+ pb.reverse)
       .getOrElse(wheelFuns)
 
-    allFuns.reduceLeft((fall, f) => f.compose(fall))(in)
+    all.reduceLeft((fall, f) => f.compose(fall))(in)
+
+  // println(f"p:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
 
 
   /** Represents a sequence of KeyCodes that has been validated for this instance
    *  of a Machine (path dependent type) */
+
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
     override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
 
@@ -135,9 +118,12 @@ sealed abstract case class EnigmaMachine(
       else
         Right(new ValidKeys(codes) {})
 
-end EnigmaMachine
+  sealed abstract case class ValidState private (state: MachineState)
 
-object EnigmaMachine:
+  object ValidState:
+    def apply(state: MachineState): Either[String, ValidState] = ???
+
+object Machine:
 
   def apply (
     symbolMap: SymbolMap,
@@ -145,7 +131,7 @@ object EnigmaMachine:
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
     plugBoard: Option[PlugBoard],
-  ): Either[String, Machine[MachineState]] =
+  ): Either[String, Machine] =
     for
       sm <- Either.cond(
         symbolMap.size === keyboard.size,
@@ -170,6 +156,4 @@ object EnigmaMachine:
         )
       ).getOrElse(Right(None))
     yield
-      new EnigmaMachine(sm, keyboard, wh, ref, plugBoard) {}
-
-end EnigmaMachine
+      new Machine(sm, keyboard, wh, ref, plugBoard) {}

@@ -12,13 +12,14 @@ case class SettingsJs private (
   reflector: Option[CodeJs],
   plugs: PlugsJs
 ):
-  def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
-    for
-      rs <- rings.toCodes(symbols)
-      wh <- wheels.toCodes(symbols)
-      ref <- reflector.map(_.toCodes(symbols)).getOrElse(Right(Vector(Position.zero)))
-      //plg <- plugs.toPlugBoard(symbols)
-    yield ???
+  def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] = ???
+    // for
+    //   rs <- rings.toCodes(symbols)
+    //   wh <- wheels.toCodes(symbols)
+    //   ref <- reflector.map(_.toCodes(symbols)).getOrElse(Right(Vector(Position.zero)))
+    //   //plg <- plugs.toPlugBoard(symbols, busSize)
+    //   //mstate <- MachineState(wh, ref, ???)
+    // yield mstate
 
 
 object SettingsJs:

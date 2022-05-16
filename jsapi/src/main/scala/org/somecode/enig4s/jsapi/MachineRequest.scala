@@ -15,7 +15,7 @@ final case class MachineRequest(
   settings: SettingsJs,
   text: Option[String]
 ):
-  def toMachine(cabinet: Cabinet): Either[String, Machine[MachineState]] =
+  def toMachine(cabinet: Cabinet): Either[String, Machine] =
     for
       smap <- symbolMap.map(_.toSymbolMap(cabinet)) match
         case Some(sm) => sm
@@ -29,9 +29,10 @@ final case class MachineRequest(
 
       rf <- reflector.toReflector(smap, cabinet)
 
+      //spb <-
       //set <- settings
 
-      machine <- EnigmaMachine(smap, kb, wh, rf, ???)
+      machine <- Machine(smap, kb, wh, rf, ???)
     yield machine
 
 object MachineRequest:

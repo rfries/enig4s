@@ -4,7 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Cabinet, Position, Reflector, SymbolMap, Wiring}
+import org.somecode.enig4s.mach.{Cabinet, Reflector, SymbolMap, Wiring}
 
 import scala.collection.immutable.ArraySeq
 
