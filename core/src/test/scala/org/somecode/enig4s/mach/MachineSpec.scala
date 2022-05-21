@@ -79,9 +79,9 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       wheelState.reverse
         .zipWithIndex
         .map { case ((pos, rs), idx) =>
-          WheelState(Some(idx), KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
+          WheelState(KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
         },
-      WheelState(None, KeyCode.unsafe(reflectorState), RingSetting.zero)
+      Position.unsafe(reflectorState)
     )
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =

@@ -4,23 +4,25 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{MachineState, Position, SymbolMap}
+import org.somecode.enig4s.mach.{KeyCode, MachineState, Position, RingSetting, SymbolMap, WheelState}
 
 case class SettingsJs private (
   rings: CodesJs,
   wheels: CodesJs,
-  reflector: Option[CodeJs],
-  plugs: PlugsJs
+  reflector: Option[CodeJs]
 ):
-  def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] = ???
-    // for
-    //   rs <- rings.toCodes(symbols)
-    //   wh <- wheels.toCodes(symbols)
-    //   ref <- reflector.map(_.toCodes(symbols)).getOrElse(Right(Vector(Position.zero)))
-    //   //plg <- plugs.toPlugBoard(symbols, busSize)
-    //   //mstate <- MachineState(wh, ref, ???)
-    // yield mstate
+  def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
+    for
+      ringCodes <- rings.toCodes(symbols)
+      posCodes <- wheels.toCodes(symbols)
+      ws = ringCodes.zip(posCodes)
+              .map((ring, pos) => WheelState(pos, RingSetting.unsafe(ring)))
 
+      ref <- reflector
+              .map( _.toCode(symbols).map(Position.unsafe))
+              .getOrElse(Right(Position.zero))
+
+    yield MachineState(ws, ref)
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec

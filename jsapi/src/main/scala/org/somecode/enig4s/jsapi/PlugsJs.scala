@@ -17,18 +17,6 @@ final case class PlugsJs(
 
     case PlugsJs(Some(pairs), None) => EnigmaPlugBoard(size, pairs, symbols)
 
-      // if (pairs.exists(_.length != 2))
-      //   Left("Pairing strings must contain only two symbols per string.")
-      // else
-      //   for
-      //     codes <- pairs.map(p => symbols.stringToCodes(p).map(v => v(0) -> v(1)))
-      //       .to(ArraySeq)
-      //       .sequence
-      //     pb <- EnigmaPlugBoard(codes)
-      //   yield pb
-
-      // PlugBoard(size, pairs, symbols)
-
     case PlugsJs(None, Some(cds)) =>
       if codes.exists(_.length == 2) then
         Left(s"All elements of plugboard array must be pairs (length 2)")

@@ -10,10 +10,10 @@ sealed abstract case class Reflector private (
 
   def size: Int = wiring.size
 
-  def forward(state: WheelState): KeyCode => KeyCode =
+  def forward(pos: Position): KeyCode => KeyCode =
     in =>
-      val out = wiring.codes(plusMod(in, state))
-      println(f"r: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
+      val out = wiring.codes(plusMod(in, pos))
+      println(f"r: [$pos%02d] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
       out
 
 object Reflector:

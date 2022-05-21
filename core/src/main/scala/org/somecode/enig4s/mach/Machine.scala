@@ -70,22 +70,10 @@ sealed abstract case class Machine(
           case n @ 2 => (n, atNotch(1))
           case n => (n, false)
         }.map {
-          (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
+          (idx, cond) => WheelState(advanceIf(idx, cond), start.wheelState(idx).ring)
         }
     )
-    // MachineState(
-    //   wheels.indices
-    //     .map {
-    //       case n @ 0 => (n, true)
-    //       case n @ 1 => (n, atNotch(0) || atNotch(1))
-    //       case n @ 2 => (n, atNotch(1))
-    //       case n => (n, false)
-    //     }.map {
-    //       (idx, cond) => WheelState(Some(idx), advanceIf(idx, cond), start.wheelState(idx).ring)
-    //     },
-    //   start.reflectorState,
-    //   start.plugState
-    // )
+
   def translate(state: MachineState): KeyCode => KeyCode = in =>
     val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
 
@@ -101,9 +89,6 @@ sealed abstract case class Machine(
 
     all.reduceLeft((fall, f) => f.compose(fall))(in)
 
-  // println(f"p:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-
-
   /** Represents a sequence of KeyCodes that has been validated for this instance
    *  of a Machine (path dependent type) */
 
@@ -118,10 +103,38 @@ sealed abstract case class Machine(
       else
         Right(new ValidKeys(codes) {})
 
+  /** Represents a machine state that has been validated for this instance
+   *  of a Machine (path dependent type) */
+
   sealed abstract case class ValidState private (state: MachineState)
 
   object ValidState:
-    def apply(state: MachineState): Either[String, ValidState] = ???
+    def apply(state: MachineState): Either[String, ValidState] =
+      for
+        _ <-  state.wheelState
+                .find(_.position >= entry.size)
+                .map(ws => s"Wheel position (${ws.position}) is too large for bus ($busSize)")
+                .toLeft(())
+        _ <-  state.wheelState
+                .find(_.ring >= busSize)
+                .map(ws => s"Ring setting (${ws.ring}) is too large for bus ($busSize)")
+                .toLeft(())
+        _ <-  Either.cond(
+                state.reflectorState < busSize,
+                (),
+                s"Reflector position (${state.reflectorState}) is too large for bus ($busSize)"
+              )
+        _ <-  Either.cond(
+                reflector.positions.getOrElse(Vector(0)).contains(state.reflectorState),
+                (),
+                s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
+              )
+        _ <-  Either.cond(
+                state.wheelState.size != wheels.size,
+                (),
+                s"Wheel state size (${state.wheelState.size}) does not match number of wheels (${wheels.size})"
+              )
+      yield new ValidState(state) {}
 
 object Machine:
 

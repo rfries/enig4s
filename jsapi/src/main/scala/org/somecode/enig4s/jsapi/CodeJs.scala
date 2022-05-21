@@ -9,7 +9,7 @@ import org.somecode.enig4s.mach.{SymbolMap, KeyCode}
 import scala.collection.immutable.ArraySeq
 
 case class CodeJs(symbol: Option[String], code: Option[Int]):
-  def toCodes(symbols: SymbolMap): Either[String, KeyCode] = this match
+  def toCode(symbols: SymbolMap): Either[String, KeyCode] = this match
     case CodeJs(Some(str), None) => str match
       case s if s.length != 1 => Left("'symbol' length must be 1")
       case s => symbols.pointToCode(str(0))

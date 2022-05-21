@@ -13,6 +13,7 @@ import org.somecode.enig4s.jsapi.MachineResponse
 import org.somecode.enig4s.mach.Cabinet
 import org.http4s.HttpRoutes
 import org.http4s.Response
+import org.somecode.enig4s.jsapi.MachineRequestJs
 
 class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Http4sDsl[F]:
 
@@ -20,7 +21,7 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Htt
     HttpRoutes.of[F] {
       case req @ POST -> Root =>
         for
-          mreq <- req.as[MachineRequest]
+          mreq <- req.as[MachineRequestJs]
           resp <- machineRequest(mreq)
         yield resp
 
@@ -30,5 +31,5 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Htt
     }
   }
 
-  def machineRequest(mreq: MachineRequest): F[Response[F]] =
+  def machineRequest(mreq: MachineRequestJs): F[Response[F]] =
     Ok(MachineResponse("AAA", "SENDMORECHUCKBERRY").asJson)
