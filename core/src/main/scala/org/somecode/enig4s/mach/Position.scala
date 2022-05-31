@@ -1,15 +1,11 @@
-package org.somecode.enig4s.mach
+package org.somecode.enig4s
+package mach
+
+/**
+ * Represents the position of a rotor; that is, a value that is added to a [[KeyCode]]
+ * when being transformed by a [[Wheel]]. `Position` is a tiny `Int` type
+ * limited to positive integers and 0.
+ */
 
 opaque type Position <: Int = Int
-
-object Position:
-
-  val zero: Position = unsafe(0)
-  val one: Position = unsafe(1)
-
-  def apply(c: Int): Either[String, Position] =
-    Either.cond(c >= 0, c, s"RingSetting ($c) must be >= 0.")
-
-  def unsafe(n: Int): Position = apply(n).fold(
-    s => throw new IllegalArgumentException(s),
-    v => v)
+object Position extends NewPozNum[Position, Int]

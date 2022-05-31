@@ -12,31 +12,31 @@ import scala.collection.immutable.ArraySeq
  */
 class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
 
-  val pointToCode: Map[Int, KeyCode] = codePoints.zipWithIndex
-    .map((pt, code) => (pt: Int, KeyCode.unsafe(code)))
+  val pointsToCode: Map[Int, KeyCode] = codePoints.zipWithIndex
+    .map((pt, code) => (pt, KeyCode.unsafe(code)))
     .toMap
 
   val size: Int = codePoints.size
 
   def pointToCode(cp: Int): Either[String, KeyCode] =
-    pointToCode.get(cp).toRight(f"Code point $cp%x not found in map.")
+    pointsToCode.get(cp).toRight(f"Code point $cp%x not found in map.")
 
   def codeToPoint(key: KeyCode): Either[String, Int] =
     codePoints.lift(key).toRight(s"Key code $key not found in map.")
 
   def stringToCodes(in: String): Either[String, ArraySeq[KeyCode]] =
     // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
-    in.toArray.to(ArraySeq).map(ch => pointToCode.get(ch)).sequence match {
+    in.toArray.to(ArraySeq).map(ch => pointsToCode.get(ch)).sequence match {
       case Some(out) => Right(out)
       case None =>
         val bad = in.filterNot(codePoints.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
-        Left(s"Invalid character(s) for character map: $bad")
+        Left(s"Invalid character(s) for symbol map: $bad")
     }
 
   def codesToString(in: IndexedSeq[KeyCode]): Either[String, String] =
     in.map(codePoints.lift).to(ArraySeq).sequence match {
       case Some(out) => Right(String(out.toArray[Int], 0, out.length))
-      case None => Left("Key code not found in character map.")
+      case None => Left("Key code not found in symbol map.")
     }
 
 end SymbolMap

@@ -19,31 +19,31 @@ object Cabinet:
 
   case class SymbolsInit(name: String, mapping: String)
   case class WiringInit(name: String, symbols: String, mapping: String)
-  case class WheelInit(name: String, wiringName: String, notches: String, ringSetting: KeyCode)
-  case class ReflectorInit(name: String, wiringName: String, positions: String, advance: Boolean)
+  case class WheelInit(name: String, wiringName: String, symbols: String, notches: String)
+  case class ReflectorInit(name: String, wiringName: String, positions: String = "A")
 
   def init: Either[String, Cabinet] =
     for
-      symbols <- initCharMaps
+      symbols <- initSymbolMaps
       wirings <- initWirings(symbols)
-      wheels <- initWheels(wirings)
+      wheels <- initWheels(symbols, wirings)
       reflectors <- initReflectors(wirings)
     yield
       Cabinet(symbols, wirings, wheels, reflectors)
 
-  def initCharMaps: Either[String, Symbols] =
+  def initSymbolMaps: Either[String, Symbols] =
     symbolsInit
       .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
       .sequence
       .map(_.toMap)
 
-  def initWirings(charMaps: Symbols): Either[String, Wirings] =
+  def initWirings(symMaps: Symbols): Either[String, Wirings] =
     val pairs: Vector[Either[String, (String, Wiring)]] =
       for
         wi <- wiringInit
       yield for
-        charMap <- charMaps.get(wi.symbols).toRight(s"Character map '${wi.symbols}' not defined.")
-        keyCodes <- charMap.stringToCodes(wi.mapping)
+        symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
+        keyCodes <- symMap.stringToCodes(wi.mapping)
         wiring <- Wiring(keyCodes).map(w => (wi.name, w))
       yield wiring
     // turn inside-out and then to a map:
@@ -51,22 +51,18 @@ object Cabinet:
     //   then, if Right, Vector[(String, Wiring)] => Map[String, Wiring]
     pairs.sequence.map(_.toMap)
 
-  def initWheels(wirings: Wirings): Either[String, Wheels] =
-    wheelInit
-      .map( winit =>
-        wirings
-          .get(winit.wiringName)
-          .toRight(s"Wiring '${winit.wiringName}' not defined.")
-          .flatMap(wiring => Wheel(wiring, winit.notches, SymbolMap.AZ).map(wheel => (winit.name, wheel)))
-      )
-      .sequence
-      .map(_.toMap)
+  def initWheels(symMaps: Symbols, wirings: Wirings): Either[String, Wheels] =
+    val pairs: Vector[Either[String, (String, Wheel)]] =
+      for
+        winit <- wheelInit
+      yield for
+        symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
+        wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
+        wheel <- Wheel(wiring, winit.notches, symMap)
+      yield (winit.name, wheel)
+    pairs.sequence.map(_.toMap)
 
-  val symbolsInit: Vector[SymbolsInit] = Vector(
-    SymbolsInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-  )
 
-  def initReflectors(wirings: Wirings): Either[String, Reflectors] = Right(Map.empty)
     // wheelInit
     //   .map( winit =>
     //     wirings
@@ -77,51 +73,122 @@ object Cabinet:
     //   .sequence
     //   .map(_.toMap)
 
-  val wheelInit: Vector[WheelInit] = Vector(
-  //          name   wiring  notches ringSetting
-    WheelInit("I",    "I",    "Q",  KeyCode.zero),
-    WheelInit("II",   "II",   "E",  KeyCode.zero),
-    WheelInit("III",  "III",  "V",  KeyCode.zero),
-    WheelInit("IV",   "IV",   "J",  KeyCode.zero),
-    WheelInit("V",    "V",    "Z",  KeyCode.zero),
+  def initReflectors(wirings: Wirings): Either[String, Reflectors] =
+    reflectorInit
+      .map( rinit =>
+        wirings.get(rinit.wiringName)
+          .toRight(s"Wiring '${rinit.wiringName}' not defined.")
+          .flatMap(wiring => Reflector(wiring, None).map(ref => (rinit.name, ref)))
+      )
+      .sequence
+      .map(_.toMap)
 
-    WheelInit("VI",   "VI",   "ZM", KeyCode.zero),
-    WheelInit("VII",  "VII",  "ZM", KeyCode.zero),
-    WheelInit("VIII", "VIII", "ZM", KeyCode.zero)
+  val symbolsInit: Vector[SymbolsInit] = Vector(
+    SymbolsInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    SymbolsInit("10", "1234567890")
+  )
+
+  val wheelInit: Vector[WheelInit] = Vector(
+    //        name          wiring        symbolMap notches
+
+    WheelInit("I",          "I",          "AZ",   "Q"),
+    WheelInit("II",         "II",         "AZ",   "E"),
+    WheelInit("III",        "III",        "AZ",   "V"),
+    WheelInit("IV",         "IV",         "AZ",   "J"),
+    WheelInit("V",          "V",          "AZ",   "Z"),
+    WheelInit("m3.VI",      "m3.VI",      "AZ",   "ZM"),
+    WheelInit("m3.VII",     "m3.VII",     "AZ",   "ZM"),
+    WheelInit("m3.VIII",    "m3.VIII",    "AZ",   "ZM"),
+    WheelInit("m4.BETA",    "m4.BETA",    "AZ",   ""),
+    WheelInit("m4.GAMMA",   "m4.GAMMA",   "AZ",   ""),
+    WheelInit("d.I",        "d.I",        "AZ",   "Y"),
+    WheelInit("d.II",       "d.II",       "AZ",   "E"),
+    WheelInit("d.III",      "d.III",      "AZ",   "N"),
+    WheelInit("g.I",        "d.I",        "AZ",   "SUVWZABCEFGIKLOPQ"),
+    WheelInit("g.II",       "d.II",       "AZ",   "STVYZACDFGHKMNQ"),
+    WheelInit("g.III",      "d.III",      "AZ",   "UWXAEFHKMNR"),
+    WheelInit("r.I",        "r.I",        "AZ",   "N"),
+    WheelInit("r.II",       "r.II",       "AZ",   "E"),
+    WheelInit("r.III",      "r.III",      "AZ",   "Y"),
+    WheelInit("z.I",        "z.I",        "10",   "9"),
+    WheelInit("z.II",       "z.II",       "10",   "9"),
+    WheelInit("z.III",      "z.III",      "10",   "9"),
   )
 
   val reflectorInit: Vector[ReflectorInit] = Vector(
-    //ReflectorInit("")
+  //              name     wiring
+    ReflectorInit("UKW-A",      "UKW-A"),
+    ReflectorInit("UKW-B",      "UKW-B"),
+    ReflectorInit("UKW-C",      "UKW-C"),
+    ReflectorInit("m4.UKW-B",   "m4.UKW-B"),
+    ReflectorInit("m4.UKW-C",   "m4.UKW-C"),
+    ReflectorInit("d.UKW",      "d.UKW"),
+    ReflectorInit("r.UKW",      "r.UKW"),
+    ReflectorInit("g312.UKW",   "g312.UKW"),
+    ReflectorInit("z.UKW",      "z.UKW"),
   )
 
   val wiringInit: Vector[WiringInit] = Vector(
-    WiringInit("IC",      "AZ",   "DMTWSILRUYQNKFEJCAZBPGXOHV"),
-    WiringInit("IIC",     "AZ",   "HQZGPJTMOBLNCIFDYAWVEUSRKX"),
-    WiringInit("IIIC",    "AZ",   "UQNTLSZFMREHDPXKIBVYGJCWOA"),
-    WiringInit("IR",      "AZ",   "JGDQOXUSCAMIFRVTPNEWKBLZYH"),
-    WiringInit("IIR",     "AZ",   "NTZPSFBOKMWRCJDIVLAEYUXHGQ"),
-    WiringInit("IIIR",    "AZ",   "JVIUBHTCDYAKEQZPOSGXNRMWFL"),
-    WiringInit("UKWR",    "AZ",   "QYHOGNECVPUZTFDJAXWMKISRBL"),
-    WiringInit("ETWR",    "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
-    WiringInit("IK",      "AZ",   "PEZUOHXSCVFMTBGLRINQJWAYDK"),
-    WiringInit("IIK",     "AZ",   "ZOUESYDKFWPCIQXHMVBLGNJRAT"),
-    WiringInit("IIIK",    "AZ",   "EHRVXGAOBQUSIMZFLYNWKTPDJC"),
-    WiringInit("UKWK",    "AZ",   "IMETCGFRAYSQBZXWLHKDVUPOJN"),
-    WiringInit("ETWK",    "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
-    WiringInit("I",       "AZ",   "EKMFLGDQVZNTOWYHXUSPAIBRCJ"),
-    WiringInit("II",      "AZ",   "AJDKSIRUXBLHWTMCQGZNPYFVOE"),
-    WiringInit("III",     "AZ",   "BDFHJLCPRTXVZNYEIWGAKMUSQO"),
-    WiringInit("IV",      "AZ",   "ESOVPZJAYQUIRHXLNFTGKDCMWB"),
-    WiringInit("V",       "AZ",   "VZBRGITYUPSDNHLXAWMJQOFECK"),
-    WiringInit("VI",      "AZ",   "JPGVOUMFYQBENHZRDKASXLICTW"),
-    WiringInit("VII",     "AZ",   "NZJHGRCXMYSWBOUFAIVLPEKQDT"),
-    WiringInit("VIII",    "AZ",   "FKQHTLXOCBJSPDZRAMEWNIUYGV"),
-    WiringInit("BETA",    "AZ",   "LEYJVCNIXWPBQMDRTAKZGFUHOS"),
-    WiringInit("GAMMA",   "AZ",   "FSOKANUERHMBTIYCWLQPZXVGJD"),
-    WiringInit("A",       "AZ",   "EJMZALYXVBWFCRQUONTSPIKHGD"),
-    WiringInit("B",       "AZ",   "YRUHQSLDPXNGOKMIEBFZCWVJAT"),
-    WiringInit("C",       "AZ",   "FVPJIAOYEDRZXWGCTKUQSBNMHL"),
-    WiringInit("B_THIN",  "AZ",   "ENKQAUYWJICOPBLMDXZVFTHRGS"),
-    WiringInit("C_THIN",  "AZ",   "RDOBJNTKVEHMLFCWZAXGYIPSUQ"),
-    WiringInit("ETW",     "AZ",   "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+    // Enigma I
+    WiringInit("ETW",       "AZ",   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+
+    WiringInit("I",         "AZ",   "EKMFLGDQVZNTOWYHXUSPAIBRCJ"),
+    WiringInit("II",        "AZ",   "AJDKSIRUXBLHWTMCQGZNPYFVOE"),
+    WiringInit("III",       "AZ",   "BDFHJLCPRTXVZNYEIWGAKMUSQO"),
+    WiringInit("IV",        "AZ",   "ESOVPZJAYQUIRHXLNFTGKDCMWB"),
+    WiringInit("V",         "AZ",   "VZBRGITYUPSDNHLXAWMJQOFECK"),
+
+    WiringInit("UKW-A",     "AZ",   "EJMZALYXVBWFCRQUONTSPIKHGD"),
+    WiringInit("UKW-B",     "AZ",   "YRUHQSLDPXNGOKMIEBFZCWVJAT"),
+    WiringInit("UKW-C",     "AZ",   "FVPJIAOYEDRZXWGCTKUQSBNMHL"),
+
+    // M3 & M4
+    WiringInit("m3.VI",     "AZ",   "JPGVOUMFYQBENHZRDKASXLICTW"),
+    WiringInit("m3.VII",    "AZ",   "NZJHGRCXMYSWBOUFAIVLPEKQDT"),
+    WiringInit("m3.VIII",   "AZ",   "FKQHTLXOCBJSPDZRAMEWNIUYGV"),
+
+    // M4
+    WiringInit("m4.BETA",   "AZ",   "LEYJVCNIXWPBQMDRTAKZGFUHOS"),
+    WiringInit("m4.GAMMA",  "AZ",   "FSOKANUERHMBTIYCWLQPZXVGJD"),
+    WiringInit("m4.UKW-B",  "AZ",   "ENKQAUYWJICOPBLMDXZVFTHRGS"),
+    WiringInit("m4.UKW-C",  "AZ",   "RDOBJNTKVEHMLFCWZAXGYIPSUQ"),
+
+    // Enigma D (A26), K & G (Zählwerk Enigma)
+    WiringInit("d.ETW",     "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
+    WiringInit("d.I",       "AZ",   "LPGSZMHAEOQKVXRFYBUTNICJDW"),
+    WiringInit("d.II",      "AZ",   "SLVGBTFXJQOHEWIRZYAMKPCNDU"),
+    WiringInit("d.III",     "AZ",   "CJGDPSHKTURAWZXFMYNQOBVLIE"),
+    WiringInit("d.UKW",     "AZ",   "IMETCGFRAYSQBZXWLHKDVUPOJN"),
+
+    // Enigma K - Swiss Variant ("Swiss K")
+    WiringInit("sk.ETW",    "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
+    WiringInit("sk.I",      "AZ",   "PEZUOHXSCVFMTBGLRINQJWAYDK"),
+    WiringInit("sk.II",     "AZ",   "ZOUESYDKFWPCIQXHMVBLGNJRAT"),
+    WiringInit("sk.III",    "AZ",   "EHRVXGAOBQUSIMZFLYNWKTPDJC"),
+
+    // Enigma G-312 (One of several Enigma G wirings used by the Abwehr)
+    WiringInit("g312.I",    "AZ",   "DMTWSILRUYQNKFEJCAZBPGXOHV"),
+    WiringInit("g312.II",   "AZ",   "HQZGPJTMOBLNCIFDYAWVEUSRKX"),
+    WiringInit("g312.III",  "AZ",   "UQNTLSZFMREHDPXKIBVYGJCWOA"),
+    WiringInit("g312.UKW",  "AZ",   "RULQMZJSYGOCETKWDAHNBXPVIF"),
+
+    // Enigma G-260 (One of several Enigma G wirings used by the Abwehr)
+    WiringInit("g260.I",    "AZ",   "RCSPBLKQAUMHWYTIFZVGOJNEXD"),
+    WiringInit("g260.II",   "AZ",   "WCMIBVPJXAROSGNDLZKEYHUFQT"),
+    WiringInit("g260.III",  "AZ",   "FVDHZELSQMAXOKYIWPGCBUJTNR"),
+
+    // Railway Enigma (Rocket)
+    WiringInit("r.ETW",     "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
+    WiringInit("r.I",       "AZ",   "JGDQOXUSCAMIFRVTPNEWKBLZYH"),
+    WiringInit("r.II",      "AZ",   "NTZPSFBOKMWRCJDIVLAEYUXHGQ"),
+    WiringInit("r.III",     "AZ",   "JVIUBHTCDYAKEQZPOSGXNRMWFL"),
+    WiringInit("r.UKW",     "AZ",   "QYHOGNECVPUZTFDJAXWMKISRBL"),
+
+    // Enigma Z
+    WiringInit("z.ETW",     "10",   "1234567890"),
+    WiringInit("z.I",       "10",   "6418270359"),
+    WiringInit("z.II",      "10",   "5841097632"),
+    WiringInit("z.III",     "10",   "3581620794"),
+    WiringInit("z.UKW",     "10",   "5079183642"),
   )

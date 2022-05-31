@@ -1,9 +1,12 @@
-import org.somecode.enig4s.mach.Cabinet
+import org.somecode.enig4s.mach.SymbolMap
 import io.circe.*
 import io.circe.parser.*
+import org.scalatest.OptionValues.*
+import org.scalatest.EitherValues.*
 import org.somecode.enig4s.jsapi.MachineRequestJs
+import org.somecode.enig4s.mach.Cabinet
 
-val js3 = """ { "n": 1 }"""
+val cab = Cabinet.init.value
 
 val js = """
   {
@@ -30,25 +33,34 @@ val js = """
   }
 """
 
-val cab = Cabinet.init.getOrElse(throw new RuntimeException("Boo!"))
-println("Hello there....")
+val json = parse(js).value
 
-val json = parse(js)
-json match
-  case Left(pf) => println("-->" + pf)
-  case Right(js) => println("Got JSON: " + js)
+val mreqJs = decode[MachineRequestJs](js).value
 
-json
+val mreq = mreqJs.toMachineRequest(cab).value
 
-val mrjs = decode[MachineRequestJs](js)
-mrjs match {
-  case Left(pf) => println("-->" + pf)
-  case Right(mr) =>
-    val got = mr.toMachineRequest(cab)
-    println("Got JSON: " + got)
-    println(mr.plugboard)
-    //println("plugboard: " + mr.plugboard)
-}
+val (st, tx) = mreq.machine.crypt(mreq.state, mreq.text).value
+
+st.wheelPositions(SymbolMap.AZ)
+tx
+
+
+
+// json match
+//   case Left(pf) => println("-->" + pf)
+//   case Right(js) => println("Got JSON: " + js)
+
+// json
+
+// val mrjs = decode[MachineRequestJs](js)
+// mrjs match {
+//   case Left(pf) => println("-->" + pf)
+//   case Right(mr) =>
+//     val got = mr.toMachineRequest(cab)
+//     println("Got JSON: " + got)
+//     println(mr.plugboard)
+//     //println("plugboard: " + mr.plugboard)
+// }
 
 
 //json.map(j => j.as[MachineRequestJs])

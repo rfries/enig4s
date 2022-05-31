@@ -89,8 +89,10 @@ sealed abstract case class Machine(
 
     all.reduceLeft((fall, f) => f.compose(fall))(in)
 
-  /** Represents a sequence of KeyCodes that has been validated for this instance
-   *  of a Machine (path dependent type) */
+  /**
+   * Represents a sequence of KeyCodes that has been validated for this instance
+   * of a Machine (path dependent type)
+   */
 
   sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
     override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
@@ -103,8 +105,8 @@ sealed abstract case class Machine(
       else
         Right(new ValidKeys(codes) {})
 
-  /** Represents a machine state that has been validated for this instance
-   *  of a Machine (path dependent type) */
+  /** This is a path-dependent type that represents a machine state that has been
+   *  validated for this instance of a Machine */
 
   sealed abstract case class ValidState private (state: MachineState)
 
@@ -116,11 +118,11 @@ sealed abstract case class Machine(
                 .map(ws => s"Wheel position (${ws.position}) is too large for bus ($busSize)")
                 .toLeft(())
         _ <-  state.wheelState
-                .find(_.ring >= busSize)
+                .find(_.ring.toInt >= busSize)
                 .map(ws => s"Ring setting (${ws.ring}) is too large for bus ($busSize)")
                 .toLeft(())
         _ <-  Either.cond(
-                state.reflectorState < busSize,
+                state.reflectorState.toInt < busSize,
                 (),
                 s"Reflector position (${state.reflectorState}) is too large for bus ($busSize)"
               )
@@ -132,7 +134,7 @@ sealed abstract case class Machine(
         _ <-  Either.cond(
                 state.wheelState.size != wheels.size,
                 (),
-                s"Wheel state size (${state.wheelState.size}) does not match number of wheels (${wheels.size})"
+                s"Number of wheels in state (${state.wheelState.size}) does not match number of wheels in Machine (${wheels.size})"
               )
       yield new ValidState(state) {}
 

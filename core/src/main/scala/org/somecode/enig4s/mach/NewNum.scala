@@ -22,7 +22,6 @@ class NewPozNum[T, N <: T](using num: Numeric[N], eq: Eq[N]) extends NewNum[T, N
   final override def apply(n: N): Either[String, T] =
     apply(n, num.gteq(n, num.zero), ">= 0")
 
-
 class NewPosNum[T, N <: T](using num: Numeric[N], eq: Eq[N]) extends NewNum[T, N]:
   final override def apply(n: N): Either[String, T] =
     apply(n, num.gt(n, num.zero), "> 0")

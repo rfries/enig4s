@@ -11,12 +11,12 @@ ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtV
 
 val v = new {
   val cats                  = "2.7.0"
-  val catsEffect            = "3.3.11"
+  val catsEffect            = "3.3.12"
   val scalatest             = "3.2.11"
   val scalatest_scalacheck  = "3.2.11.0"
 
-  val circe                 = "0.14.1"
-  val http4s                = "1.0.0-M32"
+  val circe                 = "0.14.2"
+  val http4s                = "1.0.0-M33"
   val fs2                   = "3.2.7"
   val monocle               = "3.1.0"
   val scalajs               = "1.8.0" // not used directly (appears in plugins.sbt)

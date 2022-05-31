@@ -14,18 +14,41 @@ import org.somecode.enig4s.mach.Cabinet
 import org.http4s.HttpRoutes
 import org.http4s.Response
 import org.somecode.enig4s.jsapi.MachineRequestJs
+import cats.effect.SyncIO
 
 class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Http4sDsl[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req @ POST -> Root =>
-        for
-          mreq <- req.as[MachineRequestJs]
-          resp <- machineRequest(mreq)
-        yield resp
+        //val mreqJs = req.as[MachineRequestJs].fold
+
+        // for
+        //   mreqJs <- req.as[MachineRequestJs]
+        // yield for
+        //   mreq <- mreqJs.toMachineRequest(cabinet)
+        //   mstate <- mreq.machine.ValidState(mreq.state)
+        //   out <- mreq.machine.crypt(mstate.state, mreq.text)
+        //   resp = MachineResponse(out._1.wheelPositions(mreq.machine.symbols), out._2)
+        //   respJs = resp.asJson
+        // yield respJs
+        //   yield out
+        // yield out) match
+        //   case Left(s) => BadRequest(s)
+        //   case Right(s) => Ok(s)
+
+        val ret = Ok("Boo!")
+        ret
 
       case GET -> Root / "wheels" =>
+        //Ok(cabinet.wheels.asJson)
+        Ok("Ok")
+
+      case GET -> Root / "reflectors" =>
+        //Ok(cabinet.wheels.asJson)
+        Ok("Ok")
+
+      case GET -> Root / "wirings" =>
         //Ok(cabinet.wheels.asJson)
         Ok("Ok")
     }

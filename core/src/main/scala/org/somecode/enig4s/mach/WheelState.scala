@@ -5,4 +5,4 @@ final case class WheelState(
   position: KeyCode,
   ring: RingSetting
 ):
-  val offset: Int = position - ring
+  val offset: Int = position.toInt - ring.toInt
