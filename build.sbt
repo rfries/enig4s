@@ -7,22 +7,22 @@ ThisBuild / version          := "0.2.1-SNAPSHOT"
 
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
-ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
+// ThisBuild / buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion)
 
 val v = new {
   val cats                  = "2.7.0"
   val catsEffect            = "3.3.12"
-  val scalatest             = "3.2.11"
+  val scalatest             = "3.2.12"
   val scalatest_scalacheck  = "3.2.11.0"
 
   val circe                 = "0.14.2"
   val http4s                = "1.0.0-M33"
-  val fs2                   = "3.2.7"
+  val fs2                   = "3.2.8"
   val monocle               = "3.1.0"
-  val scalajs               = "1.8.0" // not used directly (appears in plugins.sbt)
+  val scalajs               = "1.10.0" // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
-  val scalajsDom            = "2.1.0"
-  val scalajsReact          = "2.0.1"
+  val scalajsDom            = "2.2.0"
+  val scalajsReact          = "2.1.1"
 }
 
 lazy val commonLibs = Seq(
@@ -73,6 +73,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .enablePlugins(BuildInfoPlugin)
   .settings(
     name := "enig4s-core",
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "org.somecode.enig4s",
     commonLibs
   )
@@ -87,6 +88,7 @@ lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
   .settings(
     name := "enig4s-jsapi",
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "org.somecode.enig4s.jsapi",
     commonLibs
   )
@@ -98,6 +100,7 @@ lazy val server = project.in(file("server"))
   .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
   .settings(
     name := "enig4s-server",
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "org.somecode.enig4s.server",
     commonLibs
   )
