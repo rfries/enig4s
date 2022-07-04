@@ -13,8 +13,8 @@ case class SettingsJs private (
 ):
   def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
     for
-      ringCodes <- rings.toCodes(symbols)
-      posCodes <- wheels.toCodes(symbols)
+      ringCodes <- rings.toCodes(symbols).map(_.reverse)
+      posCodes <- wheels.toCodes(symbols).map(_.reverse)
       ws = ringCodes.zip(posCodes)
               .map((ring, pos) => WheelState(pos, RingSetting.unsafe(ring)))
 

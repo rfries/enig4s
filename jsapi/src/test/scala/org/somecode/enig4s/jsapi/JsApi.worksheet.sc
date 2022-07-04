@@ -25,7 +25,7 @@ val js = """
       }
     },
     "settings": {
-      "rings":      { "symbols": "ABC" },
+      "rings":      { "symbols": "CVG" },
       "wheels":     { "codes": [0, 1, 2] },
       "reflector":  { "symbol": "B" }
     },
@@ -34,35 +34,11 @@ val js = """
 """
 
 val json = parse(js).value
-
-val mreqJs = decode[MachineRequestJs](js).value
-
+val mreqJs = json.as[MachineRequestJs].value
 val mreq = mreqJs.toMachineRequest(cab).value
 
-val (st, tx) = mreq.machine.crypt(mreq.state, mreq.text).value
+mreq.state.readable(SymbolMap.AZ)
+val (st, text) = mreq.machine.crypt(mreq.state, mreq.text).value
 
-st.wheelPositions(SymbolMap.AZ)
-tx
-
-
-
-// json match
-//   case Left(pf) => println("-->" + pf)
-//   case Right(js) => println("Got JSON: " + js)
-
-// json
-
-// val mrjs = decode[MachineRequestJs](js)
-// mrjs match {
-//   case Left(pf) => println("-->" + pf)
-//   case Right(mr) =>
-//     val got = mr.toMachineRequest(cab)
-//     println("Got JSON: " + got)
-//     println(mr.plugboard)
-//     //println("plugboard: " + mr.plugboard)
-// }
-
-
-//json.map(j => j.as[MachineRequestJs])
-
-println(">>>> Done!")
+println(st.readable(SymbolMap.AZ))
+text
