@@ -85,10 +85,10 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     )
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
-    val (newState, out) = mach.crypt(state, in).require
-    out.toString shouldBe expected
-    info(s"$in => $out")
-    newState
+    val res = mach.crypt(state, in, false).require
+    res.text shouldBe expected
+    info(s"$in => ${res.text}")
+    res.state
 
 object MachineSpec:
   val busSize: KeyCode = KeyCode.unsafe(26)

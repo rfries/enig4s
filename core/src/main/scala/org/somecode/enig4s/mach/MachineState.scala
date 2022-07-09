@@ -23,4 +23,4 @@ final case class MachineState(
       .toOption
       .getOrElse("<unavailable>")
 
-    s"[state: $ws $ref]"
+    s"$ws $ref"

@@ -27,7 +27,7 @@ val js = """
     "settings": {
       "rings":      { "symbols": "CVG" },
       "wheels":     { "codes": [0, 1, 2] },
-      "reflector":  { "symbol": "B" }
+      "reflector":  { "symbol": "S" }
     },
     "text": "SENDMORECHUCKBERRY"
   }
@@ -38,7 +38,19 @@ val mreqJs = json.as[MachineRequestJs].value
 val mreq = mreqJs.toMachineRequest(cab).value
 
 mreq.state.readable(SymbolMap.AZ)
-val (st, text) = mreq.machine.crypt(mreq.state, mreq.text).value
+val csr = mreq.machine.crypt(mreq.state, mreq.text, true).value
 
-println(st.readable(SymbolMap.AZ))
-text
+println(csr.state.readable(SymbolMap.AZ))
+csr.text
+csr.traceMsg
+
+val jsonRev = json.hcursor.downField("text").withFocus(_.mapString(_ => csr.text)).top.value
+
+val mreqJsRev = jsonRev.as[MachineRequestJs].value
+val mreqRev = mreqJsRev.toMachineRequest(cab).value
+mreqRev.state.readable(SymbolMap.AZ)
+val csrRev = mreqRev.machine.crypt(mreqRev.state, mreqRev.text, true).value
+csrRev.text
+
+
+

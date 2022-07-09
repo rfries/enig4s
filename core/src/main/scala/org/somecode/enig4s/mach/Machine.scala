@@ -5,6 +5,7 @@ import fs2.{Pure, Stream}
 import cats.implicits.*
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
+import scala.collection.immutable.Queue
 
 sealed abstract case class Machine(
   symbols: SymbolMap,
@@ -14,9 +15,11 @@ sealed abstract case class Machine(
   plugBoard: Option[PlugBoard]
 ):
 
+  import Machine.*
+
   val busSize: Int = entry.size
 
-  def crypt(state: MachineState, in: Int): Either[String, (MachineState, KeyCode)] =
+  def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
     else if (in >= busSize)
@@ -24,28 +27,31 @@ sealed abstract case class Machine(
     else
       KeyCode(in).map( k =>
         val newState = advance(state)
-        newState -> translate(newState)(k)
+        val res = translate(newState, trace)(k)
+        CryptResult(newState, res.result, res.trace)
       )
 
-  def crypt(state: MachineState, in: String): Either[String, (MachineState, String)] =
+  def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
     if state.wheelState.size != wheels.size then
       Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
     else
       for
         validKeys <- stringToValidKeys(in)
-        res = codeStream(validKeys, state).toVector
+        res = codeStream(validKeys, state, trace).toVector
+        trc = res.map(_._2.trace).sequence.map(_.map(_.mkString("\n")))
         endState = res.lastOption.map(_._1).getOrElse(state)
-        out <- symbols.codesToString(res.map(_._2))
-      yield (endState, out)
+        out <- symbols.codesToString(res.map(_._2.result))
+      yield CryptStringResult(endState, out, trc)
 
   private def stringToValidKeys(in: String): Either[String, ValidKeys] =
     symbols.stringToCodes(in).flatMap(ValidKeys.apply)
 
-  private def codeStream(validKeys: ValidKeys, state: MachineState): Stream[Pure, (MachineState, KeyCode)] =
+  private def codeStream(validKeys: ValidKeys, state: MachineState, trace: Boolean): Stream[Pure, (MachineState, CryptResult)] =
     Stream.emits(validKeys.codes)
       .mapAccumulate(state) ( (state, ch) =>
         val newState: MachineState = advance(state)
-        (newState, translate(newState)(ch))
+        val res = translate(newState, trace)(ch)
+        (newState, CryptResult(newState, res.result, res.trace))
       )
 
   private def advance(start: MachineState): MachineState =
@@ -74,20 +80,39 @@ sealed abstract case class Machine(
         }
     )
 
-  def translate(state: MachineState): KeyCode => KeyCode = in =>
-    val wheelStates: IndexedSeq[(Wheel, WheelState)] = wheels.zip(state.wheelState)
+  def translate(state: MachineState, trace: Boolean = false): KeyCode => MachineResult = in =>
+    val wheelStates: IndexedSeq[((Wheel, WheelState), Int)] = wheels.zip(state.wheelState).zipWithIndex
 
-    val wheelFuns = Vector(entry.forward)
-      ++ (wheelStates.map ((wheel, state) => wheel.forward(state)))
-      .appended(reflector.forward(state.reflectorState))
-      .concat(wheelStates.reverse.map((wheel, state) => wheel.reverse(state)))
-      .appended(entry.reverse)
+    val wheelFuns = List(("[<- k]", entry.forward))
+      ++ (wheelStates.map { case ((wheel, state), idx) => (s"[<- $idx]", wheel.forward(state)) } )
+      .appended(("[<> r]", reflector.forward(state.reflectorState)))
+      .concat(wheelStates.reverse.map { case ((wheel, state), idx) => (s"[-> $idx]", wheel.reverse(state)) } )
+      .appended("[-> k]", entry.reverse)
 
     val all = plugBoard
-      .map(pb => pb.forward +: wheelFuns :+ pb.reverse)
+      .map(pb => ("[<- p]", pb.forward) +: wheelFuns :+ ("[-> p]", pb.reverse))
       .getOrElse(wheelFuns)
 
-    all.reduceLeft((fall, f) => f.compose(fall))(in)
+    if trace then
+      @tailrec
+      def next(funs: List[(String, KeyCode => KeyCode)], traceQ: Queue[String], k: KeyCode): (KeyCode, Queue[String]) =
+        funs match
+          case (label, f) :: rest =>
+            val out = f(k)
+            next(rest, traceQ.enqueue(traceTranslate(label, k, out)), out)
+          case Nil =>
+            (k, traceQ)
+      val (out, traceItems) = next(all, Queue.empty, in)
+      val inChar: String = symbols.displayCode(in)
+      val outChar: String = symbols.displayCode(out)
+      MachineResult(out, Some(Queue(f"[state: ${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)") ++ traceItems))
+    else
+      MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
+
+  def traceTranslate(label: String, in: KeyCode, out: KeyCode): String =
+    val inChar: String = symbols.displayCode(in)
+    val outChar: String = symbols.displayCode(out)
+    f"  $label%s $inChar ($in%02d) -> $outChar ($out%02d)"
 
   /**
    * Represents a sequence of KeyCodes that has been validated for this instance
@@ -172,3 +197,5 @@ object Machine:
       ).getOrElse(Right(None))
     yield
       new Machine(sm, keyboard, wh, ref, plugBoard) {}
+
+  final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])

@@ -12,7 +12,7 @@ sealed abstract case class Reflector private (
 
   def forward(pos: Position): KeyCode => KeyCode =
     in =>
-      val out = wiring.codes(plusMod(in, pos))
+      val out = minusMod(wiring.codes(plusMod(in, pos)), pos)
       println(f"r: [$pos%02d] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
       out
 

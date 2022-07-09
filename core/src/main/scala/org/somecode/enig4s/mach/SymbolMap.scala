@@ -12,11 +12,11 @@ import scala.collection.immutable.ArraySeq
  */
 class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
 
+  val size: Int = codePoints.size
+
   val pointsToCode: Map[Int, KeyCode] = codePoints.zipWithIndex
     .map((pt, code) => (pt, KeyCode.unsafe(code)))
     .toMap
-
-  val size: Int = codePoints.size
 
   def pointToCode(cp: Int): Either[String, KeyCode] =
     pointsToCode.get(cp).toRight(f"Code point $cp%x not found in map.")
@@ -38,6 +38,8 @@ class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
       case Some(out) => Right(String(out.toArray[Int], 0, out.length))
       case None => Left("Key code not found in symbol map.")
     }
+
+  def displayCode(in: KeyCode): String = codeToPoint(in).map(Character.toString).getOrElse("?")
 
 end SymbolMap
 
