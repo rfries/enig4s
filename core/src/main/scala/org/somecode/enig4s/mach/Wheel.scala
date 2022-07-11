@@ -11,14 +11,10 @@ sealed abstract case class Wheel private (
   val size: Int = wiring.size
 
   def forward(state: WheelState): KeyCode => KeyCode = in =>
-    val out = minusMod(wiring.forward(plusMod(in, state)), state)
-    //println(f"${state.wheelNum.getOrElse("<reflector>")}: [${state.position}%02d] $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-    out
+    minusMod(wiring.forward(plusMod(in, state)), state)
 
   def reverse(state: WheelState): KeyCode => KeyCode = in =>
-    val out = minusMod(wiring.reverse(plusMod(in, state)), state)
-    //println(f"${state.wheelNum.getOrElse("<reflector>")}: [${state.position}%02d] $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
-    out
+    minusMod(wiring.reverse(plusMod(in, state)), state)
 
   def copy(
     wiring: Wiring = wiring,

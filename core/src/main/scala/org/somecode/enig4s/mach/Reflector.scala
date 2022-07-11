@@ -7,14 +7,10 @@ sealed abstract case class Reflector private (
   wiring: Wiring,
   positions: Option[IndexedSeq[Position]]
 ) extends Rotor:
-
   def size: Int = wiring.size
 
-  def forward(pos: Position): KeyCode => KeyCode =
-    in =>
-      val out = minusMod(wiring.codes(plusMod(in, pos)), pos)
-      println(f"r: [$pos%02d] $in%02d (${(in + 'A').toChar}) --> $out%02d (${(out + 'A').toChar})")
-      out
+  def forward(pos: Position): KeyCode => KeyCode = in =>
+    minusMod(wiring.codes(plusMod(in, pos)), pos)
 
 object Reflector:
 
@@ -23,7 +19,7 @@ object Reflector:
     positions: Option[IndexedSeq[Position]] = None
   ): Either[String, Reflector] =
 
-    if (wiring.codes.zipWithIndex.exists((k, idx) => k.toInt === idx))
+    if wiring.codes.zipWithIndex.exists((k, idx) => k.toInt === idx) then
       Left("Wiring can't be used as a reflector, because there are some positions that map back to themselves")
     else
       positions.map(pos =>

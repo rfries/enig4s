@@ -157,7 +157,7 @@ sealed abstract case class Machine(
                 s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
               )
         _ <-  Either.cond(
-                state.wheelState.size != wheels.size,
+                state.wheelState.size === wheels.size,
                 (),
                 s"Number of wheels in state (${state.wheelState.size}) does not match number of wheels in Machine (${wheels.size})"
               )

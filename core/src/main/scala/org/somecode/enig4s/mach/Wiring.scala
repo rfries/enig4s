@@ -4,36 +4,15 @@ package mach
 import scala.collection.immutable.ArraySeq
 
 sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
+  val size: Int = codes.size
+  val forward: KeyCode => KeyCode = in => codes(in)
+  val reverse: KeyCode => KeyCode = in => reverseCodes(in)
 
-  private[mach] lazy val reversedCodes: IndexedSeq[KeyCode] = codes
+  private[mach] lazy val reverseCodes: IndexedSeq[KeyCode] = codes
     .zipWithIndex
     .sortBy(_._1)
     .map((_, idx) => KeyCode.unsafe(idx))
     .to(ArraySeq)
-
-  def size: Int = codes.size
-
-  val forward: KeyCode => KeyCode = in =>
-    val out = codes(in)
-    //println(f"w:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-    out
-
-  val reverse: KeyCode => KeyCode = in =>
-    val out = reversedCodes(in)
-    //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
-    out
-
-  def translate(in: KeyCode): KeyCode =
-    val out = codes(in)
-    //println(f"w:      $in%02d (${(in + 'A').toChar}) -> $out%02d (${(out + 'A').toChar})")
-    out
-
-  def reverseTranslate(in: KeyCode): KeyCode =
-    val out = reversedCodes(in)
-    //println(f"w:      $out%02d (${(out + 'A').toChar}) <- $in%02d (${(in + 'A').toChar})")
-    out
-
-end Wiring
 
 object Wiring:
 

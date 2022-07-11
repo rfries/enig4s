@@ -53,4 +53,5 @@ val csrRev = mreqRev.machine.crypt(mreqRev.state, mreqRev.text, true).value
 csrRev.text
 
 
-
+val ll: LazyList[Int] = 0 #:: 1 #:: ll.zip(ll.tail).map((n, m) => n + m)
+ll.take(12).foreach(println)

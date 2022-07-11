@@ -37,6 +37,6 @@ object Main extends IOApp:
   private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean], cabinet: Cabinet): HttpRoutes[F] =
     Router(
       "files"   ->  fileService[F](FileService.Config[F]("./static")),
-      "mach"    ->  MachineService(cabinet).routes,
+      "enigma"    ->  MachineService(cabinet).routes,
       "meta"    ->  MetaService.routes(shutdown)
     )
