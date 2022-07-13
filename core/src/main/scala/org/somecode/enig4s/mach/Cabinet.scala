@@ -41,11 +41,12 @@ object Cabinet:
     val pairs: Vector[Either[String, (String, Wiring)]] =
       for
         wi <- wiringInit
-      yield for
-        symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
-        keyCodes <- symMap.stringToCodes(wi.mapping)
-        wiring <- Wiring(keyCodes).map(w => (wi.name, w))
-      yield wiring
+      yield
+        for
+          symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
+          keyCodes <- symMap.stringToCodes(wi.mapping)
+          wiring <- Wiring(keyCodes).map(w => (wi.name, w))
+        yield wiring
     // turn inside-out and then to a map:
     //   Vector[Either[String, (String, Wiring)]] =>  Either[String, Vector[(String, Wiring]]
     //   then, if Right, Vector[(String, Wiring)] => Map[String, Wiring]
@@ -55,23 +56,13 @@ object Cabinet:
     val pairs: Vector[Either[String, (String, Wheel)]] =
       for
         winit <- wheelInit
-      yield for
-        symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
-        wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
-        wheel <- Wheel(wiring, winit.notches, symMap)
-      yield (winit.name, wheel)
+      yield
+        for
+          symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
+          wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
+          wheel <- Wheel(wiring, winit.notches, symMap)
+        yield (winit.name, wheel)
     pairs.sequence.map(_.toMap)
-
-
-    // wheelInit
-    //   .map( winit =>
-    //     wirings
-    //       .get(winit.wiringName)
-    //       .toRight(s"Wiring '${winit.wiringName}' not defined.")
-    //       .flatMap(wiring => Wheel(wiring, winit.notches, SymbolMap.AZ).map(wheel => (winit.name, wheel)))
-    //   )
-    //   .sequence
-    //   .map(_.toMap)
 
   def initReflectors(wirings: Wirings): Either[String, Reflectors] =
     reflectorInit

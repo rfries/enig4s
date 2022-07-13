@@ -4,30 +4,27 @@ package service
 
 import cats.effect.Concurrent
 import cats.implicits.*
-import io.circe.generic.auto.*
+import io.circe.Json
 import io.circe.syntax.*
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.*
-import org.http4s.dsl.Http4sDsl
 import org.somecode.enig4s.jsapi.MachineRequestJs
 import org.somecode.enig4s.jsapi.MachineResponse
 import org.somecode.enig4s.mach.Cabinet
 
-class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Http4sDsl[F]:
+class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Enig4sService[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
       case req @ POST -> Root =>
-        req.as[MachineRequestJs].map { mreqJs =>
-          for
-            mreq <- mreqJs.toMachineRequest(cabinet)
-            mstate <- mreq.machine.ValidState(mreq.state)
-            out <- mreq.machine.crypt(mstate.state, mreq.text, trace = false)
-            resp = MachineResponse(out.state.readable(mreq.machine.symbols), out.text)
-          yield resp.asJson
-        }.flatMap {
-          case Left(s) => BadRequest(s)
-          case Right(js) => Ok(js)
+        jsonResponseEither[MachineRequestJs](req) {
+          mreqJs =>
+            for
+              mreq <- mreqJs.toMachineRequest(cabinet)
+              mstate <- mreq.machine.ValidState(mreq.state)
+              out <- mreq.machine.crypt(mstate.state, mreq.text, trace = false)
+              resp = MachineResponse(out.state.readable(mreq.machine.symbols), out.text)
+            yield resp.asJson
         }
 
       case GET -> Root / "wheels" =>
