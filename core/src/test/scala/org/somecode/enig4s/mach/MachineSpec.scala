@@ -8,8 +8,6 @@ import scala.collection.immutable.ArraySeq
 
 final class MachineSpec extends AnyWordSpec with should.Matchers:
 
-  import MachineSpec._
-
   "Machine" should {
     "encrypt a string with basic wheel settings" in {
       val wheels = configureWheels(Wheels.I, Wheels.II, Wheels.III)
@@ -17,7 +15,6 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('A' -> 'A', 'A' -> 'A', 'A' -> 'A'))
       val in = "AAAAA"
 
-      info(s"*** reflector size: ${reflector.size}")
       Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, None) match
         case Right(mach) => verifyText(mach, machState, in, "BDZGO")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
@@ -89,6 +86,3 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     res.text shouldBe expected
     info(s"$in => ${res.text}")
     res.state
-
-object MachineSpec:
-  val busSize: KeyCode = KeyCode.unsafe(26)

@@ -17,12 +17,61 @@ case class Cabinet(
 
 object Cabinet:
 
-  case class SymbolsInit(name: String, mapping: String)
+  case class SymbolMapInit(name: String, mapping: String)
   case class WiringInit(name: String, symbols: String, mapping: String)
   case class WheelInit(name: String, wiringName: String, symbols: String, notches: String)
   case class ReflectorInit(name: String, wiringName: String, positions: String = "A")
 
-  def init: Either[String, Cabinet] =
+  def init(
+      symbolMapInits: Vector[SymbolMapInit] = defaultSymbolMapInits,
+      wiringInits: Vector[WiringInit] = defaultWiringInits,
+      wheelInits: Vector[WheelInit] = defaultWheelInits,
+      reflectorInits: Vector[ReflectorInit] = defaultReflectorInits,
+  ): Either[String, Cabinet] = {
+
+    def initSymbolMaps: Either[String, Symbols] =
+      symbolMapInits
+        .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
+        .sequence
+        .map(_.toMap)
+
+    def initWirings(symMaps: Symbols): Either[String, Wirings] =
+      val pairs: Vector[Either[String, (String, Wiring)]] =
+        for
+          wi <- wiringInits
+        yield
+          for
+            symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
+            keyCodes <- symMap.stringToCodes(wi.mapping)
+            wiring <- Wiring(keyCodes).map(w => (wi.name, w))
+          yield wiring
+      // turn inside-out and then to a map:
+      //   Vector[Either[String, (String, Wiring)]] =>  Either[String, Vector[(String, Wiring]]
+      //   then, if Right, Vector[(String, Wiring)] => Map[String, Wiring]
+      pairs.sequence.map(_.toMap)
+
+    def initWheels(symMaps: Symbols, wirings: Wirings): Either[String, Wheels] =
+      val pairs: Vector[Either[String, (String, Wheel)]] =
+        for
+          winit <- wheelInits
+        yield
+          for
+            symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
+            wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
+            wheel <- Wheel(wiring, winit.notches, symMap)
+          yield (winit.name, wheel)
+      pairs.sequence.map(_.toMap)
+
+    def initReflectors(wirings: Wirings): Either[String, Reflectors] =
+      reflectorInits
+        .map( rinit =>
+          wirings.get(rinit.wiringName)
+            .toRight(s"Wiring '${rinit.wiringName}' not defined.")
+            .flatMap(wiring => Reflector(wiring, None).map(ref => (rinit.name, ref)))
+        )
+        .sequence
+        .map(_.toMap)
+
     for
       symbols <- initSymbolMaps
       wirings <- initWirings(symbols)
@@ -30,56 +79,14 @@ object Cabinet:
       reflectors <- initReflectors(wirings)
     yield
       Cabinet(symbols, wirings, wheels, reflectors)
+  }
 
-  def initSymbolMaps: Either[String, Symbols] =
-    symbolsInit
-      .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
-      .sequence
-      .map(_.toMap)
-
-  def initWirings(symMaps: Symbols): Either[String, Wirings] =
-    val pairs: Vector[Either[String, (String, Wiring)]] =
-      for
-        wi <- wiringInit
-      yield
-        for
-          symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
-          keyCodes <- symMap.stringToCodes(wi.mapping)
-          wiring <- Wiring(keyCodes).map(w => (wi.name, w))
-        yield wiring
-    // turn inside-out and then to a map:
-    //   Vector[Either[String, (String, Wiring)]] =>  Either[String, Vector[(String, Wiring]]
-    //   then, if Right, Vector[(String, Wiring)] => Map[String, Wiring]
-    pairs.sequence.map(_.toMap)
-
-  def initWheels(symMaps: Symbols, wirings: Wirings): Either[String, Wheels] =
-    val pairs: Vector[Either[String, (String, Wheel)]] =
-      for
-        winit <- wheelInit
-      yield
-        for
-          symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
-          wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
-          wheel <- Wheel(wiring, winit.notches, symMap)
-        yield (winit.name, wheel)
-    pairs.sequence.map(_.toMap)
-
-  def initReflectors(wirings: Wirings): Either[String, Reflectors] =
-    reflectorInit
-      .map( rinit =>
-        wirings.get(rinit.wiringName)
-          .toRight(s"Wiring '${rinit.wiringName}' not defined.")
-          .flatMap(wiring => Reflector(wiring, None).map(ref => (rinit.name, ref)))
-      )
-      .sequence
-      .map(_.toMap)
-
-  val symbolsInit: Vector[SymbolsInit] = Vector(
-    SymbolsInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-    SymbolsInit("10", "1234567890")
+  val defaultSymbolMapInits: Vector[SymbolMapInit] = Vector(
+    SymbolMapInit("AZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    SymbolMapInit("10", "1234567890")
   )
 
-  val wheelInit: Vector[WheelInit] = Vector(
+  val defaultWheelInits: Vector[WheelInit] = Vector(
     //        name          wiring        symbolMap notches
 
     WheelInit("I",          "I",          "AZ",   "Q"),
@@ -106,7 +113,7 @@ object Cabinet:
     WheelInit("z.III",      "z.III",      "10",   "9"),
   )
 
-  val reflectorInit: Vector[ReflectorInit] = Vector(
+  val defaultReflectorInits: Vector[ReflectorInit] = Vector(
   //              name     wiring
     ReflectorInit("UKW-A",      "UKW-A"),
     ReflectorInit("UKW-B",      "UKW-B"),
@@ -119,7 +126,7 @@ object Cabinet:
     ReflectorInit("z.UKW",      "z.UKW"),
   )
 
-  val wiringInit: Vector[WiringInit] = Vector(
+  val defaultWiringInits: Vector[WiringInit] = Vector(
 
     // Enigma I
     WiringInit("ETW",       "AZ",   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
