@@ -19,7 +19,7 @@ final class MachineSpecJsSpec extends AnyWordSpec with Matchers:
 
       json match
         case Left(pf) => fail("==> " + pf)
-        case Right(js) => println(js)
+        case Right(js) => ()
 
     }
   }
