@@ -15,6 +15,7 @@ case class SettingsJs private (
     for
       ringCodes <- rings.toCodes(symbols).map(_.reverse)
       posCodes <- wheels.toCodes(symbols).map(_.reverse)
+      _ <- Either.cond(ringCodes.size === posCodes.size, (), "Position and ring settings strings must be the same length")
       ws = ringCodes.zip(posCodes)
               .map((ring, pos) => WheelState(pos, RingSetting.unsafe(ring)))
 

@@ -1,6 +1,9 @@
 package org.somecode.enig4s
 package mach
 
+import cats.implicits.*
+import org.scalatest.EitherValues
+import org.scalatest.OptionValues.*
 import org.scalatest.matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -8,8 +11,10 @@ import scala.collection.immutable.ArraySeq
 
 final class MachineSpec extends AnyWordSpec with should.Matchers:
 
+  val cab: Cabinet = Cabinet.init().require
+
   "Machine" should {
-    "encrypt a string with basic wheel settings" in {
+    "(old) encrypt a string with basic wheel settings" in {
       val wheels = configureWheels(Wheels.I, Wheels.II, Wheels.III)
       val reflector = Reflector(Wirings.B).require
       val machState = machineState(Vector('A' -> 'A', 'A' -> 'A', 'A' -> 'A'))
@@ -18,6 +23,20 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, None) match
         case Right(mach) => verifyText(mach, machState, in, "BDZGO")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
+    }
+
+    "encrypt a string with basic wheel settings (original)" in {
+      val mach = machine(Vector("I", "II", "III"), "UKW-B", None).require
+      val state = machState("AAA", "AAA").require
+
+      verify(mach, state, "AAAAA", "BDZGO")
+    }
+
+    "encrypt a string with basic wheel settings" in {
+      val mach = machine(Vector("I", "II", "III"), "UKW-B", None).require
+      val state = machState(position = "ABC", ringSettings = "DEF", "A").require
+
+      verify(mach, state, "ABCDE", "DXXVP")
     }
 
     "encrypt a string with basic wheel settings plus ring settings" in {
@@ -69,6 +88,36 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     }
   }
 
+  def machine(
+      wheels: Vector[String],
+      reflector: String,
+      plugBoard: Option[Vector[String]] = None,
+      symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
+    for
+      wh <- wheels.map(name => cab.wheels.get(name).toRight(s"Wheel $name not found")).sequence
+      ref <- cab.reflectors.get(reflector).toRight(s"Reflector $reflector not found")
+      plugs <- plugBoard.map(pb => EnigmaPlugBoard(ref.size, pb, symbols)).sequence
+      mach <- Machine(symbols, Wiring.AZ, wh.reverse, ref, plugs)
+    yield mach
+
+
+  def machState(
+      position: String,
+      ringSettings: String,
+      reflector: String = "A",
+      symbols: SymbolMap = SymbolMap.AZ): Either[String, MachineState] =
+
+    assert(reflector.size == 1)
+    for
+      pos <- symbols.stringToCodes(position).map(_.reverse)
+      ring <- symbols.stringToCodes(ringSettings).map(_.reverse)
+      _ <- Either.cond(ring.size === pos.size, (), "Position and ring settings strings must be the same length")
+      ws = pos.zip(ring)
+              .map((pos, ring) => WheelState(pos, RingSetting.unsafe(ring)))
+      ref <- symbols.pointToCode(reflector.codePointAt(0)).map(Position.unsafe)
+    yield MachineState(ws, ref)
+
+
   def configureWheels(wheelConfigs: Wheel*): IndexedSeq[Wheel] = wheelConfigs.toIndexedSeq.reverse
 
   def machineState(wheelState: Vector[(Char, Char)], reflectorState: Char = '\u0000'): MachineState =
@@ -82,7 +131,14 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     )
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
-    val res = mach.crypt(state, in, false).require
-    res.text shouldBe expected
+    val res = mach.crypt(state, in, true).require
     info(s"$in => ${res.text}")
+    info(res.trace.map(_.mkString("\n")).getOrElse(""))
+    res.text shouldBe expected
     res.state
+
+  def verify(mach: Machine, state: MachineState, in: String, expected: String): Unit =
+    val res = mach.crypt(state, in, true).require
+    info(s"$in => ${res.text}")
+    info(s"${res.trace.map(_.mkString("\n")).getOrElse("")}")
+    res.text shouldBe expected

@@ -105,7 +105,7 @@ sealed abstract case class Machine(
       val (out, traceItems) = next(all, Queue.empty, in)
       val inChar: String = symbols.displayCode(in)
       val outChar: String = symbols.displayCode(out)
-      MachineResult(out, Some(Queue(f"[state: ${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)") ++ traceItems))
+      MachineResult(out, Some(Queue(f"""[state: ${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
     else
       MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
 
