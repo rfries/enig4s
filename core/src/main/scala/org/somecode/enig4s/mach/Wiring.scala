@@ -22,8 +22,6 @@ object Wiring:
       Left("Wiring vectors have at least one value.")
     case v if v.length != v.distinct.length =>
       Left(s"Wiring vectors must not contain duplicate values.")
-    case v if v.min != 0 || v.max != keyCodes.size - 1 =>
-      Left("Wiring vectors must map to a continuous range.")
     case v if v.exists(_ >= v.length) =>
       Left(s"Wiring vectors must contain only values from 0 (inclusive) to ${v.length} (exclusive).")
     case v => Right(new Wiring(v) {})

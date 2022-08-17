@@ -8,7 +8,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class CabinetSpec extends AnyWordSpec with should.Matchers:
 
-  val cabinet = Cabinet.init()
+  val cabinet = Cabinet()
 
   "Cabinet" should {
 
@@ -20,7 +20,7 @@ class CabinetSpec extends AnyWordSpec with should.Matchers:
 
     "fail initialization if initial data is invalid" in {
       val badWiringInit = Cabinet.defaultWiringInits :+ Cabinet.WiringInit("abc", "ZZZ", "abc")
-      Cabinet.init(wiringInits = badWiringInit).isLeft shouldBe true
+      Cabinet(wiringInits = badWiringInit).isLeft shouldBe true
     }
 
     "look up a symbol map known to be present" in {

@@ -11,7 +11,7 @@ import scala.collection.immutable.ArraySeq
 
 final class MachineSpec extends AnyWordSpec with should.Matchers:
 
-  val cab: Cabinet = Cabinet.init().require
+  val cab: Cabinet = Cabinet().require
 
   "Machine" should {
     "(old) encrypt a string with basic wheel settings" in {

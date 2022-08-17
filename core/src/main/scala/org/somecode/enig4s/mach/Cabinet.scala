@@ -8,21 +8,25 @@ type Wirings    = Map[String, Wiring]
 type Wheels     = Map[String, Wheel]
 type Reflectors = Map[String, Reflector]
 
-case class Cabinet(
+case class Cabinet private (
   symbols: Symbols,
   wirings: Wirings,
   wheels: Wheels,
   reflectors: Reflectors,
+  symbolInits: Vector[Cabinet.SymbolMapInit],
+  wiringInits: Vector[Cabinet.WiringInit],
+  wheelInits: Vector[Cabinet.WheelInit],
+  reflectorInits: Vector[Cabinet.ReflectorInit]
 )
 
 object Cabinet:
 
   case class SymbolMapInit(name: String, mapping: String)
   case class WiringInit(name: String, symbols: String, mapping: String)
-  case class WheelInit(name: String, wiringName: String, symbols: String, notches: String)
-  case class ReflectorInit(name: String, wiringName: String, positions: String = "A")
+  case class WheelInit(name: String, wiring: String, symbols: String, notches: String)
+  case class ReflectorInit(name: String, wiring: String, positions: String = "A")
 
-  def init(
+  def apply(
       symbolMapInits: Vector[SymbolMapInit] = defaultSymbolMapInits,
       wiringInits: Vector[WiringInit] = defaultWiringInits,
       wheelInits: Vector[WheelInit] = defaultWheelInits,
@@ -57,7 +61,7 @@ object Cabinet:
         yield
           for
             symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
-            wiring <- wirings.get(winit.wiringName).toRight(s"Wiring '${winit.wiringName}' not defined.")
+            wiring <- wirings.get(winit.wiring).toRight(s"Wiring '${winit.wiring}' not defined.")
             wheel <- Wheel(wiring, winit.notches, symMap)
           yield (winit.name, wheel)
       pairs.sequence.map(_.toMap)
@@ -65,8 +69,8 @@ object Cabinet:
     def initReflectors(wirings: Wirings): Either[String, Reflectors] =
       reflectorInits
         .map( rinit =>
-          wirings.get(rinit.wiringName)
-            .toRight(s"Wiring '${rinit.wiringName}' not defined.")
+          wirings.get(rinit.wiring)
+            .toRight(s"Wiring '${rinit.wiring}' not defined.")
             .flatMap(wiring => Reflector(wiring, None).map(ref => (rinit.name, ref)))
         )
         .sequence
@@ -78,7 +82,8 @@ object Cabinet:
       wheels <- initWheels(symbols, wirings)
       reflectors <- initReflectors(wirings)
     yield
-      Cabinet(symbols, wirings, wheels, reflectors)
+      Cabinet(symbols, wirings, wheels, reflectors,
+        symbolMapInits, wiringInits, wheelInits, reflectorInits)
   }
 
   val defaultSymbolMapInits: Vector[SymbolMapInit] = Vector(

@@ -16,13 +16,13 @@ object WiringSpecFixtures:
 
   val goodWiringStrings: Vector[String] = Vector(
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    "ABCDFEGHIJKLMNPOQRSTUVWXYZ",
-    "ZABCDEFGHIJKLMNOPQRSTUVWXY",
-    "A"
+    "ABCDFEGHIJKLMNPOQRSTUVWXYZ", // O and P swapped
+    "ZABCDEFGHIJKLMNOPQRSTUVWXY", // rotated right one position
+    "A"                           // any single character should be legal
   )
 
   val badWiringStrings: Vector[String] = Vector(
-    "ADEFGHIJKLMNOPQRSTUVWXYZ",
-    "ABCDZ",
-    "ABBDEFGHIJKLMNOPQRSTUVWXYZ"
+    "",                           // empty
+    "ADEFGHIJKLMNOPQRSTUVWXYZ",   // not continuous
+    "ABBDEFGHIJKLMNOPQRSTUVWXYZ"  // duplicate
   )

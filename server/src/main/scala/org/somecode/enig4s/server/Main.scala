@@ -26,7 +26,7 @@ object Main extends IOApp:
       shutdown  <- Stream.eval(SignallingRef[F, Boolean](false))
       exitCode  <- Stream.eval(Ref[F].of(ExitCode.Success))
       // initialize pre-defined objects
-      cabinet   <- Stream.fromEither(Cabinet.init().left.map(s => new java.lang.IllegalArgumentException(s)))
+      cabinet   <- Stream.fromEither(Cabinet().left.map(s => new java.lang.IllegalArgumentException(s)))
       // create the server
       ret       <- BlazeServerBuilder[F]
                     .bindHttp(8080, "0.0.0.0")

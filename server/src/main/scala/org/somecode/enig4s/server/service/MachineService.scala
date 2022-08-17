@@ -4,10 +4,13 @@ package service
 
 import cats.effect.Concurrent
 import cats.implicits.*
+import io.circe.Encoder
 import io.circe.Json
+import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.*
+import org.somecode.enig4s.jsapi.CabinetJs.given
 import org.somecode.enig4s.jsapi.MachineRequestJs
 import org.somecode.enig4s.jsapi.MachineResponse
 import org.somecode.enig4s.mach.Cabinet
@@ -28,15 +31,15 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Eni
         }
 
       case GET -> Root / "wheels" =>
-        Ok(Json.arr(cabinet.wheels.keys.map(Json.fromString).toSeq *))
+        Ok(cabinet.wheelInits.asJson)
 
       case GET -> Root / "reflectors" =>
-        Ok(Json.arr(cabinet.reflectors.keys.map(Json.fromString).toSeq *))
+        Ok(cabinet.reflectorInits.asJson)
 
       case GET -> Root / "symbolmaps" =>
-        Ok(Json.arr(cabinet.symbols.keys.map(Json.fromString).toSeq *))
+        Ok(cabinet.symbolInits.asJson)
 
       case GET -> Root / "wirings" =>
-        Ok(Json.arr(cabinet.wirings.keys.map(Json.fromString).toSeq *))
+        Ok(cabinet.wiringInits.asJson)
     }
   }

@@ -6,7 +6,7 @@ import org.scalatest.EitherValues.*
 import org.somecode.enig4s.jsapi.MachineRequestJs
 import org.somecode.enig4s.mach.Cabinet
 
-val cab = Cabinet.init.value
+val cab = Cabinet.init().value
 
 val js = """
   {
