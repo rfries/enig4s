@@ -8,7 +8,7 @@ import org.somecode.enig4s.mach.{Cabinet, SymbolMap, Wiring}
 final case class KeyboardJs(name: Option[String], wiring: Option[CodesJs]):
   def toWiring(symbols: SymbolMap, cabinet: Cabinet): Either[String, Wiring] =
     this match
-      case KeyboardJs(Some(nm), None) => cabinet.wirings.get(nm).toRight(s"Wiring name '$nm' not found'")
+      case KeyboardJs(Some(nm), None) => cabinet.findWiring(nm).toRight(s"Wiring name '$nm' not found'")
       case KeyboardJs(None, Some(wires)) => wires.toCodes(symbols).flatMap(Wiring.apply)
       case _ => Left("One of 'name' or 'wiring' (but not both) must be specified")
 

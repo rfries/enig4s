@@ -18,7 +18,8 @@ val v = new {
   val circe                 = "0.14.2"
   val http4s                = "1.0.0-M35"
   val fs2                   = "3.2.12"
-  val monocle               = "3.1.0"
+
+  val ciString              = "1.2.0"
   val scalajs               = "1.10.0" // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
   val scalajsDom            = "2.2.0"
@@ -30,10 +31,10 @@ lazy val commonLibs = Seq(
     // actual core libraries
     "org.typelevel"               %%% "cats-core"           % v.cats,
     "org.typelevel"               %%% "cats-effect"         % v.catsEffect,
+    "org.typelevel"               %%% "case-insensitive"    % v.ciString,
     "org.scalatest"               %%% "scalatest"           % v.scalatest             % Test,
     "org.scalatestplus"           %%% "scalacheck-1-16"     % v.scalatest_scalacheck  % Test,
     // added for web API (circe codecs, etc)
-    "dev.optics"                  %%% "monocle-core"        % v.monocle,
     "co.fs2"                      %%% "fs2-core"            % v.fs2,
     "io.circe"                    %%% "circe-core"          % v.circe,
     "io.circe"                    %%% "circe-generic"       % v.circe,
@@ -44,7 +45,6 @@ lazy val commonLibs = Seq(
 lazy val jvmLibs = Seq(
   libraryDependencies ++= Seq(
     //"co.fs2"                      %% "fs2-io"               % v.fs2,
-    "dev.optics"                  %% "monocle-macro"        % v.monocle,
     "org.http4s"                  %% "http4s-blaze-server"  % v.http4s,
     "org.http4s"                  %% "http4s-blaze-client"  % v.http4s,
     "org.http4s"                  %% "http4s-circe"         % v.http4s,

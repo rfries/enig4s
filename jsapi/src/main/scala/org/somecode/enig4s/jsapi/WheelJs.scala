@@ -4,8 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Cabinet, KeyCode, SymbolMap, Wheel}
-import org.somecode.enig4s.mach.Wiring
+import org.somecode.enig4s.mach.{Cabinet, KeyCode, SymbolMap, Wheel, Wiring}
 
 final case class WheelJs(
   name: Option[String],
@@ -13,7 +12,7 @@ final case class WheelJs(
   notches: Option[CodesJs]
 ):
   def toWheel(symbols: SymbolMap, cabinet: Cabinet): Either[String, Wheel] = this match
-    case WheelJs(Some(name), None, None) => cabinet.wheels.get(name).toRight(s"Wheel '$name' not found'")
+    case WheelJs(Some(name), None, None) => cabinet.findWheel(name).toRight(s"Wheel '$name' not found'")
     case WheelJs(None, Some(wires), Some(notch)) =>
       for
         codes <- wires.toCodes(symbols)

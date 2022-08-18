@@ -2,22 +2,27 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
+import org.typelevel.ci.CIString
 
-type Symbols    = Map[String, SymbolMap]
-type Wirings    = Map[String, Wiring]
-type Wheels     = Map[String, Wheel]
-type Reflectors = Map[String, Reflector]
+type Symbols    = Map[CIString, SymbolMap]
+type Wirings    = Map[CIString, Wiring]
+type Wheels     = Map[CIString, Wheel]
+type Reflectors = Map[CIString, Reflector]
 
 case class Cabinet private (
-  symbols: Symbols,
-  wirings: Wirings,
-  wheels: Wheels,
-  reflectors: Reflectors,
+  private val symbols: Symbols,
+  private val wirings: Wirings,
+  private val wheels: Wheels,
+  private val reflectors: Reflectors,
   symbolInits: Vector[Cabinet.SymbolMapInit],
   wiringInits: Vector[Cabinet.WiringInit],
   wheelInits: Vector[Cabinet.WheelInit],
   reflectorInits: Vector[Cabinet.ReflectorInit]
-)
+):
+  def findSymbolMap(name: String) = symbols.get(CIString(name))
+  def findWiring(name: String)    = wirings.get(CIString(name))
+  def findWheel(name: String)     = wheels.get(CIString(name))
+  def findReflector(name: String) = reflectors.get(CIString(name))
 
 object Cabinet:
 
@@ -35,43 +40,43 @@ object Cabinet:
 
     def initSymbolMaps: Either[String, Symbols] =
       symbolMapInits
-        .map(cmi => SymbolMap(cmi.mapping).map(cm => (cmi.name, cm)))
+        .map(cmi => SymbolMap(cmi.mapping).map(cm => (CIString(cmi.name), cm)))
         .sequence
         .map(_.toMap)
 
     def initWirings(symMaps: Symbols): Either[String, Wirings] =
-      val pairs: Vector[Either[String, (String, Wiring)]] =
+      val pairs: Vector[Either[String, (CIString, Wiring)]] =
         for
           wi <- wiringInits
         yield
           for
-            symMap <- symMaps.get(wi.symbols).toRight(s"Symbol map '${wi.symbols}' not defined.")
+            symMap <- symMaps.get(CIString(wi.symbols)).toRight(s"Symbol map '${wi.symbols}' not defined.")
             keyCodes <- symMap.stringToCodes(wi.mapping)
-            wiring <- Wiring(keyCodes).map(w => (wi.name, w))
+            wiring <- Wiring(keyCodes).map(w => (CIString(wi.name), w))
           yield wiring
       // turn inside-out and then to a map:
-      //   Vector[Either[String, (String, Wiring)]] =>  Either[String, Vector[(String, Wiring]]
-      //   then, if Right, Vector[(String, Wiring)] => Map[String, Wiring]
+      //   Vector[Either[String, (CIString, Wiring)]] =>  Either[String, Vector[(CIString, Wiring]]
+      //   then, if Right, Vector[(CIString, Wiring)] => Map[CIString, Wiring]
       pairs.sequence.map(_.toMap)
 
     def initWheels(symMaps: Symbols, wirings: Wirings): Either[String, Wheels] =
-      val pairs: Vector[Either[String, (String, Wheel)]] =
+      val pairs: Vector[Either[String, (CIString, Wheel)]] =
         for
           winit <- wheelInits
         yield
           for
-            symMap <- symMaps.get(winit.symbols).toRight(s"Symbol map '${winit.symbols}' not defined.")
-            wiring <- wirings.get(winit.wiring).toRight(s"Wiring '${winit.wiring}' not defined.")
+            symMap <- symMaps.get(CIString(winit.symbols)).toRight(s"Symbol map '${winit.symbols}' not defined.")
+            wiring <- wirings.get(CIString(winit.wiring)).toRight(s"Wiring '${winit.wiring}' not defined.")
             wheel <- Wheel(wiring, winit.notches, symMap)
-          yield (winit.name, wheel)
+          yield (CIString(winit.name), wheel)
       pairs.sequence.map(_.toMap)
 
     def initReflectors(wirings: Wirings): Either[String, Reflectors] =
       reflectorInits
         .map( rinit =>
-          wirings.get(rinit.wiring)
+          wirings.get(CIString(rinit.wiring))
             .toRight(s"Wiring '${rinit.wiring}' not defined.")
-            .flatMap(wiring => Reflector(wiring, None).map(ref => (rinit.name, ref)))
+            .flatMap(wiring => Reflector(wiring, None).map(ref => (CIString(rinit.name), ref)))
         )
         .sequence
         .map(_.toMap)

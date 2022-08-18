@@ -94,8 +94,8 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       plugBoard: Option[Vector[String]] = None,
       symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
     for
-      wh <- wheels.map(name => cab.wheels.get(name).toRight(s"Wheel $name not found")).sequence
-      ref <- cab.reflectors.get(reflector).toRight(s"Reflector $reflector not found")
+      wh <- wheels.map(name => cab.findWheel(name).toRight(s"Wheel $name not found")).sequence
+      ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
       plugs <- plugBoard.map(pb => EnigmaPlugBoard(ref.size, pb, symbols)).sequence
       mach <- Machine(symbols, Wiring.AZ, wh.reverse, ref, plugs)
     yield mach

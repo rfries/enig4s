@@ -19,7 +19,7 @@ final case class ReflectorJs(
   def toReflector(symbols: SymbolMap, cabinet: Cabinet): Either[String, Reflector] =
     this match
       case ReflectorJs(Some(nm), None, None) =>
-        cabinet.reflectors.get(nm).toRight(s"Reflector '$nm' not found")
+        cabinet.findReflector(nm).toRight(s"Reflector '$nm' not found")
 
       case ReflectorJs(None, Some(wiresJs), posOpt) =>
         for
