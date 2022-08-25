@@ -52,9 +52,7 @@ object EnigmaPlugBoard:
       Left("Pairing strings must contain only two symbols per string.")
     else
       for
-        codes <- pairings.map(p => symbols.stringToCodes(p).map(v => v(0) -> v(1)))
-          .to(ArraySeq)
-          .sequence
+        codes <- pairings.to(ArraySeq).traverse(p => symbols.stringToCodes(p).map(v => v(0) -> v(1)))
         pboard <- apply(size, codes)
       yield pboard
 

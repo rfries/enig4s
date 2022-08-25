@@ -26,7 +26,7 @@ class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
 
   def stringToCodes(in: String): Either[String, ArraySeq[KeyCode]] =
     // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
-    in.toArray.to(ArraySeq).map(ch => pointsToCode.get(ch)).sequence match {
+    in.toArray.to(ArraySeq).traverse(ch => pointsToCode.get(ch)) match {
       case Some(out) => Right(out)
       case None =>
         val bad = in.filterNot(codePoints.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
@@ -34,7 +34,7 @@ class SymbolMap private(codePoints: IndexedSeq[KeyCode]):
     }
 
   def codesToString(in: IndexedSeq[KeyCode]): Either[String, String] =
-    in.map(codePoints.lift).to(ArraySeq).sequence match {
+    in.to(ArraySeq).traverse(codePoints.lift) match {
       case Some(out) => Right(String(out.toArray[Int], 0, out.length))
       case None => Left("Key code not found in symbol map.")
     }

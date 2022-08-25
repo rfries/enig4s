@@ -5,7 +5,7 @@ import cats.implicits.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
-  notches: IndexedSeq[KeyCode]
+  notches: Set[KeyCode]
 ) extends Rotor:
 
   val size: Int = wiring.size
@@ -18,30 +18,26 @@ sealed abstract case class Wheel private (
 
   def copy(
     wiring: Wiring = wiring,
-    notches: IndexedSeq[KeyCode] = notches
-  ): Either[String, Wheel] = Wheel.apply(wiring, notches)
+    notches: Set[KeyCode] = notches
+  ): Either[String, Wheel] = Wheel.apply(wiring, notches.toSeq)
 
   def notchedAt(p: KeyCode): Boolean = notches.contains(p)
 
 object Wheel:
 
-  def apply(wiring: Wiring, notches: IndexedSeq[KeyCode] = Vector.empty): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: Seq[KeyCode]): Either[String, Wheel] =
     if wiring.size < 1 then
       Left(s"Wheel size must be > 0.")
-    else if notches.exists(_ >= wiring.size) then
-      Left(s"Notch values must be between 0 and ${wiring.size-1}.")
-    else
-      Right(new Wheel(wiring, notches) {})
+    validateNotches(wiring.size, notches).map(ns => new Wheel(wiring, ns.toSet) {})
 
   def apply(wiring: Wiring, notches: String, symbols: SymbolMap): Either[String, Wheel] =
     for
       notchCodes <- symbols.stringToCodes(notches)
       validNotches <- validateNotches(wiring.size, notchCodes)
-      wheel <- Wheel(wiring, validNotches)
     yield
-      wheel
+      new Wheel(wiring, validNotches) {}
 
-  def validateNotches(wheelSize: Int, notchCodes: IndexedSeq[KeyCode]): Either[String, IndexedSeq[KeyCode]] =
+  def validateNotches(wheelSize: Int, notchCodes: Seq[KeyCode]): Either[String, Set[KeyCode]] =
     if notchCodes.length != notchCodes.distinct.length then
       Left("Notch specifier cannot contain duplicate symbols.")
     else if notchCodes.length > wheelSize then
@@ -49,4 +45,4 @@ object Wheel:
     else if notchCodes.exists(_ >= wheelSize) then
       Left(s"Notch codes must be between 0 and $wheelSize (exclusive).")
     else
-      Right(notchCodes.map(KeyCode.unsafe))
+      Right(notchCodes.map(KeyCode.unsafe).toSet)

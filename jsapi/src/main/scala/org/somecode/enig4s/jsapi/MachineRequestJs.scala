@@ -25,15 +25,11 @@ final case class MachineRequestJs(
         case Some(k) => k
         case None => Right(Wiring.AZ)
 
-      wh <- wheels.map(_.toWheel(smap, cabinet)).sequence
-
-      rf <- reflector.toReflector(smap, cabinet)
-
-      pb <- plugboard.map(pb => pb.toPlugBoard(kb.size, smap)).sequence
-
+      wh      <- wheels.traverse(_.toWheel(smap, cabinet))
+      rf      <- reflector.toReflector(smap, cabinet)
+      pb      <- plugboard.traverse(pb => pb.toPlugBoard(kb.size, smap))
       machine <- Machine(smap, kb, wh, rf, pb)
-
-      mstate <- settings.toMachineState(smap, wh.size, kb.size)
+      mstate  <- settings.toMachineState(smap, wh.size, kb.size)
 
     yield MachineRequest(machine, mstate, text)
 

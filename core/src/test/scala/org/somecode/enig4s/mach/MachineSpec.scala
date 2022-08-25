@@ -94,9 +94,9 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       plugBoard: Option[Vector[String]] = None,
       symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
     for
-      wh <- wheels.map(name => cab.findWheel(name).toRight(s"Wheel $name not found")).sequence
+      wh <- wheels.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
       ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
-      plugs <- plugBoard.map(pb => EnigmaPlugBoard(ref.size, pb, symbols)).sequence
+      plugs <- plugBoard.traverse(pb => EnigmaPlugBoard(ref.size, pb, symbols))
       mach <- Machine(symbols, Wiring.AZ, wh.reverse, ref, plugs)
     yield mach
 
@@ -126,7 +126,8 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
         .zipWithIndex
         .map { case ((pos, rs), idx) =>
           WheelState(KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
-        },
+        }
+        .to(ArraySeq),
       Position.unsafe(reflectorState)
     )
 

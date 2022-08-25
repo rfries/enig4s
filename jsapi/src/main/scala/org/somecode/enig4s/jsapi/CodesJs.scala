@@ -20,10 +20,11 @@ import scala.collection.immutable.ArraySeq
   * @param codes    The array representation of the map, must be `None` if `symbols` is provided.
   */
 case class CodesJs(symbols: Option[String], codes: Option[IndexedSeq[Int]]):
-  def toCodes(symbols: SymbolMap): Either[String, ArraySeq[KeyCode]] = this match
-    case CodesJs(Some(str), None) => symbols.stringToCodes(str)
-    case CodesJs(None, Some(arr)) => arr.map(KeyCode.apply).to(ArraySeq).sequence
-    case _ => Left("One (and only one) of 'codes' or 'symbols' must be specified.")
+  def toCodes(symbols: SymbolMap): Either[String, ArraySeq[KeyCode]] =
+    this match
+      case CodesJs(Some(str), None) => symbols.stringToCodes(str)
+      case CodesJs(None, Some(arr)) => arr.to(ArraySeq).traverse(KeyCode.apply)
+      case _ => Left("One (and only one) of 'codes' or 'symbols' must be specified.")
 
 object CodesJs:
   given Codec[CodesJs] = deriveCodec

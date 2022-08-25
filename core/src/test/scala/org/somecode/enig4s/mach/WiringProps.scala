@@ -1,12 +1,14 @@
 package org.somecode.enig4s
 package mach
 
-import scala.util.Random
 import org.scalacheck.Gen
 import org.scalacheck.Shrink.shrinkAny
 import org.scalatest.EitherValues.*
 import org.scalatest.propspec.AnyPropSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+
+import scala.collection.immutable.ArraySeq
+import scala.util.Random
 
 class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
@@ -18,7 +20,7 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
     // reflectors cannot have any straight-through mappings
 
-    forAll(genMappings) { (v: Vector[KeyCode]) =>
+    forAll(genMappings) { (v: ArraySeq[KeyCode]) =>
       whenever(v.length === Max) {
         val wiring = Wiring(v).value
         (0 to Max-1).foreach { n =>
@@ -32,8 +34,8 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
 object WiringProps:
   val Max = 26
-  val genMappings: Gen[Vector[KeyCode]] = Gen.const(
-    (0 to Max-1).map(KeyCode.unsafe).toVector
+  val genMappings: Gen[ArraySeq[KeyCode]] = Gen.const(
+    (0 to Max-1).map(KeyCode.unsafe).to(ArraySeq)
   ).map(Random.shuffle)
-  val genReflectorMappings: Gen[Vector[KeyCode]] = genMappings suchThat
+  val genReflectorMappings: Gen[ArraySeq[KeyCode]] = genMappings suchThat
     (v => !v.zipWithIndex.exists((p, idx) => p == idx))

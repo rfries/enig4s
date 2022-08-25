@@ -22,10 +22,10 @@ final case class PlugsJs(
         Left(s"All elements of plugboard array must be pairs (length 2)")
       else
         val kc: ArraySeq[Either[String, ArraySeq[KeyCode]]] =
-          cds.map(_.map(KeyCode.apply).sequence)
+          cds.map(_.traverse(KeyCode.apply))
 
         val tuples: Either[String, ArraySeq[(KeyCode, KeyCode)]] =
-          kc.map(_.map(k => k(0) -> k(1))).sequence
+          kc.traverse(_.map(k => k(0) -> k(1)))
 
         tuples.flatMap(pairs => EnigmaPlugBoard(size, pairs))
     case _ => Left("One (and only one) of 'codes' or 'symbols' must be specified for plugboard settings.")

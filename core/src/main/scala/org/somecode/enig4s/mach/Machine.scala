@@ -38,7 +38,7 @@ sealed abstract case class Machine(
       for
         validKeys <- stringToValidKeys(in)
         res = codeStream(validKeys, state, trace).toVector
-        trc = res.map(_._2.trace).sequence.map(_.map(_.mkString("\n")))
+        trc = res.traverse(_._2.trace).map(_.map(_.mkString("\n")))
         endState = res.lastOption.map(_._1).getOrElse(state)
         out <- symbols.codesToString(res.map(_._2.result))
       yield CryptStringResult(endState, out, trc)
@@ -78,6 +78,7 @@ sealed abstract case class Machine(
         }.map {
           (idx, cond) => WheelState(advanceIf(idx, cond), start.wheelState(idx).ring)
         }
+        .to(ArraySeq)
     )
 
   def translate(state: MachineState, trace: Boolean = false): KeyCode => MachineResult = in =>
@@ -105,7 +106,7 @@ sealed abstract case class Machine(
       val (out, traceItems) = next(all, Queue.empty, in)
       val inChar: String = symbols.displayCode(in)
       val outChar: String = symbols.displayCode(out)
-      MachineResult(out, Some(Queue(f"""[state: ${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
+      MachineResult(out, Some(Queue(f"""[${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
     else
       MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
 
@@ -152,7 +153,7 @@ sealed abstract case class Machine(
                 s"Reflector position (${state.reflectorState}) is too large for bus ($busSize)"
               )
         _ <-  Either.cond(
-                reflector.positions.getOrElse(Vector(0)).contains(state.reflectorState),
+                reflector.positions.getOrElse(Set(0)).contains(state.reflectorState),
                 (),
                 s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
               )

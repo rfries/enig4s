@@ -5,30 +5,25 @@ import cats.implicits.*
 import scala.collection.immutable.ArraySeq
 
 final case class MachineState(
-  wheelState: IndexedSeq[WheelState],
+  wheelState: ArraySeq[WheelState],
   reflectorState: Position
 ):
   def readable(symbols: SymbolMap): String =
     val pos = wheelState
-      .map(ws => symbols.codeToPoint(ws.position))
-      .to(ArraySeq)
-      .sequence
+      .traverse(ws => symbols.codeToPoint(ws.position))
       .map(v => String(v.toArray.reverse, 0, v.size))
       .toOption
-      .getOrElse("<unavailable>")
+      .getOrElse("<invalid>")
 
     val ring = wheelState
-      .map(ws => symbols.codeToPoint(KeyCode.unsafe(ws.ring)))
-      .to(ArraySeq)
-      .sequence
+      .traverse(ws => symbols.codeToPoint(KeyCode.unsafe(ws.ring)))
       .map(v => String(v.toArray.reverse, 0, v.size))
       .toOption
-      .getOrElse("<unavailable>")
+      .getOrElse("<invalid>")
 
-    val ref = symbols
-      .codeToPoint(KeyCode.unsafe(reflectorState))
+    val reflect = symbols.codeToPoint(KeyCode.unsafe(reflectorState))
       .map(Character.toString)
       .toOption
-      .getOrElse("<unavailable>")
+      .getOrElse("<invalid>")
 
-    s"$pos $ring $ref"
+    s"pos: $pos ring: $ring ref: $reflect"

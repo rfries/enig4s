@@ -40,8 +40,7 @@ object Cabinet:
 
     def initSymbolMaps: Either[String, Symbols] =
       symbolMapInits
-        .map(cmi => SymbolMap(cmi.mapping).map(cm => (CIString(cmi.name), cm)))
-        .sequence
+        .traverse(cmi => SymbolMap(cmi.mapping).map(cm => (CIString(cmi.name), cm)))
         .map(_.toMap)
 
     def initWirings(symMaps: Symbols): Either[String, Wirings] =
@@ -73,12 +72,11 @@ object Cabinet:
 
     def initReflectors(wirings: Wirings): Either[String, Reflectors] =
       reflectorInits
-        .map( rinit =>
+        .traverse( rinit =>
           wirings.get(CIString(rinit.wiring))
             .toRight(s"Wiring '${rinit.wiring}' not defined.")
             .flatMap(wiring => Reflector(wiring, None).map(ref => (CIString(rinit.name), ref)))
         )
-        .sequence
         .map(_.toMap)
 
     for

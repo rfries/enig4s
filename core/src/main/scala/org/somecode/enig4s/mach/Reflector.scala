@@ -5,7 +5,7 @@ import cats.implicits.*
 
 sealed abstract case class Reflector private (
   wiring: Wiring,
-  positions: Option[IndexedSeq[Position]]
+  positions: Option[Set[Position]]
 ) extends Rotor:
   def size: Int = wiring.size
 
@@ -16,7 +16,7 @@ object Reflector:
 
   def apply(
     wiring: Wiring,
-    positions: Option[IndexedSeq[Position]] = None
+    positions: Option[Seq[Position]] = None
   ): Either[String, Reflector] =
 
     if wiring.codes.zipWithIndex.exists((k, idx) => k.toInt === idx) then
@@ -28,6 +28,6 @@ object Reflector:
         else if (pos.distinct.size =!= pos.size)
           Left(s"Position list contains duplicates")
         else
-          Right(pos).map(p => new Reflector(wiring, Some(p)) {})
+          Right(pos).map(p => new Reflector(wiring, Some(p.toSet)) {})
       )
       .getOrElse(Right(new Reflector(wiring, None) {}))

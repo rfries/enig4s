@@ -5,6 +5,7 @@ import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
 import org.somecode.enig4s.mach.{KeyCode, MachineState, Position, RingSetting, SymbolMap, WheelState}
+import scala.collection.immutable.ArraySeq
 
 case class SettingsJs private (
   rings: CodesJs,
@@ -23,7 +24,7 @@ case class SettingsJs private (
               .map( _.toCode(symbols).map(Position.unsafe))
               .getOrElse(Right(Position.zero))
 
-    yield MachineState(ws, ref)
+    yield MachineState(ws.to(ArraySeq), ref)
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec

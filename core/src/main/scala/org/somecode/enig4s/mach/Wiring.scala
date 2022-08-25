@@ -3,7 +3,7 @@ package mach
 
 import scala.collection.immutable.ArraySeq
 
-sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
+sealed abstract case class Wiring private (codes: ArraySeq[KeyCode]):
   val size: Int = codes.size
   val forward: KeyCode => KeyCode = in => codes(in)
   val reverse: KeyCode => KeyCode = in => reverseCodes(in)
@@ -17,7 +17,7 @@ sealed abstract case class Wiring private (codes: IndexedSeq[KeyCode]):
 object Wiring:
 
   /** Create Wiring from a vector of key codes  */
-  def apply(keyCodes: IndexedSeq[KeyCode]): Either[String, Wiring] = keyCodes match
+  def apply(keyCodes: ArraySeq[KeyCode]): Either[String, Wiring] = keyCodes match
     case v if v.isEmpty =>
       Left("Wiring vectors have at least one value.")
     case v if v.length != v.distinct.length =>
@@ -30,7 +30,7 @@ object Wiring:
     symbols.stringToCodes(mapping).flatMap(Wiring.apply)
 
   // A straight-through mapping, used by the keyboard on most models
-  val AZ: Wiring = Wiring((0 to 25).map(KeyCode.unsafe))
+  val AZ: Wiring = Wiring((0 to 25).map(KeyCode.unsafe).to(ArraySeq))
     .getOrElse(throw RuntimeException("Wiring: Bad Init"))
 
 end Wiring
