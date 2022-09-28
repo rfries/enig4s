@@ -100,7 +100,7 @@ sealed abstract case class Machine(
         funs match
           case (label, f) :: rest =>
             val out = f(k)
-            next(rest, traceQ.enqueue(traceTranslate(label, k, out)), out)
+            next(rest, traceQ.enqueue(formatTrace(label, k, out)), out)
           case Nil =>
             (k, traceQ)
       val (out, traceItems) = next(all, Queue.empty, in)
@@ -110,7 +110,7 @@ sealed abstract case class Machine(
     else
       MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
 
-  def traceTranslate(label: String, in: KeyCode, out: KeyCode): String =
+  def formatTrace(label: String, in: KeyCode, out: KeyCode): String =
     val inChar: String = symbols.displayCode(in)
     val outChar: String = symbols.displayCode(out)
     f"  $label%s $inChar ($in%02d) -> $outChar ($out%02d)"
