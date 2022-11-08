@@ -6,9 +6,9 @@ import scala.collection.immutable.ArraySeq
 
 final case class MachineState(
   wheelState: ArraySeq[WheelState],
-  reflectorState: Position
+  reflectorState: Glyph
 ):
-  def readable(symbols: SymbolMap): String =
+  def display(symbols: SymbolMap): String =
     val pos = wheelState
       .traverse(ws => symbols.codeToPoint(ws.position))
       .map(v => String(v.toArray.reverse, 0, v.size))

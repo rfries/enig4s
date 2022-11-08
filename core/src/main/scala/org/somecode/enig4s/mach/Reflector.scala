@@ -6,8 +6,11 @@ import cats.implicits.*
 sealed abstract case class Reflector private (
   wiring: Wiring,
   positions: Option[Set[Position]]
-) extends Rotor:
+) extends Transformer:
   def size: Int = wiring.size
+
+  override val transformer: (MachineState, Glyph) => (MachineState, Glyph) =
+
 
   def forward(pos: Position): KeyCode => KeyCode = in =>
     minusMod(wiring.codes(plusMod(in, pos)), pos)

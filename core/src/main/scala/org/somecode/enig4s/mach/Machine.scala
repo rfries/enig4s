@@ -3,6 +3,7 @@ package mach
 
 import fs2.{Pure, Stream}
 import cats.implicits.*
+import cats.kernel.Eq
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.immutable.Queue
@@ -13,17 +14,15 @@ sealed abstract case class Machine(
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
   plugBoard: Option[PlugBoard]
-):
+)(using mod: Modulus):
 
   import Machine.*
-
-  val busSize: Int = entry.size
 
   def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-    else if (in >= busSize)
-      Left(s"KeyCode ($in) not in range of wheel size ($busSize).")
+    else if (in >= mod.toInt)
+      Left(s"KeyCode ($in) not in range of wheel size (${mod.toInt}).")
     else
       KeyCode(in).map( k =>
         val newState = advance(state)
@@ -57,7 +56,7 @@ sealed abstract case class Machine(
   private def advance(start: MachineState): MachineState =
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
-        start.wheelState(idx).position.next(busSize)
+        start.wheelState(idx).position.next(mod.toInt)
       else
         start.wheelState(idx).position
 
@@ -106,7 +105,7 @@ sealed abstract case class Machine(
       val (out, traceItems) = next(all, Queue.empty, in)
       val inChar: String = symbols.displayCode(in)
       val outChar: String = symbols.displayCode(out)
-      MachineResult(out, Some(Queue(f"""[${state.readable(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
+      MachineResult(out, Some(Queue(f"""[${state.display(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
     else
       MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
 
@@ -114,6 +113,26 @@ sealed abstract case class Machine(
     val inChar: String = symbols.displayCode(in)
     val outChar: String = symbols.displayCode(out)
     f"  $label%s $inChar ($in%02d) -> $outChar ($out%02d)"
+
+  // /**
+  //   * Convert a String into a sequence of [[Glyph]]s.
+  //   *
+  //   * Each code point in the given String is looked up in the symbol
+  //   * table, and if all are found, a sequence of the corresponding [[Glyph]]
+  //   * values are returned.
+  //   *
+  //   * @param s  The String to convert.
+  //   * @return   Either an error string or sequence of corresponding [[Glyph]]s
+  //   */
+  // def glyphs(s: String): Either[String, IndexedSeq[Glyph]] =
+  //   s.codePoints.toArray.to(ArraySeq).traverse(symbols.pointMap.get) match
+  //     case Some(out) => out.traverse(Glyph.apply)
+  //     case None =>
+  //       val bad = s.filterNot(symbols.codePoints.isDefinedAt)
+  //         .map(c => f"'$c%c' (${c.toInt}%#04x)")
+  //         .mkString(",")
+  //       Left(s"Invalid character(s) for symbol map: $bad")
+
 
   /**
    * Represents a sequence of KeyCodes that has been validated for this instance
@@ -126,8 +145,8 @@ sealed abstract case class Machine(
   object ValidKeys:
 
     def apply(codes: IndexedSeq[KeyCode]): Either[String, ValidKeys] =
-      if (codes.exists(k => k >= busSize))
-        Left(s"All KeyCodes must be between 0 and ${busSize-1}, inclusive")
+      if (codes.exists(k => k >= mod.toInt))
+        Left(s"All KeyCodes must be between 0 and ${mod.toInt-1}, inclusive")
       else
         Right(new ValidKeys(codes) {})
 
@@ -141,16 +160,16 @@ sealed abstract case class Machine(
       for
         _ <-  state.wheelState
                 .find(_.position >= entry.size)
-                .map(ws => s"Wheel position (${ws.position}) is too large for bus ($busSize)")
+                .map(ws => s"Wheel position (${ws.position}) is too large for bus (${mod.toInt})")
                 .toLeft(())
         _ <-  state.wheelState
-                .find(_.ring.toInt >= busSize)
-                .map(ws => s"Ring setting (${ws.ring}) is too large for bus ($busSize)")
+                .find(_.ring.toInt >= mod.toInt)
+                .map(ws => s"Ring setting (${ws.ring}) is too large for bus (${mod.toInt})")
                 .toLeft(())
         _ <-  Either.cond(
-                state.reflectorState.toInt < busSize,
+                state.reflectorState.toInt < mod.toInt,
                 (),
-                s"Reflector position (${state.reflectorState}) is too large for bus ($busSize)"
+                s"Reflector position (${state.reflectorState}) is too large for bus (${mod.toInt})"
               )
         _ <-  Either.cond(
                 reflector.positions.getOrElse(Set(0)).contains(state.reflectorState),
@@ -174,6 +193,7 @@ object Machine:
     plugBoard: Option[PlugBoard],
   ): Either[String, Machine] =
     for
+
       sm <- Either.cond(
         symbolMap.size === keyboard.size,
         symbolMap,
@@ -196,7 +216,8 @@ object Machine:
           s"Plugboard size (${plugBoard.size}) does not match the bus size (${keyboard.size})"
         )
       ).getOrElse(Right(None))
+      busSize <- Modulus(keyboard.size)
     yield
-      new Machine(sm, keyboard, wh, ref, plugBoard) {}
+      new Machine(sm, keyboard, wh, ref, plugBoard)(using busSize) {}
 
   final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])

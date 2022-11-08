@@ -1,8 +1,4 @@
 package org.somecode.enig4s
 package mach
 
-final case class WheelState(
-  position: KeyCode,
-  ring: RingSetting
-):
-  val offset: Int = position.toInt - ring.toInt
+final case class WheelState(position: Glyph, ring: Glyph)

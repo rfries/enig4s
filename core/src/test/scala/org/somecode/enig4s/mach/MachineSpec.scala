@@ -2,7 +2,7 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
-import org.scalatest.EitherValues
+import org.scalatest.EitherValues.*
 import org.scalatest.OptionValues.*
 import org.scalatest.matchers.*
 import org.scalatest.wordspec.AnyWordSpec
@@ -86,6 +86,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
           newState.wheelState shouldBe machineState(Vector('L' -> 'A', 'F' -> 'A', 'T' -> 'A')).wheelState
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
+
   }
 
   def machine(
