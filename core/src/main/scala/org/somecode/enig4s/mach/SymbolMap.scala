@@ -20,15 +20,28 @@ class SymbolMap private(val codePoints: IndexedSeq[Int]):
 
   val size: Int = codePoints.size
 
-  val pointToGlyph: Map[Int, Glyph] = codePoints.zipWithIndex.map((cp, idx) => (cp, Glyph.unsafe(idx))).toMap
+  val glyphMap: Map[Int, Glyph] = codePoints.zipWithIndex.map((cp, idx) => (cp, Glyph.unsafe(idx))).toMap
 
   def stringToGlyphs(in: String): Either[String, ArraySeq[Glyph]] =
     // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
-    in.to(ArraySeq).traverse(ch => pointToGlyph.get(ch)) match
+    in.toArray.to(ArraySeq).traverse(ch => glyphMap.get(ch)) match
       case Some(out) => Right(out)
       case None =>
         val bad = in.filterNot(codePoints.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
         Left(s"Invalid character(s) for symbol map: $bad")
+
+  def glyphToPoint(g: Glyph): Either[String, Int] =
+    codePoints.lift(g.toInt).toRight(s"Glyph $g not found in map.")
+
+  def glyphsToString(glyphs: Seq[Glyph]): Either[String,String] =
+    glyphs.to(ArraySeq)
+      .traverse(glyphToPoint)
+      .map(a => String(a.toArray[Int], 0, a.length))
+
+  def pointToGlyph(point: Int): Either[String,Glyph] =
+    glyphMap.get(point).toRight(s"Code point $point not found in symbol map.")
+
+
 
   private val pointsToCode: Map[Int, KeyCode] = codePoints.zipWithIndex
     .map((pt, code) => (pt, KeyCode.unsafe(code)))

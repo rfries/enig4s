@@ -38,8 +38,8 @@ object Glyph:
       case _ => "<invalid>"
 
   extension (g: Glyph)
-    def intVal: Int = g
-    def %+(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g + o.intVal)
-    def %-(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g - o.intVal)
+    def toInt: Int = g
+    def +%(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g + o.toInt)
+    def -%(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g - o.toInt)
 
 end Glyph

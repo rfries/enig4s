@@ -1,5 +1,8 @@
 package org.somecode.enig4s.mach
 
+import cats.kernel.Eq
+import cats.data.NonEmptyVector
+
 /**
   * Represents the modulus, or the value at which increasing values wrap
   * around to zero. This, in effect, defines the domain of the transposition
@@ -7,12 +10,29 @@ package org.somecode.enig4s.mach
   * operations they are built on.
   */
 opaque type Modulus = Int
-object Modulus extends NewPosNum[Modulus, Int]:
+object Modulus:
+
+  def apply(n: Int): Either[String, Modulus] =
+    if n <= 0 then
+      Left(s"Modulus ($n) must be greater than zero.")
+    else
+      Right(n)
+
+  def unsafe(n: Int): Modulus = n match
+    case n if n <= 0 => throw new IllegalArgumentException("Modulus must be positive.")
+    case n => n
+
+  given Eq[Modulus] = summon[Eq[Int]]
+  given Ordering[Modulus] = summon[Ordering[Int]]
+
+  def normalize(n: Int, mod: Modulus): Int =
+    val res = n % mod.toInt
+    val out = if res < 0 then res + mod.toInt else res
+    Modulus.unsafe(out)
+
+
   extension (mod: Modulus)
     def toInt: Int = mod
-
-  // def apply(n: Int): Either[String, BusSize] =
-  //   if n <= 0 then
-  //     Left(s"Bus size ($n) must be greater than zero.")
-  //   else
-  //     Right(n)
+    def sum(gs: Glyph*) = normalize(gs.map(_.toInt).sum, mod)
+    def plus(a: Glyph, b: Glyph) = normalize(a.toInt + b.toInt, mod)
+    def minus(a: Glyph, b: Glyph) = normalize(a.toInt - b.toInt, mod)

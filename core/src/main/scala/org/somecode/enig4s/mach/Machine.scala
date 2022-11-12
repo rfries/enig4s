@@ -13,8 +13,9 @@ sealed abstract case class Machine(
   entry: Wiring,
   wheels: IndexedSeq[Wheel],
   reflector: Reflector,
-  plugBoard: Option[PlugBoard]
-)(using mod: Modulus):
+  plugBoard: Option[PlugBoard],
+  mod: Modulus
+):
 
   import Machine.*
 
@@ -159,7 +160,7 @@ sealed abstract case class Machine(
     def apply(state: MachineState): Either[String, ValidState] =
       for
         _ <-  state.wheelState
-                .find(_.position >= entry.size)
+                .find(_.position >= entry.length)
                 .map(ws => s"Wheel position (${ws.position}) is too large for bus (${mod.toInt})")
                 .toLeft(())
         _ <-  state.wheelState
@@ -195,29 +196,29 @@ object Machine:
     for
 
       sm <- Either.cond(
-        symbolMap.size === keyboard.size,
+        symbolMap.size === keyboard.length,
         symbolMap,
-        s"Symbol map size (${symbolMap.size}) does not match the bus size (${keyboard.size})"
+        s"Symbol map size (${symbolMap.size}) does not match the bus size (${keyboard.length})"
       )
       wh <- Either.cond(
-        wheels.forall(_.size === keyboard.size),
+        wheels.forall(_.size === keyboard.length),
         wheels,
-        s"Wheel sizes ${wheels.map(_.size).mkString("(",",",")")} do not match the bus size (${keyboard.size})"
+        s"Wheel sizes ${wheels.map(_.size).mkString("(",",",")")} do not match the bus size (${keyboard.length})"
       )
       ref <- Either.cond(
-        reflector.wiring.size === keyboard.size,
+        reflector.wiring.length === keyboard.length,
         reflector,
-        s"Reflector size (${reflector.size}) does not match the bus size (${keyboard.size})"
+        s"Reflector size (${reflector.size}) does not match the bus size (${keyboard.length})"
       )
       plug <- plugBoard.map(pb =>
         Either.cond(
-          pb.size === keyboard.size,
+          pb.size === keyboard.length,
           pb,
-          s"Plugboard size (${plugBoard.size}) does not match the bus size (${keyboard.size})"
+          s"Plugboard size (${plugBoard.size}) does not match the bus size (${keyboard.length})"
         )
       ).getOrElse(Right(None))
-      busSize <- Modulus(keyboard.size)
+      mod <- Modulus(keyboard.length)
     yield
-      new Machine(sm, keyboard, wh, ref, plugBoard)(using busSize) {}
+      new Machine(sm, keyboard, wh, ref, plugBoard, mod) {}
 
   final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])
