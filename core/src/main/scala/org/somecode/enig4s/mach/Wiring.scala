@@ -1,6 +1,7 @@
 package org.somecode.enig4s
 package mach
 
+import cats.implicits.*
 import cats.syntax.all.*
 import scala.collection.immutable.ArraySeq
 
@@ -8,7 +9,7 @@ final case class Wiring private (wiring: ArraySeq[Glyph]) extends Transformer:
 
   val length: Int = wiring.length
 
-  // provide a modulus based on the (already validated) 'wires' array size
+  // provide a modulus based on the 'wires' array size, (already validated as non-zero)
   given modulus: Modulus = Modulus.unsafe(length)
 
   override val transformer: (MachineState, Glyph) => (MachineState, Glyph) =
@@ -41,7 +42,7 @@ final case class Wiring private (wiring: ArraySeq[Glyph]) extends Transformer:
 object Wiring:
 
   /** Create Wiring from a vector of unicode code points   */
-  def apply(glyphs: Seq[Int]): Either[String, Wiring] = glyphs match
+  def apply(points: Seq[Int]): Either[String, Wiring] = points match
     case v if v.isEmpty =>
       Left("Wiring vectors must have at least one value.")
     case v if v.length != v.distinct.length =>
@@ -51,7 +52,7 @@ object Wiring:
     case v => Right(Wiring(v.map(Glyph.unsafe).to(ArraySeq)))
 
   def apply(mapping: String, symbols: SymbolMap): Either[String, Wiring] =
-    symbols.stringToCodes(mapping).flatMap(Wiring.apply)
+    symbols.stringToGlyphs(mapping).flatMap(gs => Wiring(gs.map(_.toInt)))
 
   // A straight-through mapping, used by the keyboard on most models
   val AZ: Wiring = Wiring((0 to 25).map(KeyCode.unsafe).to(ArraySeq))

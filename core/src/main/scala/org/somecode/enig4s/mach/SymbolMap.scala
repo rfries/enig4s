@@ -16,7 +16,7 @@ import scala.jdk.StreamConverters.*
  * in the translation table.  Lookups will fail (return Left) for code
  * points which are not present in the translation table.
  */
-class SymbolMap private(val codePoints: IndexedSeq[Int]):
+final class SymbolMap private(val codePoints: IndexedSeq[Int]):
 
   val size: Int = codePoints.size
 
