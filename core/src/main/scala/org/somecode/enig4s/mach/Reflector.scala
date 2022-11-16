@@ -6,14 +6,14 @@ import cats.implicits.*
 sealed abstract case class Reflector private (
   wiring: Wiring,
   positions: Option[Set[Glyph]],
-) extends Transformer:
-
+):
   import wiring.modulus
 
-  override val transformer: (MachineState, Glyph) => (MachineState, Glyph) =
-    (state, in) =>
+  val length: Int = wiring.length
+
+  val transformer: Transformer = (state, in) =>
       val pos = state.reflectorState
-      val out = wiring.wire(in +% pos) -% pos
+      val out = wiring.wire(in %+ pos) %- pos
       (state, out)
 
   // def forward(pos: Position): KeyCode => KeyCode = in =>

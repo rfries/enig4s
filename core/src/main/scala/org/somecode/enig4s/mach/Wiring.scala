@@ -5,15 +5,14 @@ import cats.implicits.*
 import cats.syntax.all.*
 import scala.collection.immutable.ArraySeq
 
-final case class Wiring private (wiring: ArraySeq[Glyph]) extends Transformer:
+final case class Wiring private (wiring: ArraySeq[Glyph]):
 
   val length: Int = wiring.length
 
   // provide a modulus based on the 'wires' array size, (already validated as non-zero)
   given modulus: Modulus = Modulus.unsafe(length)
 
-  override val transformer: (MachineState, Glyph) => (MachineState, Glyph) =
-    (state, in) => (state, wire(in))
+  val transformer: Transformer = (state, in) => (state, wire(in))
 
   /**
     * Look up a glyph in the wiring table.  Unsafe; this is just an array

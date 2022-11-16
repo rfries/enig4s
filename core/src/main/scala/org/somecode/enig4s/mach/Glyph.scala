@@ -7,6 +7,9 @@ import cats.implicits.*
 opaque type Glyph = Int
 object Glyph:
 
+  val zero = unsafe(0)
+  val one = unsafe(1)
+
   def apply(codePoint: Int)(using mod: Modulus): Either[String, Glyph] =
     if codePoint < 0 || codePoint >= mod.toInt then
       Left(s"Glyph ($codePoint) must be >= 0 and < ${mod.toInt} for this Machine instance.")
@@ -39,7 +42,8 @@ object Glyph:
 
   extension (g: Glyph)
     def toInt: Int = g
-    def +%(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g + o.toInt)
-    def -%(o: Glyph)(using Modulus): Glyph = Glyph.normalMod(g - o.toInt)
+    def %+(o: Glyph)(using Modulus): Glyph = normalMod(g + o.toInt)
+    def %-(o: Glyph)(using Modulus): Glyph = normalMod(g - o.toInt)
+    def next(using Modulus): Glyph = normalMod(g + 1)
 
 end Glyph
