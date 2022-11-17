@@ -1,6 +1,7 @@
 package org.somecode.enig4s
 package mach
 
+import cats.implicits.*
 import scala.collection.immutable.Queue
 
 final case class CryptStringResult(
@@ -9,4 +10,5 @@ final case class CryptStringResult(
   trace: Option[IndexedSeq[String]]
 ):
   def traceMsg: String =
-    s"""==> "$text"\n """ + trace.map(_.mkString("\n")).getOrElse("")
+    state.traceQ.toVector.mkString("\n") + s"""==> "$text"\n """
+

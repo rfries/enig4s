@@ -9,11 +9,10 @@ import scala.collection.immutable.Queue
 
 sealed abstract case class Machine(
   symbols: SymbolMap,
-  entry: Wiring,
+  entry: Entry,
   wheels: ArraySeq[Wheel],
   reflector: Reflector,
-  plugBoard: Option[PlugBoard],
-  mod: Modulus
+  plugBoard: Option[PlugBoard]
 ):
   import entry.modulus
 
@@ -22,13 +21,13 @@ sealed abstract case class Machine(
   def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
     if (state.wheelState.size != wheels.size)
       Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-    else if (in >= mod.toInt)
-      Left(s"KeyCode ($in) not in range of wheel size (${mod.toInt}).")
+    else if (in >= entry.length)
+      Left(s"KeyCode ($in) not in range of wheel size (${entry.length}).")
     else
-      KeyCode(in).map( k =>
+      Glyph(in).map( g =>
         val newState = advance(state)
-        val res = translate(newState, trace)(k)
-        CryptResult(newState, res.result, res.trace)
+        val (endState, out) = transformer(newState, g)
+        CryptResult(endState, out)
       )
 
   def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
@@ -36,22 +35,20 @@ sealed abstract case class Machine(
       Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
     else
       for
-        validKeys <- stringToValidKeys(in)
-        res = codeStream(validKeys, state, trace).toVector
-        trc = res.traverse(_._2.trace).map(_.map(_.mkString("\n")))
+        validGlyphs <- validateGlyphs(in)
+        res = codeStream(validGlyphs, state, trace).toVector
+        trc = res.traverse(_._1.traceQ).map(_.map(_.mkString("\n")))
         endState = res.lastOption.map(_._1).getOrElse(state)
-        out <- symbols.codesToString(res.map(_._2.result))
+        out <- symbols.glyphsToString(res.map(_._2))
       yield CryptStringResult(endState, out, trc)
 
-  private def stringToValidKeys(in: String): Either[String, ValidKeys] =
-    symbols.stringToCodes(in).flatMap(ValidKeys.apply)
+  private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
+    symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
 
-  private def codeStream(validKeys: ValidKeys, state: MachineState, trace: Boolean): Stream[Pure, (MachineState, CryptResult)] =
-    Stream.emits(validKeys.codes)
-      .mapAccumulate(state) ( (state, ch) =>
-        val newState: MachineState = advance(state)
-        val res = translate(newState, trace)(ch)
-        (newState, CryptResult(newState, res.result, res.trace))
+  private def codeStream(glyphs: ValidGlyphs, state: MachineState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
+    Stream.emits(glyphs.glyphs)
+      .mapAccumulate(state) ( (state, in) =>
+        transformer(advance(state), in)
       )
 
   private def advance(start: MachineState): MachineState =
@@ -63,9 +60,7 @@ sealed abstract case class Machine(
 
     val atNotch = start.wheelState
       .zip(wheels)
-      .map { (pos, wheel) =>
-        wheel.notches.contains(pos)
-      }
+      .map((pos, wheel) => wheel.notchedAt(pos))
 
     start.copy(wheelState =
       wheels.indices
@@ -82,106 +77,95 @@ sealed abstract case class Machine(
 
   protected[mach] def transformer: Transformer = (state, glyph) =>
 
-    val wheelFuns = Vector.empty[Transformer]
-      .appended(entry.transformer)
-      .appendedAll(wheels.map(_.forward))
-      .appended(reflector.transformer)
-      .appendedAll(wheels.reverse.map(_.reverse))
-      .appended(entry.inverse.transformer)
+    val wheelFuns = Vector(entry.forward)
+      ++ (wheels.map(_.forward) :+ reflector.transformer)
+      ++ (wheels.reverse.map(_.reverse) :+ entry.reverse)
 
-    val allFuns = plugBoard
-      .map(pb => pb.forward +: wheelFuns :+ pb.reverse)
+    val allFuns = plugBoard.map(pb => pb.forward +: wheelFuns :+ pb.reverse)
       .getOrElse(wheelFuns)
 
     Function.chain[(MachineState, Glyph)](allFuns)(state, glyph)
 
-  def translate(state: MachineState, trace: Boolean = false): KeyCode => MachineResult = ???
-  /*
-    val wheelStates: IndexedSeq[((Wheel, Glyph), Int)] = wheels.zip(state.wheelState).zipWithIndex
-
-    val wheelFuns = List(("[<- k]", entry.forward))
-      ++ (wheelStates.map { case ((wheel, state), idx) => (s"[<- $idx]", wheel.forward(state)) } )
-      .appended(("[<> r]", reflector.forward(state.reflectorState)))
-      .concat(wheelStates.reverse.map { case ((wheel, state), idx) => (s"[-> $idx]", wheel.reverse(state)) } )
-      .appended("[-> k]", entry.reverse)
-
-    val all = plugBoard
-      .map(pb => ("[<- p]", pb.forward) +: wheelFuns :+ ("[-> p]", pb.reverse))
-      .getOrElse(wheelFuns)
-
-    if trace then
-      @tailrec
-      def next(funs: List[(String, KeyCode => KeyCode)], traceQ: Queue[String], k: KeyCode): (KeyCode, Queue[String]) =
-        funs match
-          case (label, f) :: rest =>
-            val out = f(k)
-            next(rest, traceQ.enqueue(formatTrace(label, k, out)), out)
-          case Nil =>
-            (k, traceQ)
-      val (out, traceItems) = next(all, Queue.empty, in)
-      val inChar: String = symbols.displayCode(in)
-      val outChar: String = symbols.displayCode(out)
-      MachineResult(out, Some(Queue(f"""[${state.display(symbols)}] $inChar ($in%02d) => $outChar ($out%02d)""") ++ traceItems))
-    else
-      MachineResult(all.map(_._2).reduceLeft((fall, f) => f.compose(fall))(in), None)
-
-  def formatTrace(label: String, in: KeyCode, out: KeyCode): String =
-    val inChar: String = symbols.displayCode(in)
-    val outChar: String = symbols.displayCode(out)
-    f"  $label%s $inChar ($in%02d) -> $outChar ($out%02d)"
-*/
-
   /**
-   * Represents a sequence of KeyCodes that has been validated for this instance
-   * of a Machine (path dependent type)
+   * Represents a sequence of [[Glyph]]s that has been validated for this instance
+   * of a Machine (path dependent type).
    */
 
-  sealed abstract case class ValidKeys private (codes: IndexedSeq[KeyCode]):
-    override def toString: String = symbols.codesToString(codes).getOrElse("<invalid>")
+  sealed abstract case class ValidGlyphs private (glyphs: IndexedSeq[Glyph]):
+    override def toString: String = symbols.glyphsToString(glyphs).getOrElse("<invalid>")
 
-  object ValidKeys:
+  object ValidGlyphs:
 
-    def apply(codes: IndexedSeq[KeyCode]): Either[String, ValidKeys] =
-      if (codes.exists(k => k >= mod.toInt))
-        Left(s"All KeyCodes must be between 0 and ${mod.toInt-1}, inclusive")
+    def apply(glyphs: IndexedSeq[Glyph]): Either[String, ValidGlyphs] =
+      if glyphs.exists(g => g.invalidFor(entry.length)) then
+        Left(s"All KeyCodes must be between 0 and ${entry.length-1}, inclusive")
       else
-        Right(new ValidKeys(codes) {})
+        Right(new ValidGlyphs(glyphs) {})
+
+  /**
+   * This is a path-dependent type that represents a machine state that has been
+   * validated for this instance of a Machine
+   */
+
+  sealed abstract case class ValidState private (state: MachineState)
+
+  object ValidState:
+    def apply(state: MachineState): Either[String, ValidState] =
+      for
+        _ <-  Either.cond(
+                state.wheelState.size === wheels.size,
+                (),
+                s"Number of wheels in state (${state.wheelState.size}) does not match number of wheels in Machine (${wheels.size})"
+              )
+        _ <-  state.wheelState
+                .find(_.invalidFor(entry.length))
+                .map(g => s"Wheel position ($g) is too large for bus (${entry.length})")
+                .toLeft(())
+        _ <-  Either.cond(
+                state.reflectorState.validFor(entry.length),
+                (),
+                s"Reflector position (${state.reflectorState}) is too large for bus ($entry.length)"
+              )
+        _ <-  Either.cond(
+                reflector.positions.map(_.contains(state.reflectorState)).getOrElse(true),
+                (),
+                s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
+              )
+      yield new ValidState(state) {}
 
 object Machine:
 
   def apply (
     symbolMap: SymbolMap,
-    keyboard: Wiring,
+    entry: Entry,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugBoard: Option[PlugBoard],
+    plugBoard: Option[PlugBoard]
   ): Either[String, Machine] =
     for
-
       sm <- Either.cond(
-        symbolMap.size === keyboard.length,
+        symbolMap.size === entry.length,
         symbolMap,
-        s"Symbol map size (${symbolMap.size}) does not match the bus size (${keyboard.length})"
+        s"Symbol map size (${symbolMap.size}) does not match the bus size (${entry.length})"
       )
       wh <- Either.cond(
-        wheels.forall(_.length === keyboard.length),
+        wheels.forall(_.length === entry.length),
         wheels,
-        s"Wheel sizes ${wheels.map(_.length).mkString("(",",",")")} do not match the bus size (${keyboard.length})"
+        s"Wheel sizes ${wheels.map(_.length).mkString("(",",",")")} do not match the bus size (${entry.length})"
       )
       ref <- Either.cond(
-        reflector.wiring.length === keyboard.length,
+        reflector.wiring.length === entry.length,
         reflector,
-        s"Reflector size (${reflector.length}) does not match the bus size (${keyboard.length})"
+        s"Reflector size (${reflector.length}) does not match the bus size (${entry.length})"
       )
       plug <- plugBoard.map(pb =>
         Either.cond(
-          pb.length === keyboard.length,
+          pb.length === entry.length,
           pb,
-          s"Plugboard size (${plugBoard.size}) does not match the bus size (${keyboard.length})"
+          s"Plugboard size (${plugBoard.size}) does not match the bus size (${entry.length})"
         )
       ).getOrElse(Right(None))
-      mod <- Modulus(keyboard.length)
     yield
-      new Machine(sm, keyboard, wh.to(ArraySeq), ref, plugBoard, mod) {}
+      new Machine(sm, entry, wh.to(ArraySeq), ref, plugBoard) {}
 
   final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])

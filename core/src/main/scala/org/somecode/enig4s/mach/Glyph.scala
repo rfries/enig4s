@@ -45,5 +45,7 @@ object Glyph:
     def %+(o: Glyph)(using Modulus): Glyph = normalMod(g + o.toInt)
     def %-(o: Glyph)(using Modulus): Glyph = normalMod(g - o.toInt)
     def next(using Modulus): Glyph = normalMod(g + 1)
+    def validFor(size: Int): Boolean = size > 0 && g < size
+    def invalidFor(size: Int): Boolean = !validFor(size)
 
 end Glyph

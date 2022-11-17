@@ -1,7 +1,7 @@
 package org.somecode.enig4s
 package mach
 
-import cats.implicits.*
+//import cats.implicits.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
@@ -22,12 +22,7 @@ sealed abstract case class Wheel private (
       val out = wires.wire(glyph %+ off) %- off
       (state, out)
 
-  // def forward(state: WheelState): KeyCode => KeyCode = in =>
-  //   minusMod(wiring.forward(plusMod(in, state)), state)
-
-  // def reverse(state: WheelState): KeyCode => KeyCode = in =>
-  //   minusMod(wiring.reverse(plusMod(in, state)), state)
-
+  def notchedAt(p: Glyph): Boolean = notches.contains(p)
 
   def copy(
     wiring: Wiring = wiring,
@@ -36,8 +31,6 @@ sealed abstract case class Wheel private (
     notches: Set[Glyph] = notches
   ): Either[String, Wheel] = Wheel.apply(wiring, ring, wheelNum, notches.toSeq)
 
-  def notchedAt(p: Glyph): Boolean = notches.contains(p)
-
 object Wheel:
 
   def apply(wiring: Wiring, ring: Glyph, wheelNum: Int, notches: Seq[Glyph]): Either[String, Wheel] =
@@ -45,8 +38,8 @@ object Wheel:
       Left(s"Wheel size must be > 0.")
     else if ring.toInt >= wiring.length then
       Left(s"Ring setting (${ring.toInt}) is too large for wheel size (${wiring.length})")
-    else if wheelNum <= 0 then
-      Left("Wheel number must be > 0")
+    else if wheelNum < 0  then
+      Left(s"Wheel number ($wheelNum) must be 0 or more")
     else
       validateNotches(wiring.length, notches).map(ns => new Wheel(wiring, ring, wheelNum, ns.toSet) {})
 
