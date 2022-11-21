@@ -9,9 +9,9 @@ class ReflectorSpec extends AnyWordSpec with should.Matchers:
 
   "reflector" should {
     "allow creation with valid parameters" in {
-      val wiring = Wiring("ABC")
+      val wiring = Wiring("ABC", SymbolMap.AZ)
       wiring.isRight shouldBe true
-      wiring.length shouldBe 3
+      wiring.value.length shouldBe 3
       true
     }
   }

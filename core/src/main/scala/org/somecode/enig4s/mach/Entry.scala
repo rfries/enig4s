@@ -17,3 +17,5 @@ object Entry:
       new Entry(wiring),
       s"Wiring length (${wiring.length}) must be > 0"
     )
+
+  val AZ: Entry = Entry(Wiring.AZ).getOrElse(throw new IllegalArgumentException("Entry disc init failed (AZ)"))

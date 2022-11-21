@@ -18,8 +18,8 @@ final class GlyphSpec extends AnyWordSpec with should.Matchers {
 
       info(s"g1: $g11")
       info(s"g2: $g22")
-      (g11 %+ g22).intVal shouldBe 7
-      (g0 %- g11).intVal shouldBe 15
+      (g11 %+ g22).toInt shouldBe 7
+      (g0 %- g11).toInt shouldBe 15
     }
   }
 }

@@ -1,6 +1,7 @@
 package org.somecode.enig4s
 package mach
 
+import cats.implicits.*
 import org.scalacheck.Gen
 import org.scalacheck.Shrink.shrinkAny
 import org.scalatest.EitherValues.*
@@ -13,29 +14,29 @@ import scala.util.Random
 class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
   import WiringProps._
-  // note: adding a type annotation here causes compiler crash w/ scala 3.0.0
-  // i.e. val genPosVector: Gen[Vector[Position]] =
 
   property("Wiring translation (properties)") {
 
     // reflectors cannot have any straight-through mappings
 
-    forAll(genMappings) { (v: ArraySeq[KeyCode]) =>
-      whenever(v.length === Max) {
+    forAll(genMappings) { (v: ArraySeq[Int]) =>
+      whenever(v.length === BusSize) {
         val wiring = Wiring(v).value
-        (0 to Max-1).foreach { n =>
-          val forward = wiring.codes(n)
+        (0 to BusSize-1).foreach { n =>
+          val forward = wiring.wiring(n)
           assert(forward === v(n))
-          assert(wiring.reverseCodes(forward.toInt) === n)
+          assert(wiring.inverse.wire(forward) === n)
         }
       }
     }
   }
 
 object WiringProps:
-  val Max = 26
-  val genMappings: Gen[ArraySeq[KeyCode]] = Gen.const(
-    (0 to Max-1).map(KeyCode.unsafe).to(ArraySeq)
-  ).map(Random.shuffle)
-  val genReflectorMappings: Gen[ArraySeq[KeyCode]] = genMappings suchThat
-    (v => !v.zipWithIndex.exists((p, idx) => p == idx))
+  val genMax = Gen.choose(1, 300)
+  val BusSize = 26
+
+  val genMappings: Gen[ArraySeq[Int]] = Gen.const((0 to BusSize-1).to(ArraySeq))
+    .map(Random.shuffle)
+
+  val genReflectorMappings: Gen[ArraySeq[Int]] = genMappings suchThat
+    (v => !v.zipWithIndex.exists((p, idx) => p.toInt === idx))

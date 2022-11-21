@@ -20,7 +20,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('A' -> 'A', 'A' -> 'A', 'A' -> 'A'))
       val in = "AAAAA"
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, None) match
+      Machine(SymbolMap.AZ, Entry.AZ, wheels, reflector, None) match
         case Right(mach) => verifyText(mach, machState, in, "BDZGO")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -45,7 +45,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('A' -> 'B', 'A' -> 'B', 'A' -> 'B'))
       val in = "AAAAA"
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, None) match
+      Machine(SymbolMap.AZ, Entry.AZ, wheels, reflector, None) match
         case Right(mach) => verifyText(mach, machState, in, "EWTYX")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -57,7 +57,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val in = "AAAAA"
       val plugboard = EnigmaPlugBoard(26, Vector("AZ", "SO", "FB"), SymbolMap.AZ).require
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
+      Machine(SymbolMap.AZ, Entry.AZ, wheels, reflector, Some(plugboard)) match
         case Right(mach) => verifyText(mach, machState, in, "UTZJY")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -69,7 +69,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val in = "ZELDA"
       val plugboard = EnigmaPlugBoard(26, Vector("SD", "FG", "HJ", "QY", "EC", "RV", "TB", "ZN", "UM"), SymbolMap.AZ).require
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, Some(plugboard)) match
+      Machine(SymbolMap.AZ, Entry.AZ, wheels, reflector, Some(plugboard)) match
         case Right(mach) => verifyText(mach, machState, in, "NAWHM")
         case Left(msg) => fail(s"Failed to initialize Machine: $msg")
     }
@@ -80,7 +80,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       val machState = machineState(Vector('K' -> 'A', 'D' -> 'A', 'O' -> 'A'))
       val in = "AAAAA"
 
-      Machine(SymbolMap.AZ, Wirings.ETW, wheels, reflector, None) match
+      Machine(SymbolMap.AZ, Entry.AZ, wheels, reflector, None) match
         case Right(mach) =>
           val newState = verifyText(mach, machState, in, "ULMHJ")
           newState.wheelState shouldBe machineState(Vector('L' -> 'A', 'F' -> 'A', 'T' -> 'A')).wheelState
@@ -91,45 +91,44 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
 
   def machine(
       wheels: Vector[String],
+      rings: String,
       reflector: String,
       plugBoard: Option[Vector[String]] = None,
       symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
     for
-      wh <- wheels.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
+      _ <- Either.cond(rings.length() === wheels.length, (), "Wheels vector and ring settings string must be the same length.")
+      wh <- wheels.reverse.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
+      ringGlyphs <- symbols.stringToGlyphs(rings.reverse)
+      cfgWheels <- wh.zip(ringGlyphs).traverse((wheel, glyph) => wheel.copy(ring = glyph))
       ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
-      plugs <- plugBoard.traverse(pb => EnigmaPlugBoard(ref.size, pb, symbols))
-      mach <- Machine(symbols, Wiring.AZ, wh.reverse, ref, plugs)
+      plugs <- plugBoard.traverse(pb => EnigmaPlugBoard(ref.length, pb, symbols))
+      mach <- Machine(symbols, Entry.AZ, cfgWheels, ref, plugs)
     yield mach
 
 
   def machState(
       position: String,
-      ringSettings: String,
       reflector: String = "A",
       symbols: SymbolMap = SymbolMap.AZ): Either[String, MachineState] =
 
     assert(reflector.size == 1)
     for
-      pos <- symbols.stringToCodes(position).map(_.reverse)
-      ring <- symbols.stringToCodes(ringSettings).map(_.reverse)
-      _ <- Either.cond(ring.size === pos.size, (), "Position and ring settings strings must be the same length")
-      ws = pos.zip(ring)
-              .map((pos, ring) => WheelState(pos, RingSetting.unsafe(ring)))
-      ref <- symbols.pointToCode(reflector.codePointAt(0)).map(Position.unsafe)
-    yield MachineState(ws, ref)
+      pos <- symbols.stringToGlyphs(position).map(_.reverse)
+      ref <- symbols.pointToGlyph(reflector.codePointAt(0))
+    yield MachineState(pos, ref)
 
 
   def configureWheels(wheelConfigs: Wheel*): IndexedSeq[Wheel] = wheelConfigs.toIndexedSeq.reverse
 
-  def machineState(wheelState: Vector[(Char, Char)], reflectorState: Char = '\u0000'): MachineState =
+  def machineState(wheelState: Vector[(Char, Char)]): MachineState =
     MachineState(
       wheelState.reverse
         .zipWithIndex
         .map { case ((pos, rs), idx) =>
-          WheelState(KeyCode.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
+          WheelState(Glyph.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
         }
         .to(ArraySeq),
-      Position.unsafe(reflectorState)
+      Glyph.zero
     )
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =

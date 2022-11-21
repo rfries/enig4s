@@ -5,9 +5,9 @@ package mach
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
+  notches: Set[Glyph],
   ring: Glyph,
-  wheelNum: Int,
-  notches: Set[Glyph]
+  wheelNum: Int
 ):
   import wiring.modulus
 
@@ -26,14 +26,14 @@ sealed abstract case class Wheel private (
 
   def copy(
     wiring: Wiring = wiring,
-    ring: Glyph,
-    wheelNum: Int,
-    notches: Set[Glyph] = notches
-  ): Either[String, Wheel] = Wheel.apply(wiring, ring, wheelNum, notches.toSeq)
+    notches: Set[Glyph] = notches,
+    ring: Glyph = ring,
+    wheelNum: Int = wheelNum
+  ): Either[String, Wheel] = Wheel.apply(wiring, notches.toSeq, ring, wheelNum)
 
 object Wheel:
 
-  def apply(wiring: Wiring, ring: Glyph, wheelNum: Int, notches: Seq[Glyph]): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: Seq[Glyph], ring: Glyph, wheelNum: Int): Either[String, Wheel] =
     if wiring.length < 1 then
       Left(s"Wheel size must be > 0.")
     else if ring.toInt >= wiring.length then
@@ -41,16 +41,16 @@ object Wheel:
     else if wheelNum < 0  then
       Left(s"Wheel number ($wheelNum) must be 0 or more")
     else
-      validateNotches(wiring.length, notches).map(ns => new Wheel(wiring, ring, wheelNum, ns.toSet) {})
+      validateNotches(wiring.length, notches).map(ns => new Wheel(wiring, ns.toSet, ring, wheelNum) {})
 
-  def apply(wiring: Wiring, ring: String, wheelNum: Int, notches: String, symbols: SymbolMap): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: String, ring: String, wheelNum: Int, symbols: SymbolMap): Either[String, Wheel] =
     for
       notchCodes <- symbols.stringToGlyphs(notches)
       rs <- validateRingSetting(ring, symbols)
       wn <- Either.cond(wheelNum < 1, wheelNum, "Wheel number must be > 0")
       validNotches <- validateNotches(wiring.length, notchCodes)
     yield
-      new Wheel(wiring, rs, wn, validNotches) {}
+      new Wheel(wiring, validNotches, rs, wn) {}
 
   def validateNotches(wheelSize: Int, notchCodes: Seq[Glyph]): Either[String, Set[Glyph]] =
     if notchCodes.length != notchCodes.distinct.length then

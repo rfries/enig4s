@@ -26,7 +26,6 @@ class SymbolMapSpec extends AnyWordSpec with should.Matchers:
       SymbolMap.AZ.codesToString(badCodes).isLeft shouldBe true
     }
 
-
     "translate a valid String into a vector of Glyphs" in {
       val expected = Vector(0, 25, 7).map(Glyph.unsafe)
       SymbolMap.AZ.stringToCodes("AZH").value shouldBe expected
@@ -37,13 +36,13 @@ class SymbolMapSpec extends AnyWordSpec with should.Matchers:
     }
 
     "translate a valid vector of Glyphs into a String" in {
-      val Glyphs = Vector(0, 25, 7).map(Glyph.unsafe)
-      SymbolMap.AZ.codesToString(Glyphs).value shouldBe "AZH"
+      val glyphs = Vector(0, 25, 7).map(Glyph.unsafe)
+      SymbolMap.AZ.glyphsToString(glyphs).value shouldBe "AZH"
     }
 
     "return an error when translating a Vector with invalid Glyphs" in {
-      val badCodes = Vector(1,2,99).map(Glyph.unsafe)
-      SymbolMap.AZ.codesToString(badCodes).isLeft shouldBe true
+      val badGlyphs = Vector(1,2,99).map(Glyph.unsafe)
+      SymbolMap.AZ.glyphsToString(badGlyphs).isLeft shouldBe true
     }
 
   }

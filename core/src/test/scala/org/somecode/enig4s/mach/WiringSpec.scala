@@ -8,7 +8,7 @@ import org.scalatest.EitherValues.*
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
 
-class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
+final class WiringSpec extends Enig4sSpec:
 
   "Wiring" should {
     "allow creation with well-formed letter maps" in {
@@ -25,14 +25,21 @@ class WiringSpec extends AnyWordSpec with should.Matchers with AppendedClues:
     }
 
     "translate positions according to the specified vector or letter map" in {
-      val p0 = KeyCode.zero
-      val p1 = KeyCode(1).value
+      val p0 = Glyph.zero
+      val p1 = Glyph.one
 
-      val wiringId = Wiring(SymbolMap.AZ.stringToCodes("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value).value
-      assert(wiringId.codes(p0.toInt) === p0)
-      assert(wiringId.reverseCodes(p0.toInt) === p0)
-      val wiringPlusOne = Wiring(SymbolMap.AZ.stringToCodes("BCDEFGHIJKLMNOPQRSTUVWXYZA").value).value
-      assert(wiringPlusOne.codes(p0.toInt) === p1)
-      assert(wiringPlusOne.reverseCodes(p1.toInt) === p0)
+      val wiringId = Wiring(
+        SymbolMap.AZ.stringToInts("ABCDEFGHIJKLMNOPQRSTUVWXYZ").value
+      ).value
+
+      assert(wiringId.wire(p0) === p0)
+      assert(wiringId.inverse.wire(p0) === p0)
+
+      val wiringPlusOne = Wiring(
+        SymbolMap.AZ.stringToInts("BCDEFGHIJKLMNOPQRSTUVWXYZA").value
+      ).value
+
+      assert(wiringPlusOne.wire(p0) === p1)
+      assert(wiringPlusOne.inverse.wire(p1) === p0)
     }
   }

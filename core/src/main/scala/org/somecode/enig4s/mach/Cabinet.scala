@@ -66,7 +66,7 @@ object Cabinet:
           for
             symMap <- symMaps.get(CIString(winit.symbols)).toRight(s"Symbol map '${winit.symbols}' not defined.")
             wiring <- wirings.get(CIString(winit.wiring)).toRight(s"Wiring '${winit.wiring}' not defined.")
-            wheel <- Wheel(wiring, "A", 0, winit.notches, symMap) // stub
+            wheel <- Wheel(wiring, winit.notches, "A", 0, symMap) // stub
           yield (CIString(winit.name), wheel)
       pairs.sequence.map(_.toMap)
 
