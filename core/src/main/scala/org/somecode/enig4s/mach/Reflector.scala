@@ -11,7 +11,7 @@ sealed abstract case class Reflector private (
 
   val length: Int = wiring.length
 
-  val transformer: Transformer = (state, in) =>
+  val reflect: Transformer = (state, in) =>
       val pos = state.reflectorState
       val out = wiring.wire(in %+ pos) %- pos
       (state, out)

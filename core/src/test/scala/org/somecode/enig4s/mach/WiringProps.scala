@@ -19,24 +19,19 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
 
     // reflectors cannot have any straight-through mappings
 
-    forAll(genMappings) { (v: ArraySeq[Int]) =>
-      whenever(v.length === BusSize) {
-        val wiring = Wiring(v).value
-        (0 to BusSize-1).foreach { n =>
-          val forward = wiring.wiring(n)
-          assert(forward === v(n))
-          assert(wiring.inverse.wire(forward) === n)
+    List(1, 2, 26, 100, 1000).foreach { busSize =>
+      forAll(genMappings(busSize)) { (v: ArraySeq[Int]) =>
+        whenever(v.length === busSize) {
+          WiringSpec.checkWiring(v)
         }
       }
     }
   }
 
 object WiringProps:
-  val genMax = Gen.choose(1, 300)
-  val BusSize = 26
 
-  val genMappings: Gen[ArraySeq[Int]] = Gen.const((0 to BusSize-1).to(ArraySeq))
-    .map(Random.shuffle)
+  def genMappings(size: Int): Gen[ArraySeq[Int]] =
+    Gen.const((0 until size).to(ArraySeq)).map(Random.shuffle)
 
-  val genReflectorMappings: Gen[ArraySeq[Int]] = genMappings suchThat
-    (v => !v.zipWithIndex.exists((p, idx) => p.toInt === idx))
+  // val genReflectorMappings: Gen[ArraySeq[Int]] = genMappings suchThat
+  //   (v => !v.zipWithIndex.exists((p, idx) => p.toInt === idx))

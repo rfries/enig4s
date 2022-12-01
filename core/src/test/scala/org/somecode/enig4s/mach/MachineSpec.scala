@@ -12,7 +12,7 @@ import scala.collection.immutable.ArraySeq
 final class MachineSpec extends AnyWordSpec with should.Matchers:
 
   val cab: Cabinet = Cabinet().require
-
+/**
   "Machine" should {
     "(old) encrypt a string with basic wheel settings" in {
       val wheels = configureWheels(Wheels.I, Wheels.II, Wheels.III)
@@ -125,7 +125,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
       wheelState.reverse
         .zipWithIndex
         .map { case ((pos, rs), idx) =>
-          WheelState(Glyph.unsafe(pos - 'A'), RingSetting.unsafe(rs - 'A'))
+          WheelState(Glyph.unsafe(pos - 'A'))
         }
         .to(ArraySeq),
       Glyph.zero
@@ -143,3 +143,5 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     info(s"$in => ${res.text}")
     info(s"${res.trace.map(_.mkString("\n")).getOrElse("")}")
     res.text shouldBe expected
+
+    **/

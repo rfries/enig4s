@@ -22,14 +22,10 @@ object Modulus:
     case n if n <= 0 => throw new IllegalArgumentException("Modulus must be positive.")
     case n => n
 
-  given Eq[Modulus] = summon[Eq[Int]]
-  given Ordering[Modulus] = summon[Ordering[Int]]
-
   def normalize(n: Int, mod: Modulus): Int =
     val res = n % mod.toInt
     val out = if res < 0 then res + mod.toInt else res
     Modulus.unsafe(out)
-
 
   extension (mod: Modulus)
     def toInt: Int = mod

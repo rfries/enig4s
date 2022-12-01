@@ -8,15 +8,28 @@ import scala.collection.immutable.ArraySeq
 import scala.collection.immutable.Queue
 
 sealed abstract case class Machine(
-  symbols: SymbolMap,
   entry: Entry,
   wheels: ArraySeq[Wheel],
   reflector: Reflector,
-  plugBoard: Option[PlugBoard]
+  plugboard: Option[PlugBoard],
+  symbols: SymbolMap
 ):
-  import entry.modulus
+  import entry.wiring.modulus
 
   import Machine.*
+
+  protected[mach] val transformer: Transformer = (state, glyph) =>
+    val wheelfuns = Vector(entry.forward)
+      :++ wheels.map(_.forward)
+      :+  reflector.reflect
+      :++ wheels.reverse.map(_.reverse)
+      :+  entry.reverse
+
+    val allfuns = plugboard match
+      case Some(pb) => pb.forward +: wheelfuns :+ pb.reverse
+      case None     => wheelfuns
+
+    Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
 
   def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
     if (state.wheelState.size != wheels.size)
@@ -75,17 +88,6 @@ sealed abstract case class Machine(
         .to(ArraySeq)
     )
 
-  protected[mach] def transformer: Transformer = (state, glyph) =>
-
-    val wheelFuns = Vector(entry.forward)
-      ++ (wheels.map(_.forward) :+ reflector.transformer)
-      ++ (wheels.reverse.map(_.reverse) :+ entry.reverse)
-
-    val allFuns = plugBoard.map(pb => pb.forward +: wheelFuns :+ pb.reverse)
-      .getOrElse(wheelFuns)
-
-    Function.chain[(MachineState, Glyph)](allFuns)(state, glyph)
-
   /**
    * Represents a sequence of [[Glyph]]s that has been validated for this instance
    * of a Machine (path dependent type).
@@ -135,6 +137,24 @@ sealed abstract case class Machine(
 
 object Machine:
 
+  final case class SymbolMapName(s: String)
+  final case class EntryDiskName(s: String)
+  final case class WheelName(s: String)
+  final case class ReflectorName(s: String)
+  final case class PlugBoardName(s: String)
+
+  def apply (
+    symbolMap: SymbolMapName,
+    entry: EntryDiskName,
+    wheels: IndexedSeq[WheelName],
+    reflector: ReflectorName,
+    plugBoard: Option[PlugBoardName],
+    cabinet: Cabinet
+  ): Either[String, Machine] = {
+    Left("Boo!")
+  }
+
+
   def apply (
     symbolMap: SymbolMap,
     entry: Entry,
@@ -166,6 +186,6 @@ object Machine:
         )
       ).getOrElse(Right(None))
     yield
-      new Machine(sm, entry, wh.to(ArraySeq), ref, plugBoard) {}
+      new Machine(entry, wh.to(ArraySeq), ref, plugBoard, sm) {}
 
   final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])

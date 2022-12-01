@@ -20,9 +20,6 @@ object Glyph:
     case n if n < 0 => throw new IllegalArgumentException("Glyph can not be negative.")
     case n => n
 
-  given Eq[Glyph] = summon[Eq[Int]]
-  given Ordering[Glyph] = summon[Ordering[Int]]
-
   def normalMod(n: Int)(using mod: Modulus): Int =
     val res = n % mod.toInt
     val out = if res < 0 then res + mod.toInt else res

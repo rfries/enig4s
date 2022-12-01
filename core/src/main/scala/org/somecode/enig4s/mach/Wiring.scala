@@ -4,6 +4,7 @@ package mach
 import cats.implicits.*
 import cats.syntax.all.*
 import scala.collection.immutable.ArraySeq
+import cats.kernel.Eq
 
 final case class Wiring private (wiring: ArraySeq[Glyph]):
 
@@ -33,26 +34,28 @@ final case class Wiring private (wiring: ArraySeq[Glyph]):
    * Note that since we know that the index is >= 0, and <= the size of the mapping
    * array, calling 'Glyph.unsafe` for each index value should be safe.
    */
-  def inverse: Wiring = Wiring(wiring.zipWithIndex
-    .sortBy(_._1)
+  def inverse: Wiring = new Wiring(wiring.zipWithIndex
+    .sortBy(_._1.toInt)
     .map((_, idx) => Glyph.unsafe(idx))
   )
 
 object Wiring:
 
-  /** Create Wiring from a vector of unicode code points   */
+  /** Create a Wiring from a sequence of ints (must be > 0 and < the bus size)   */
   def apply(points: Seq[Int]): Either[String, Wiring] = points match
     case v if v.isEmpty =>
       Left("Wiring vectors must have at least one value.")
     case v if v.length != v.distinct.length =>
       Left(s"Wiring vectors must not contain duplicate values.")
     case v if v.exists(c => c < 0 || c >= v.length) =>
-      Left(s"Wiring vector must contain only values from 0 (inclusive) to the vector length ${v.length} (exclusive).")
+      Left(s"Wiring vector must contain only values from 0 (inclusive) to ${v.length} (exclusive).")
     case v => Right(Wiring(v.map(Glyph.unsafe).to(ArraySeq)))
 
+  /** Create a Wiring from a string of characters, using the given SymbolMap
+   * to translate each character into its corresponding Glyph */
   def apply(mapping: String, symbols: SymbolMap): Either[String, Wiring] =
-    symbols.stringToGlyphs(mapping).flatMap(gs => Wiring(gs.map(_.toInt)))
+    symbols.stringToInts(mapping).flatMap(ints => Wiring(ints))
 
-  // A straight-through mapping, used by the keyboard on most models
-  val AZ: Wiring = Wiring((0 to 25).map(KeyCode.unsafe).to(ArraySeq))
-    .getOrElse(throw RuntimeException("Wiring: Bad Init"))
+  def passthrough(size: Int): Either[String, Wiring] = apply(Range(0, size).to(ArraySeq))
+
+  given wiringEq: Eq[Wiring] = Eq.fromUniversalEquals[Wiring]

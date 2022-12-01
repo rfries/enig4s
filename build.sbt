@@ -2,7 +2,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "Some Code"
-ThisBuild / scalaVersion     := "3.2.0"
+ThisBuild / scalaVersion     := "3.2.1"
 ThisBuild / version          := "0.9.1-SNAPSHOT"
 
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")

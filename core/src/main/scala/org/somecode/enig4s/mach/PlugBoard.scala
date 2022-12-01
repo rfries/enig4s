@@ -6,7 +6,7 @@ import cats.implicits.*
 
 import scala.collection.immutable.ArraySeq
 
-trait PlugBoard:
+trait PlugBoard extends Bidirectional:
   def length: Int
 
   val maxPlugs: Int = length / 2

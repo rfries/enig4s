@@ -8,14 +8,18 @@ sealed abstract case class Wheel private (
   notches: Set[Glyph],
   ring: Glyph,
   wheelNum: Int
-):
+) extends Bidirectional:
+
   import wiring.modulus
 
   val length: Int = wiring.length
-
   val forward: Transformer = transformer(wiring)
   val reverse: Transformer = transformer(wiring.inverse)
 
+  // Due to the physical geometry of the wheels, the position is
+  // additive and the ring setting is subtractive.  They are applied
+  // before looking up the value via the wiring, and then unapplied
+  // to the result.
   def transformer(wires: Wiring): Transformer = (state, glyph) =>
       val pos = state.wheelState(wheelNum)
       val off = pos %- ring
