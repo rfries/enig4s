@@ -1,7 +1,7 @@
 
 ## Collections Usage
 
-Wheels, Reflectors, and Wiring do lots of indexed access, so they should use
+Wheels, Reflectors, and Wiring do lots of indexed lookups, so they should use
 IndexedSeqs.  However, since there is no Applicative instance for IndexedSeq,
 and traverse/sequence is 80% of why I use cats, I use a concrete class
 (ArraySeq) in a number of places to prevent the need for conversion when
@@ -15,4 +15,4 @@ and includes some useful cats instances.
 ## Error Types
 
 Generally, errors are expressed as Either[String, A].  This is mostly an expediency, and in larger
-or more enterprisy software I would recommend the use an error ADT instead of String.
+or more enterprisey software I would recommend the use an ADT instead of String.

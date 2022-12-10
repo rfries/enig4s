@@ -50,8 +50,8 @@ object Cabinet:
         yield
           for
             symMap <- symMaps.get(CIString(wi.symbols)).toRight(s"Symbol map '${wi.symbols}' not defined.")
-            keyCodes <- symMap.stringToCodes(wi.mapping)
-            wiring <- Wiring(keyCodes).map(w => (CIString(wi.name), w))
+            glyphs <- symMap.stringToInts(wi.mapping)
+            wiring <- Wiring(glyphs).map(w => (CIString(wi.name), w))
           yield wiring
       // turn inside-out and then to a map:
       //   Vector[Either[String, (CIString, Wiring)]] =>  Either[String, Vector[(CIString, Wiring]]
@@ -116,9 +116,9 @@ object Cabinet:
     WheelInit("r.I",        "r.I",        "AZ",   "N"),
     WheelInit("r.II",       "r.II",       "AZ",   "E"),
     WheelInit("r.III",      "r.III",      "AZ",   "Y"),
-    WheelInit("z.I",        "z.I",        "10",   "9"),
-    WheelInit("z.II",       "z.II",       "10",   "9"),
-    WheelInit("z.III",      "z.III",      "10",   "9"),
+    // WheelInit("z.I",        "z.I",        "10",   "9"),
+    // WheelInit("z.II",       "z.II",       "10",   "9"),
+    // WheelInit("z.III",      "z.III",      "10",   "9"),
   )
 
   val defaultReflectorInits: Vector[ReflectorInit] = Vector(

@@ -18,17 +18,24 @@ sealed abstract case class Machine(
 
   import Machine.*
 
+  /**
+    * Compose an aggregate transformer for the forward and return paths
+    * through the plugboard, entry disc, wheels, and reflector.
+    */
   protected[mach] val transformer: Transformer = (state, glyph) =>
+    // entry disc -> wheels -> reflector -> wheels -> entry disc
     val wheelfuns = Vector(entry.forward)
       :++ wheels.map(_.forward)
       :+  reflector.reflect
       :++ wheels.reverse.map(_.reverse)
       :+  entry.reverse
 
+    // bracket the wheel transformers with the plugboard, if defined
     val allfuns = plugboard match
       case Some(pb) => pb.forward +: wheelfuns :+ pb.reverse
       case None     => wheelfuns
 
+    // compose to a single Transformer
     Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
 
   def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
@@ -61,7 +68,7 @@ sealed abstract case class Machine(
   private def codeStream(glyphs: ValidGlyphs, state: MachineState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
     Stream.emits(glyphs.glyphs)
       .mapAccumulate(state) ( (state, in) =>
-        transformer(advance(state), in)
+        transformer(advance(state.copy(traceQ = Some(Queue.empty))), in)
       )
 
   private def advance(start: MachineState): MachineState =
@@ -137,30 +144,24 @@ sealed abstract case class Machine(
 
 object Machine:
 
-  final case class SymbolMapName(s: String)
-  final case class EntryDiskName(s: String)
-  final case class WheelName(s: String)
-  final case class ReflectorName(s: String)
-  final case class PlugBoardName(s: String)
+  // simple string descriptor
+  // def apply (
+  //   entry: String,
+  //   wheels: IndexedSeq[String],
+  //   reflector: String,
+  //   plugBoard: List[String],
+  //   symbolMap: String,
+  //   cabinet: Cabinet
+  // ): Either[String, Machine] = {
+  //   Left("Boo!")
+  // }
 
   def apply (
-    symbolMap: SymbolMapName,
-    entry: EntryDiskName,
-    wheels: IndexedSeq[WheelName],
-    reflector: ReflectorName,
-    plugBoard: Option[PlugBoardName],
-    cabinet: Cabinet
-  ): Either[String, Machine] = {
-    Left("Boo!")
-  }
-
-
-  def apply (
-    symbolMap: SymbolMap,
     entry: Entry,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugBoard: Option[PlugBoard]
+    plugBoard: Option[PlugBoard],
+    symbolMap: SymbolMap
   ): Either[String, Machine] =
     for
       sm <- Either.cond(
@@ -187,5 +188,3 @@ object Machine:
       ).getOrElse(Right(None))
     yield
       new Machine(entry, wh.to(ArraySeq), ref, plugBoard, sm) {}
-
-  final case class MachineResult(result: KeyCode, trace: Option[Queue[String]])

@@ -8,12 +8,9 @@ import scala.collection.immutable.Queue
 final case class MachineState(
   wheelState: ArraySeq[Glyph],
   reflectorState: Glyph,
-  traceQ: Option[Queue[String]] = None
+  symbols: SymbolMap,
+  traceQ: Option[Queue[String]] = Some(Queue.empty)
 ):
-  def trace(str: String) = traceQ
-    .map(q => copy(wheelState, reflectorState, Some(q.enqueue(str))))
-    .getOrElse(this)
-
   def display(symbols: SymbolMap): String =
     val pos = symbols.glyphsToString(wheelState)
       .toOption

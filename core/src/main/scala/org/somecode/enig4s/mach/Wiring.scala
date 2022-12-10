@@ -13,7 +13,7 @@ final case class Wiring private (wiring: ArraySeq[Glyph]):
   // provide a modulus based on the 'wires' array size, (already validated as non-zero)
   given modulus: Modulus = Modulus.unsafe(length)
 
-  val transformer: Transformer = (state, in) => (state, wire(in))
+  //val transformer: Transformer = (state, in) => (state, wire(in))
 
   /**
     * Look up a glyph in the wiring table.  Unsafe; this is just an array

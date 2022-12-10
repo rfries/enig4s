@@ -11,7 +11,16 @@ import scala.collection.immutable.ArraySeq
 
 final class MachineSpec extends AnyWordSpec with should.Matchers:
 
-  val cab: Cabinet = Cabinet().require
+  import MachineSpec.*
+
+  "encrypt a string with basic wheel settings" in {
+    val mach = machine(wheels = Vector("I", "II", "III"), rings = "DEF", reflector = "UKW-B").require
+    val state = machState(position = "ABC", "A").require
+    println(s">>> $state")
+
+    verify(mach, state, "ABCDE", "DXXVP")
+  }
+
 /**
   "Machine" should {
     "(old) encrypt a string with basic wheel settings" in {
@@ -89,47 +98,7 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
 
   }
 
-  def machine(
-      wheels: Vector[String],
-      rings: String,
-      reflector: String,
-      plugBoard: Option[Vector[String]] = None,
-      symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
-    for
-      _ <- Either.cond(rings.length() === wheels.length, (), "Wheels vector and ring settings string must be the same length.")
-      wh <- wheels.reverse.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
-      ringGlyphs <- symbols.stringToGlyphs(rings.reverse)
-      cfgWheels <- wh.zip(ringGlyphs).traverse((wheel, glyph) => wheel.copy(ring = glyph))
-      ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
-      plugs <- plugBoard.traverse(pb => EnigmaPlugBoard(ref.length, pb, symbols))
-      mach <- Machine(symbols, Entry.AZ, cfgWheels, ref, plugs)
-    yield mach
-
-
-  def machState(
-      position: String,
-      reflector: String = "A",
-      symbols: SymbolMap = SymbolMap.AZ): Either[String, MachineState] =
-
-    assert(reflector.size == 1)
-    for
-      pos <- symbols.stringToGlyphs(position).map(_.reverse)
-      ref <- symbols.pointToGlyph(reflector.codePointAt(0))
-    yield MachineState(pos, ref)
-
-
-  def configureWheels(wheelConfigs: Wheel*): IndexedSeq[Wheel] = wheelConfigs.toIndexedSeq.reverse
-
-  def machineState(wheelState: Vector[(Char, Char)]): MachineState =
-    MachineState(
-      wheelState.reverse
-        .zipWithIndex
-        .map { case ((pos, rs), idx) =>
-          WheelState(Glyph.unsafe(pos - 'A'))
-        }
-        .to(ArraySeq),
-      Glyph.zero
-    )
+  **/
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
     val res = mach.crypt(state, in, true).require
@@ -144,4 +113,48 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
     info(s"${res.trace.map(_.mkString("\n")).getOrElse("")}")
     res.text shouldBe expected
 
-    **/
+object MachineSpec:
+
+  val cab: Cabinet = Cabinet().require
+  val entryAz: Entry = Entry.passthrough(26).require
+
+  def machine(
+      wheels: Vector[String],
+      rings: String,
+      reflector: String,
+      plugBoard: Option[Vector[String]] = None,
+      symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
+    for
+      _ <- Either.cond(rings.length() === wheels.length, (), "Wheels vector and ring settings string must be the same length.")
+      wh <- wheels.reverse.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
+      ringGlyphs <- symbols.stringToGlyphs(rings.reverse)
+      cfgWheels <- wh.zip(ringGlyphs).zipWithIndex.traverse((tup, wheelNum) => tup match { case (wheel, glyph) => wheel.copy(ring = glyph, wheelNum = wheelNum)})
+      ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
+      plugs <- plugBoard.traverse(pb => EnigmaPlugBoard(ref.length, pb, symbols))
+      mach <- Machine(entryAz, cfgWheels, ref, plugs, symbols)
+    yield mach
+
+  def machState(
+      position: String,
+      reflector: String = "A",
+      symbols: SymbolMap = SymbolMap.AZ): Either[String, MachineState] =
+
+    assert(reflector.size == 1)
+    for
+      pos <- symbols.stringToGlyphs(position).map(_.reverse)
+      ref <- symbols.pointToGlyph(reflector.codePointAt(0))
+    yield MachineState(pos, ref, symbols)
+
+
+  def configureWheels(wheelConfigs: Wheel*): IndexedSeq[Wheel] = wheelConfigs.toIndexedSeq.reverse
+
+  def machineState(wheelState: Vector[(Char, Char)], symbols: SymbolMap): MachineState =
+    MachineState(
+      wheelState.reverse
+        .zipWithIndex
+        .map { case ((pos, rs), idx) =>
+          Glyph.unsafe(pos - 'A')
+        }.to(ArraySeq),
+      Glyph.zero,
+      symbols
+    )

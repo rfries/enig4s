@@ -3,6 +3,7 @@ package mach
 
 import cats.*
 import cats.implicits.*
+import Trace.*
 
 import scala.collection.immutable.ArraySeq
 
@@ -26,10 +27,14 @@ trait PlugBoard extends Bidirectional:
 sealed abstract case class EnigmaPlugBoard private (length: Int, mapping: Map[Glyph, Glyph])
   extends PlugBoard:
 
-  def forward: Transformer = (state, glyph) => (state, mapping.getOrElse(glyph, glyph))
+  def forward: Transformer = (state, glyph) =>
+    val out = mapping.getOrElse(glyph, glyph)
+    Trace.trace(state, glyph, out, Component.Plugboard, Direction.Forward)
 
   // for the enigma plugboard, reciprocal mappings are always added, so forward/reverse is the same operation
-  def reverse: Transformer = forward
+  def reverse: Transformer = (state, glyph) =>
+    val out = mapping.getOrElse(glyph, glyph)
+    Trace.trace(state, glyph, out, Component.Plugboard, Direction.Reverse)
 
 object EnigmaPlugBoard:
 

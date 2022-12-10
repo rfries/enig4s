@@ -2,6 +2,7 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
+import Trace.*
 
 sealed abstract case class Reflector private (
   wiring: Wiring,
@@ -14,10 +15,7 @@ sealed abstract case class Reflector private (
   val reflect: Transformer = (state, in) =>
       val pos = state.reflectorState
       val out = wiring.wire(in %+ pos) %- pos
-      (state, out)
-
-  // def forward(pos: Position): KeyCode => KeyCode = in =>
-  //   minusMod(wiring.codes(plusMod(in, pos)), pos)
+      Trace.trace(state, in, out, Component.Reflector, Trace.Direction.Reflect, s"pos: ${state.symbols.displayCode(pos)}")
 
 object Reflector:
 

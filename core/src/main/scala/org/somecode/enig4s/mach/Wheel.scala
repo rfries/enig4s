@@ -1,7 +1,7 @@
 package org.somecode.enig4s
 package mach
 
-//import cats.implicits.*
+import Trace.*
 
 sealed abstract case class Wheel private (
   wiring: Wiring,
@@ -13,18 +13,19 @@ sealed abstract case class Wheel private (
   import wiring.modulus
 
   val length: Int = wiring.length
-  val forward: Transformer = transformer(wiring)
-  val reverse: Transformer = transformer(wiring.inverse)
+  val forward: Transformer = transformer(wiring, Direction.Forward)
+  val reverse: Transformer = transformer(wiring.inverse, Direction.Reverse)
 
   // Due to the physical geometry of the wheels, the position is
   // additive and the ring setting is subtractive.  They are applied
   // before looking up the value via the wiring, and then unapplied
   // to the result.
-  def transformer(wires: Wiring): Transformer = (state, glyph) =>
+  def transformer(wires: Wiring, direction: Direction): Transformer = (state, glyph) =>
       val pos = state.wheelState(wheelNum)
       val off = pos %- ring
       val out = wires.wire(glyph %+ off) %- off
-      (state, out)
+      Trace.trace(state, glyph, out, Component.Wheel(wheelNum), direction,
+        s"pos: ${state.symbols.displayCode(pos)}, ring: ${state.symbols.displayCode(pos)}")
 
   def notchedAt(p: Glyph): Boolean = notches.contains(p)
 
