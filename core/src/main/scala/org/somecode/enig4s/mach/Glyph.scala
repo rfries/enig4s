@@ -1,20 +1,22 @@
-package org.somecode.enig4s.mach
+package org.somecode.enig4s
+package mach
 
-import scala.collection.immutable.ArraySeq
-import cats.kernel.Eq
-import cats.implicits.*
-
+/**
+  * A non-negative integer value that represents a symbol being processed
+  * by a [[Machine]].  A Glyph is a value between zero and the bus/wheel size
+  * of the machine, which represents an offset into the symbol table in use.
+  */
 opaque type Glyph = Int
 object Glyph:
 
   val zero = unsafe(0)
   val one = unsafe(1)
 
-  def apply(codePoint: Int)(using mod: Modulus): Either[String, Glyph] =
-    if codePoint < 0 || codePoint >= mod.toInt then
-      Left(s"Glyph ($codePoint) must be >= 0 and < ${mod.toInt} for this Machine instance.")
+  def apply(value: Int): Either[String, Glyph] =
+    if value < 0 then
+      Left(s"Glyph ($value) must be >= 0.")
     else
-      Right(codePoint)
+      Right(value)
 
   def unsafe(codepoint: Int): Glyph = codepoint match
     case n if n < 0 => throw new IllegalArgumentException("Glyph can not be negative.")
@@ -25,24 +27,12 @@ object Glyph:
     val out = if res < 0 then res + mod.toInt else res
     Glyph.unsafe(out)
 
-  /**
-    * Convert a sequence of glyphs into a string, via the symbol map.
-    *
-    * @param gs A sequence of [[Glyph]]s.  In practice, this will usually be an ArraySeq,
-    *           but we convert if not so we can get a typeclass for the traverse.
-    * @return The converted string.  If any invalid glyphs are found, the string "<invalid>" is returned.
-    */
-  def display(gs: IndexedSeq[Glyph], symbols: SymbolMap): String =
-    gs.to(ArraySeq).traverse(symbols.codePoints.lift) match
-      case Some(ints) => String(ints.toArray, 0, ints.length)
-      case _ => "<invalid>"
-
   extension (g: Glyph)
     def toInt: Int = g
     def %+(o: Glyph)(using Modulus): Glyph = normalMod(g + o.toInt)
     def %-(o: Glyph)(using Modulus): Glyph = normalMod(g - o.toInt)
     def next(using Modulus): Glyph = normalMod(g + 1)
-    def validFor(size: Int): Boolean = size > 0 && g < size
-    def invalidFor(size: Int): Boolean = !validFor(size)
+    inline def validFor(size: Int): Boolean = size > 0 && g < size
+    inline def invalidFor(size: Int): Boolean = !validFor(size)
 
 end Glyph

@@ -38,17 +38,17 @@ sealed abstract case class Machine(
     // compose to a single Transformer
     Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
 
-  def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
-    if (state.wheelState.size != wheels.size)
-      Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-    else if (in >= entry.length)
-      Left(s"KeyCode ($in) not in range of wheel size (${entry.length}).")
-    else
-      Glyph(in).map( g =>
-        val newState = advance(state)
-        val (endState, out) = transformer(newState, g)
-        CryptResult(endState, out)
-      )
+  // def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
+  //   if (state.wheelState.size != wheels.size)
+  //     Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
+  //   else if (in >= entry.length)
+  //     Left(s"KeyCode ($in) not in range of wheel size (${entry.length}).")
+  //   else
+  //     Glyph(in).map( g =>
+  //       val newState = advance(state)
+  //       val (endState, out) = transformer(newState, g)
+  //       CryptResult(endState, out)
+  //     )
 
   def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
     if state.wheelState.size != wheels.size then
@@ -107,7 +107,7 @@ sealed abstract case class Machine(
 
     def apply(glyphs: IndexedSeq[Glyph]): Either[String, ValidGlyphs] =
       if glyphs.exists(g => g.invalidFor(entry.length)) then
-        Left(s"All KeyCodes must be between 0 and ${entry.length-1}, inclusive")
+        Left(s"All glyphs must be between 0 and ${entry.length-1}, inclusive")
       else
         Right(new ValidGlyphs(glyphs) {})
 
@@ -119,6 +119,7 @@ sealed abstract case class Machine(
   sealed abstract case class ValidState private (state: MachineState)
 
   object ValidState:
+
     def apply(state: MachineState): Either[String, ValidState] =
       for
         _ <-  Either.cond(
@@ -136,25 +137,13 @@ sealed abstract case class Machine(
                 s"Reflector position (${state.reflectorState}) is too large for bus ($entry.length)"
               )
         _ <-  Either.cond(
-                reflector.positions.map(_.contains(state.reflectorState)).getOrElse(true),
+                reflector.positions.contains(state.reflectorState),
                 (),
                 s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
               )
       yield new ValidState(state) {}
 
 object Machine:
-
-  // simple string descriptor
-  // def apply (
-  //   entry: String,
-  //   wheels: IndexedSeq[String],
-  //   reflector: String,
-  //   plugBoard: List[String],
-  //   symbolMap: String,
-  //   cabinet: Cabinet
-  // ): Either[String, Machine] = {
-  //   Left("Boo!")
-  // }
 
   def apply (
     entry: Entry,

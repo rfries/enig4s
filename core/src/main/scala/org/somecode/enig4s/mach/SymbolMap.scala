@@ -20,7 +20,7 @@ final class SymbolMap private(val codePoints: IndexedSeq[Int]):
 
   val size: Int = codePoints.size
 
-  val glyphMap: Map[Int, Glyph] = codePoints.zipWithIndex.map((cp, idx) => (cp, Glyph.unsafe(idx))).toMap
+  private val glyphMap: Map[Int, Glyph] = codePoints.zipWithIndex.map((cp, idx) => (cp, Glyph.unsafe(idx))).toMap
 
   def glyphsToString(glyphs: Seq[Glyph]): Either[String,String] =
     glyphs.to(ArraySeq)
@@ -28,6 +28,9 @@ final class SymbolMap private(val codePoints: IndexedSeq[Int]):
       .map(a => String(a.toArray[Int], 0, a.length))
 
   def glyphToString(glyph: Glyph): Either[String,String] = glyphsToString(ArraySeq(glyph))
+
+  def glyphToPoint(g: Glyph): Either[String, Int] =
+    codePoints.lift(g.toInt).toRight(s"Glyph $g not found in map.")
 
   def stringToGlyphs(in: String): Either[String, ArraySeq[Glyph]] =
     // note that we should be calling codePoints here, but that doesn't play well with scala.js right now
@@ -37,16 +40,25 @@ final class SymbolMap private(val codePoints: IndexedSeq[Int]):
         val bad = in.filterNot(codePoints.isDefinedAt).map(c => f"'$c%c' (${c.toInt}%#04x)").mkString(",")
         Left(s"Invalid character(s) for symbol map: $bad")
 
+  // there should be a way to do this without actually mapping, but I haven't found it yet
   def stringToInts(in: String): Either[String, ArraySeq[Int]] = stringToGlyphs(in).map(_.map(_.toInt))
-
-  def glyphToPoint(g: Glyph): Either[String, Int] =
-    codePoints.lift(g.toInt).toRight(s"Glyph $g not found in map.")
 
   def pointToGlyph(point: Int): Either[String,Glyph] =
     glyphMap.get(point).toRight(s"Code point $point not found in symbol map.")
 
-
   def displayCode(in: Glyph): String = f"${glyphToPoint(in).map(Character.toString).getOrElse("?")} ($in%02d)"
+
+   /**
+    * Convert a sequence of glyphs into a string, via the symbol map.
+    *
+    * @param gs A sequence of [[Glyph]]s.  In practice, this will usually be an ArraySeq,
+    *           but we convert if not so we can get a typeclass for the traverse.
+    * @return The converted string.  If any invalid glyphs are found, the string "<invalid>" is returned.
+    */
+  def displayGlyphs(gs: IndexedSeq[Glyph]): String =
+    gs.to(ArraySeq).traverse(g => codePoints.lift(g.toInt)) match
+      case Some(ints) => String(ints.toArray, 0, gs.length)
+      case _ => "<invalid>"
 
 end SymbolMap
 
@@ -67,5 +79,6 @@ object SymbolMap:
 
   val AZ: SymbolMap = SymbolMap("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     .getOrElse(throw RuntimeException("Symbol Map: Bad Init"))
+
 
 end SymbolMap

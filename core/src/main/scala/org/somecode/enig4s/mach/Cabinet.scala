@@ -75,7 +75,8 @@ object Cabinet:
         .traverse( rinit =>
           wirings.get(CIString(rinit.wiring))
             .toRight(s"Wiring '${rinit.wiring}' not defined.")
-            .flatMap(wiring => Reflector(wiring, None).map(ref => (CIString(rinit.name), ref)))
+            .flatMap(wiring => Reflector(wiring).map(ref => (CIString(rinit.name), ref)))
+          // TODO: reflector positions
         )
         .map(_.toMap)
 
