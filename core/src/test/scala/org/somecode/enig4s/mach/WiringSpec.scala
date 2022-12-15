@@ -36,6 +36,13 @@ final class WiringSpec extends Enig4sSpec:
       Wiring(glyphs(0,1,3,4)).left.value should include ("only values from")
       Wiring(glyphs(1)).left.value should include ("only values from")
     }
+
+    "fail creation with invalid values in the sequence" in {
+      an [java.lang.IllegalArgumentException] should be thrownBy {
+        Wiring(glyphs(0,1,-1)).left.value should include ("only values from")
+
+      }
+    }
   }
 
   "Wiring (String Constructor)" should {
@@ -66,7 +73,6 @@ final class WiringSpec extends Enig4sSpec:
 
 object WiringSpec:
 
-  def glyphs(ints: Int*): ArraySeq[Glyph] = ints.map(Glyph.unsafe).to(ArraySeq)
 
   def checkWiring(glyphs: IndexedSeq[Glyph]): Wiring =
     withClue(s"Creating wiring with sequence $glyphs") {
