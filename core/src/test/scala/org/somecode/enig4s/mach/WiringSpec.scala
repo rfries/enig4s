@@ -18,10 +18,10 @@ final class WiringSpec extends Enig4sSpec:
 
   "Wiring (Seq Constructor)" should {
     "allow creation with well-formed sequences" in {
-      checkWiring(ArraySeq(0))
-      checkWiring(ArraySeq(0, 1))
-      checkWiring(ArraySeq(1, 0))
-      checkWiring(ArraySeq(4, 3, 2, 1, 0))
+      checkWiring(glyphs(0))
+      checkWiring(glyphs(0, 1))
+      checkWiring(glyphs(1, 0))
+      checkWiring(glyphs(4, 3, 2, 1, 0))
     }
 
     "fail creation with an empty sequence" in {
@@ -29,16 +29,12 @@ final class WiringSpec extends Enig4sSpec:
     }
 
     "fail creation with duplicate values in the sequence" in {
-      Wiring(Seq(0,1,2,1)).left.value should include ("duplicate")
+      Wiring(glyphs(0,1,2,1)).left.value should include ("duplicate")
     }
 
     "fail creation with non-continuous range in the sequence" in {
-      Wiring(Seq(0,1,3,4)).left.value should include ("only values from")
-      Wiring(Seq(1)).left.value should include ("only values from")
-    }
-
-    "fail creation with invalid values in the sequence" in {
-      Wiring(Seq(0,1,-1)).left.value should include ("only values from")
+      Wiring(glyphs(0,1,3,4)).left.value should include ("only values from")
+      Wiring(glyphs(1)).left.value should include ("only values from")
     }
   }
 
@@ -70,14 +66,15 @@ final class WiringSpec extends Enig4sSpec:
 
 object WiringSpec:
 
-  def checkWiring(seq: IndexedSeq[Int]): Wiring =
-    withClue(s"Creating wiring with sequence $seq") {
-      Wiring(seq) match
+  def glyphs(ints: Int*): ArraySeq[Glyph] = ints.map(Glyph.unsafe).to(ArraySeq)
+
+  def checkWiring(glyphs: IndexedSeq[Glyph]): Wiring =
+    withClue(s"Creating wiring with sequence $glyphs") {
+      Wiring(glyphs) match
         case Left(s) =>
-          fail(s"Failed to create wiring with sequence $seq")
+          fail(s"Failed to create wiring with sequence $glyphs")
         case Right(wiring) =>
-          assert(wiring.length === seq.length)
-          val glyphs = seq.map(Glyph.unsafe)
+          assert(wiring.length === glyphs.length)
           glyphs.zipWithIndex foreach {
             (expected, n) =>
               val in = Glyph.unsafe(n)
@@ -88,4 +85,4 @@ object WiringSpec:
     }
 
   def checkWiring(mapping: String, symbols: SymbolMap = SymbolMap.AZ): Wiring =
-    checkWiring(symbols.stringToInts(mapping).value)
+    checkWiring(symbols.stringToGlyphs(mapping).value)

@@ -4,7 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Cabinet, Reflector, SymbolMap, Wiring}
+import org.somecode.enig4s.mach.{Cabinet, Glyph, Reflector, SymbolMap, Wiring}
 
 import scala.collection.immutable.ArraySeq
 
@@ -13,8 +13,8 @@ import scala.collection.immutable.ArraySeq
 // else with wiring, positions and advance have defaults
 final case class ReflectorJs(
   name: Option[String],
-  wiring: Option[CodesJs],
-  positions: Option[PositionsJs]
+  wiring: Option[GlyphsJs],
+  positions: Option[GlyphsJs]
 ):
   def toReflector(symbols: SymbolMap, cabinet: Cabinet): Either[String, Reflector] =
     this match
@@ -23,12 +23,12 @@ final case class ReflectorJs(
 
       case ReflectorJs(None, Some(wiresJs), posOpt) =>
         for
-          wireCodes <- wiresJs.toCodes(symbols)
+          wireCodes <- wiresJs.toGlyphs(symbols)
           wires <- Wiring.apply(wireCodes)
           pos <- posOpt match
-            case Some(js) => js.toPositions(symbols).map(Some(_))
+            case Some(posJs) => posJs.toGlyphs(symbols)
             case None => Right(None)
-          ref <- Reflector(wires, pos)
+          ref <- Reflector(wires, pos.toSet)
         yield ref
 
       case _ => Left("One of 'name' or 'wiring' must be provided for a reflector")

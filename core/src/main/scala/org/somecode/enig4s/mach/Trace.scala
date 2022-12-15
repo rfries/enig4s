@@ -3,9 +3,9 @@ package org.somecode.enig4s.mach
 object Trace:
 
   enum Direction(val shortArrow: String, val longArrow: String):
-    case Forward extends Direction("->", "===>")
-    case Reverse extends Direction("<-", "<===")
-    case Reflect extends Direction("><", "<<>>")
+    case Forward extends Direction("<-", "<===")
+    case Reverse extends Direction("->", "===>")
+    case Reflect extends Direction("><", ">><<")
 
   enum Component(val shortName: String):
     case EntryDisc        extends Component("Entry")
@@ -27,9 +27,9 @@ object Trace:
 
       val glyphs =
         if direction == Direction.Reverse then
-          f"$out ${direction.longArrow} $in"
-        else
           s"$in ${direction.longArrow} $out"
+        else
+          f"$out ${direction.longArrow} $in"
 
       val msg = f"${direction.shortArrow} ${component.shortName}%-9s $glyphs $extra"
       state.copy(traceQ = Some(q.enqueue(msg)))

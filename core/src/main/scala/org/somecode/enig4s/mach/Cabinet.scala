@@ -50,7 +50,7 @@ object Cabinet:
         yield
           for
             symMap <- symMaps.get(CIString(wi.symbols)).toRight(s"Symbol map '${wi.symbols}' not defined.")
-            glyphs <- symMap.stringToInts(wi.mapping)
+            glyphs <- symMap.stringToGlyphs(wi.mapping)
             wiring <- Wiring(glyphs).map(w => (CIString(wi.name), w))
           yield wiring
       // turn inside-out and then to a map:

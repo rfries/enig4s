@@ -22,7 +22,7 @@ class WiringProps extends AnyPropSpec with ScalaCheckDrivenPropertyChecks:
     List(1, 2, 26, 100, 1000).foreach { busSize =>
       forAll(genMappings(busSize)) { (v: ArraySeq[Int]) =>
         whenever(v.length === busSize) {
-          WiringSpec.checkWiring(v)
+          WiringSpec.checkWiring(v.map(Glyph.unsafe))
         }
       }
     }
