@@ -1,4 +1,5 @@
-package org.somecode.enig4s.mach
+package org.somecode.enig4s
+package mach
 
 object Trace:
 
@@ -12,7 +13,6 @@ object Trace:
     case Wheel(num: Int)  extends Component(s"Wheel[$num]")
     case Reflector        extends Component("Reflect")
     case Plugboard        extends Component("Plugboard")
-
 
   def trace(state: MachineState,
     inGlyph: Glyph,

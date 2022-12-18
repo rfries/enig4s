@@ -7,5 +7,9 @@ package mach
  * limited to positive integers and 0.
  */
 
-opaque type RingSetting <: Int = Int
+opaque type RingSetting = Int
 object RingSetting extends NewPozNum[RingSetting, Int]
+
+extension (rs: RingSetting)
+  def toInt = rs
+  def toGlyph = Glyph.unsafe(rs)

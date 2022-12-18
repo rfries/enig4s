@@ -18,7 +18,7 @@ final case class WheelJs(
         glyphs <- wires.toGlyphs(symbols)
         wr <- Wiring(glyphs)
         nt <- notch.toGlyphs(symbols)
-        wh <- Wheel(wr, nt, Glyph.zero, 0)
+        wh <- Wheel(wr, nt, 0)
       yield wh
     case _ => Left(s"Wheels must contain either 'name' or 'mapping' and 'notches' only.")
 

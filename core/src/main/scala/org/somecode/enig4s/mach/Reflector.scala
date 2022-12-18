@@ -13,7 +13,7 @@ sealed abstract case class Reflector private (
   val length: Int = wiring.length
 
   val reflect: Transformer = (state, in) =>
-      val pos = state.reflectorState
+      val pos = state.reflector
       val out = wiring.wire(in %+ pos) %- pos
       Trace.trace(state, in, out, Component.Reflector, Trace.Direction.Reflect, s"pos: ${state.symbols.displayCode(pos)}")
 

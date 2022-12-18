@@ -13,6 +13,6 @@ final class WheelSpec extends AnyWordSpec with should.Matchers:
   "Wheel" should {
     "allow creation with valid parameters" in {
       val wiring = Wiring("ABCDEFGHIJKLMNOPQRSTUVWXYZ", SymbolMap.AZ).value
-      Wheel(wiring, Vector(Glyph.zero), Glyph.zero, 0).value shouldBe a [Wheel]
+      Wheel(wiring, Vector(Glyph.zero), 0).value shouldBe a [Wheel]
     }
   }

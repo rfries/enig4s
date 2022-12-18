@@ -6,7 +6,6 @@ import Trace.*
 sealed abstract case class Wheel private (
   wiring: Wiring,
   notches: Set[Glyph],
-  ring: Glyph,
   wheelNum: Int
 ) extends Bidirectional:
 
@@ -21,7 +20,8 @@ sealed abstract case class Wheel private (
   // before looking up the value via the wiring, and then unapplied
   // to the result.
   def transformer(wires: Wiring, direction: Direction): Transformer = (state, glyph) =>
-      val pos = state.wheelState(wheelNum)
+      val pos = state.positions(wheelNum)
+      val ring = state.rings(wheelNum)
       val off = pos %- ring
       val out = wires.wire(glyph %+ off) %- off
       Trace.trace(state, glyph, out, Component.Wheel(wheelNum), direction,
@@ -32,30 +32,26 @@ sealed abstract case class Wheel private (
   def copy(
     wiring: Wiring = wiring,
     notches: Set[Glyph] = notches,
-    ring: Glyph = ring,
     wheelNum: Int = wheelNum
-  ): Either[String, Wheel] = Wheel.apply(wiring, notches.toSeq, ring, wheelNum)
+  ): Either[String, Wheel] = Wheel.apply(wiring, notches.toSeq, wheelNum)
 
 object Wheel:
 
-  def apply(wiring: Wiring, notches: Seq[Glyph], ring: Glyph, wheelNum: Int): Either[String, Wheel] =
+  def apply(wiring: Wiring, notches: Seq[Glyph], wheelNum: Int): Either[String, Wheel] =
     if wiring.length < 1 then
       Left(s"Wheel size must be > 0.")
-    else if ring.toInt >= wiring.length then
-      Left(s"Ring setting (${ring.toInt}) is too large for wheel size (${wiring.length})")
     else if wheelNum < 0  then
       Left(s"Wheel number ($wheelNum) must be 0 or more")
     else
-      validateNotches(wiring.length, notches).map(ns => new Wheel(wiring, ns.toSet, ring, wheelNum) {})
+      validateNotches(wiring.length, notches).map(ns => new Wheel(wiring, ns.toSet, wheelNum) {})
 
   def apply(wiring: Wiring, notches: String, ring: String, wheelNum: Int, symbols: SymbolMap): Either[String, Wheel] =
     for
       notchCodes <- symbols.stringToGlyphs(notches)
-      rs <- validateRingSetting(ring, symbols)
       wn <- Either.cond(wheelNum < 1, wheelNum, "Wheel number must be > 0")
       validNotches <- validateNotches(wiring.length, notchCodes)
     yield
-      new Wheel(wiring, validNotches, rs, wn) {}
+      new Wheel(wiring, validNotches, wn) {}
 
   def validateNotches(wheelSize: Int, notchCodes: Seq[Glyph]): Either[String, Set[Glyph]] =
     if notchCodes.length != notchCodes.distinct.length then
@@ -66,10 +62,3 @@ object Wheel:
       Left(s"Notch codes must be between 0 and $wheelSize (exclusive).")
     else
       Right(notchCodes.toSet)
-
-  def validateRingSetting(rs: String, symbols: SymbolMap): Either[String, Glyph] =
-    if (rs.length() != 1)
-      Left("Ring setting string length is not 1.")
-    else
-      symbols.pointToGlyph(rs.codePointAt(0))
-

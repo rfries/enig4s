@@ -14,7 +14,7 @@ case class SettingsJs private (
 ):
   def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
     for
-      ringCodes <- rings.toGlyphs(symbols).map(_.reverse)
+      rings <- rings.toGlyphs(symbols).map(_.reverse)
       posGlyphs <- wheels.toGlyphs(symbols).map(_.reverse)
       //_ <- Either.cond(ringCodes.size === posCodes.size, (), "Position and ring settings strings must be the same length")
       //ws = posGlyphs
@@ -23,7 +23,7 @@ case class SettingsJs private (
               .map( _.toGlyph(symbols))
               .getOrElse(Right(Glyph.zero))
 
-    yield MachineState(posGlyphs, ref, symbols)
+    yield MachineState(posGlyphs, rings, ref, symbols)
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec

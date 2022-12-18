@@ -2,12 +2,9 @@ package org.somecode.enig4s
 package mach
 
 import org.scalatest.EitherValues.*
-import org.scalatest.OptionValues.*
-import org.scalatest.matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
-
-final class GlyphSpec extends AnyWordSpec with should.Matchers {
+final class GlyphSpec extends Enig4sSpec {
   "Glyph" should {
     "use a BusSize for modulo math" in {
       given Modulus = Modulus(26).value

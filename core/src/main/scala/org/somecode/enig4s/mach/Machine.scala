@@ -51,16 +51,14 @@ sealed abstract case class Machine(
   //     )
 
   def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
-    if state.wheelState.size != wheels.size then
-      Left(s"Wheel count in state (${state.wheelState.size}) does not match machine configuration (${wheels.size}).")
-    else
-      for
-        validGlyphs <- validateGlyphs(in)
-        res = codeStream(validGlyphs, state, trace).toVector
-        trc = res.traverse(_._1.traceQ).map(_.map(_.mkString("\n")))
-        endState = res.lastOption.map(_._1).getOrElse(state)
-        out <- symbols.glyphsToString(res.map(_._2))
-      yield CryptStringResult(endState, out, trc)
+    for
+      validState <- ValidState(state)
+      validGlyphs <- validateGlyphs(in)
+      res = codeStream(validGlyphs, state, trace).toVector
+      trc = res.traverse(_._1.traceQ).map(_.map(_.mkString("\n")))
+      endState = res.lastOption.map(_._1).getOrElse(state)
+      out <- symbols.glyphsToString(res.map(_._2))
+    yield CryptStringResult(endState, out, trc)
 
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
@@ -74,15 +72,15 @@ sealed abstract case class Machine(
   private def advance(start: MachineState): MachineState =
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
-        start.wheelState(idx).next
+        start.positions(idx).next
       else
-        start.wheelState(idx)
+        start.positions(idx)
 
-    val atNotch = start.wheelState
+    val atNotch = start.positions
       .zip(wheels)
       .map((pos, wheel) => wheel.notchedAt(pos))
 
-    start.copy(wheelState =
+    start.copy(positions =
       wheels.indices
         .map {
           case n @ 0 => (n, true)
@@ -123,23 +121,28 @@ sealed abstract case class Machine(
     def apply(state: MachineState): Either[String, ValidState] =
       for
         _ <-  Either.cond(
-                state.wheelState.size === wheels.size,
+                state.positions.size === wheels.size,
                 (),
-                s"Number of wheels in state (${state.wheelState.size}) does not match number of wheels in Machine (${wheels.size})"
+                s"Size of position vector in state (${state.positions.size}) does not match number of wheels in Machine (${wheels.size})"
               )
-        _ <-  state.wheelState
+        _ <-  Either.cond(
+                state.rings.size === wheels.size,
+                (),
+                s"Size of Ring Settings vector in state (${state.rings.size}) does not match number of wheels in Machine (${wheels.size})"
+              )
+        _ <-  state.positions
                 .find(_.invalidFor(entry.length))
                 .map(g => s"Wheel position ($g) is too large for bus (${entry.length})")
                 .toLeft(())
         _ <-  Either.cond(
-                state.reflectorState.validFor(entry.length),
+                state.reflector.validFor(entry.length),
                 (),
-                s"Reflector position (${state.reflectorState}) is too large for bus ($entry.length)"
+                s"Reflector position (${state.reflector}) is too large for bus ($entry.length)"
               )
         _ <-  Either.cond(
-                reflector.positions.contains(state.reflectorState),
+                reflector.positions.contains(state.reflector),
                 (),
-                s"Reflector position (${state.reflectorState}) is not allowed for this reflector."
+                s"Reflector position (${state.reflector}) is not allowed for this reflector."
               )
       yield new ValidState(state) {}
 
