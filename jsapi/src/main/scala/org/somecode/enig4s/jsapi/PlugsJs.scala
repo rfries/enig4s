@@ -12,7 +12,7 @@ final case class PlugsJs(
   symbols: Option[ArraySeq[String]],
   codes: Option[ArraySeq[ArraySeq[Int]]]
 ):
-  def toPlugBoard(symbols: SymbolMap, size: Int): Either[String, PlugBoard] = this match
+  def toPlugBoard(symbols: SymbolMap, size: Int): Either[String, EnigmaPlugBoard] = this match
 
     case PlugsJs(Some(pairs), None) => EnigmaPlugBoard(size, pairs, symbols)
 

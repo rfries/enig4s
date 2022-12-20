@@ -4,9 +4,9 @@ package mach
 object Trace:
 
   enum Direction(val shortArrow: String, val longArrow: String):
-    case Forward extends Direction("<-", "<===")
-    case Reverse extends Direction("->", "===>")
-    case Reflect extends Direction("><", ">><<")
+    case Forward extends Direction("<-", "<==")
+    case Reverse extends Direction("->", "==>")
+    case Reflect extends Direction("><", ">>>")
 
   enum Component(val shortName: String):
     case EntryDisc        extends Component("Entry")
@@ -26,7 +26,7 @@ object Trace:
       val out = state.symbols.displayCode(outGlyph)
 
       val glyphs =
-        if direction == Direction.Reverse then
+        if direction == Direction.Reverse || direction == Direction.Reflect then
           s"$in ${direction.longArrow} $out"
         else
           f"$out ${direction.longArrow} $in"

@@ -11,7 +11,7 @@ sealed abstract case class Machine(
   entry: Entry,
   wheels: ArraySeq[Wheel],
   reflector: Reflector,
-  plugboard: Option[PlugBoard],
+  //plugboard: Option[PlugBoard],
   symbols: SymbolMap
 ):
   import entry.wiring.modulus
@@ -31,7 +31,7 @@ sealed abstract case class Machine(
       :+  entry.reverse
 
     // bracket the wheel transformers with the plugboard, if defined
-    val allfuns = plugboard match
+    val allfuns = state.plugboard match
       case Some(pb) => pb.forward +: wheelfuns :+ pb.reverse
       case None     => wheelfuns
 
@@ -139,6 +139,11 @@ sealed abstract case class Machine(
                 (),
                 s"Reflector position (${state.reflector}) is too large for bus ($entry.length)"
               )
+        _ <-  state.plugboard match
+                case Some(pb) => if pb.length === entry.length then Right(()) else
+                  Left(s"Plugboard size (${pb.length}) does not match the bus size (${entry.length})")
+                case None => Right(())
+
         _ <-  Either.cond(
                 reflector.positions.contains(state.reflector),
                 (),
@@ -147,36 +152,28 @@ sealed abstract case class Machine(
       yield new ValidState(state) {}
 
 object Machine:
-
+ 
   def apply (
     entry: Entry,
     wheels: IndexedSeq[Wheel],
     reflector: Reflector,
-    plugBoard: Option[PlugBoard],
     symbolMap: SymbolMap
   ): Either[String, Machine] =
     for
       sm <- Either.cond(
-        symbolMap.size === entry.length,
-        symbolMap,
-        s"Symbol map size (${symbolMap.size}) does not match the bus size (${entry.length})"
-      )
+              symbolMap.size === entry.length,
+              symbolMap,
+              s"Symbol map size (${symbolMap.size}) does not match the bus size (${entry.length})"
+            )
       wh <- Either.cond(
-        wheels.forall(_.length === entry.length),
-        wheels,
-        s"Wheel sizes ${wheels.map(_.length).mkString("(",",",")")} do not match the bus size (${entry.length})"
-      )
+              wheels.forall(_.length === entry.length),
+              wheels,
+              s"Wheel sizes ${wheels.map(_.length).mkString("(",",",")")} do not match the bus size (${entry.length})"
+            )
       ref <- Either.cond(
-        reflector.wiring.length === entry.length,
-        reflector,
-        s"Reflector size (${reflector.length}) does not match the bus size (${entry.length})"
-      )
-      plug <- plugBoard.map(pb =>
-        Either.cond(
-          pb.length === entry.length,
-          pb,
-          s"Plugboard size (${plugBoard.size}) does not match the bus size (${entry.length})"
-        )
-      ).getOrElse(Right(None))
+              reflector.wiring.length === entry.length,
+              reflector,
+              s"Reflector size (${reflector.length}) does not match the bus size (${entry.length})"
+            )
     yield
-      new Machine(entry, wh.to(ArraySeq), ref, plugBoard, sm) {}
+      new Machine(entry, wh.to(ArraySeq), ref, sm) {}

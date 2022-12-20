@@ -36,15 +36,15 @@ final class MachineSpec extends AnyWordSpec with should.Matchers:
   }
 
   "encrypt a valid string with basic wheel settings and plugs" in {
-    val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B", Some(Vector("AZ", "SO", "FB"))).require
-    val state = machState(position = "AAA", rings = "AAA", "A").require
+    val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
+    val state = machState(position = "AAA", rings = "AAA", plugboard = Some(Vector("AZ", "SO", "FB"))).require
     verify(mach, state, "AAAAA", "UTZJY")
   }
 
   "encrypt a valid string with more complex settings" in {
-    val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B",
+    val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
+    val state = machState(position = "DHX", rings = "OCW",
       plugboard = Some(Vector("SD", "FG", "HJ", "QY", "EC", "RV", "TB", "ZN", "UM"))).require
-    val state = machState(position = "DHX", rings = "OCW", "A").require
 
     verify(mach, state, "ZELDA", "NAWHM")
   }
@@ -79,24 +79,24 @@ object MachineSpec:
   def machine(
       wheels: Vector[String],
       reflector: String,
-      plugboard: Option[Vector[String]] = None,
       symbols: SymbolMap = SymbolMap.AZ): Either[String, Machine] =
     for
       wh <- wheels.reverse.traverse(name => cab.findWheel(name).toRight(s"Wheel $name not found"))
       cfgWheels <- wh.zipWithIndex.traverse((wheel, wheelNum) => wheel.copy(wheelNum = wheelNum))
       ref <- cab.findReflector(reflector).toRight(s"Reflector $reflector not found")
-      plugs <- plugboard.traverse(pb => EnigmaPlugBoard(ref.length, pb, symbols))
-      mach <- Machine(entryAz, cfgWheels, ref, plugs, symbols)
+      mach <- Machine(entryAz, cfgWheels, ref, symbols)
     yield mach
 
   def machState(
         position: String,
         rings: String,
         reflector: String = "A",
+        plugboard: Option[Vector[String]] = None,
         symbols: SymbolMap = SymbolMap.AZ): Either[String, MachineState] =
 
     for
       pos <- symbols.stringToGlyphs(position).map(_.reverse)
       ring <- symbols.stringToGlyphs(rings).map(_.reverse)
       ref <- symbols.pointToGlyph(reflector.codePointAt(0))
-    yield MachineState(pos, ring, ref, symbols)
+      plugs <- plugboard.traverse(pb => EnigmaPlugBoard(symbols.size, pb, symbols))
+    yield MachineState(pos, ring, ref, plugs, symbols)

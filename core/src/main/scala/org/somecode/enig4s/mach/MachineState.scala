@@ -9,15 +9,16 @@ final case class MachineState(
   positions: ArraySeq[Glyph],
   rings: ArraySeq[Glyph],
   reflector: Glyph,
+  plugboard: Option[EnigmaPlugBoard],
   symbols: SymbolMap,
   traceQ: Option[Queue[String]] = Some(Queue.empty)
 ):
   def display(symbols: SymbolMap): String =
-    val pos = symbols.glyphsToString(positions)
+    val pos = symbols.glyphsToString(positions.reverse)
       .toOption
       .getOrElse("<invalid>")
 
-    val ring = symbols.glyphsToString(rings)
+    val ring = symbols.glyphsToString(rings.reverse)
       .toOption
       .getOrElse("<invalid>")
 
@@ -26,4 +27,7 @@ final case class MachineState(
       .toOption
       .getOrElse("<invalid>")
 
-    s"pos: $pos ring: $ring ref: $reflect"
+    val plug = plugboard.map(pb => s"${pb.mapping.size} mappings")
+      .getOrElse("not present")
+
+    s"pos: $pos ring: $ring ref: $reflect plugboard: $plug"

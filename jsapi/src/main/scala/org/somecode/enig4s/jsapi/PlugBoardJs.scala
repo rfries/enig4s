@@ -11,7 +11,7 @@ final case class PlugBoardJs(
   wiring: Option[GlyphsJs],
   plugs: Option[PlugsJs]
 ):
-  def toPlugBoard(size: Int, symbols: SymbolMap): Either[String,PlugBoard] = this match
+  def toPlugBoard(size: Int, symbols: SymbolMap): Either[String, EnigmaPlugBoard] = this match
     case PlugBoardJs(Some(glyphsJs), None) =>
       Left("TypeX plugboard not yet supported")
       // for

@@ -11,26 +11,26 @@ final case class MachineRequestJs(
   keyboard: Option[KeyboardJs],
   wheels: Vector[WheelJs],
   reflector: ReflectorJs,
-  plugboard: Option[PlugBoardJs],
   settings: SettingsJs,
   text: String
 ):
   def toMachineRequest(cabinet: Cabinet): Either[String, MachineRequest] =
     for
-      smap    <- symbolMap.map(_.toSymbolMap(cabinet)) match
+      symbols    <- symbolMap.map(_.toSymbolMap(cabinet)) match
         case Some(sm) => sm
         case None => Right(SymbolMap.AZ)
 
-      kbwires <- keyboard.map(_.toWiring(smap, cabinet)) match
+      kbwires <- keyboard.map(_.toWiring(symbols, cabinet)) match
           case Some(k) => k
-          case None => Wiring.passthrough(26)
+          case None => Wiring.passthrough(symbols.size)
       
-      kb = Entry(kbwires)
-      wh      <- wheels.traverse(_.toWheel(smap, cabinet))
-      rf      <- reflector.toReflector(smap, cabinet)
-      pb      <- plugboard.traverse(pb => pb.toPlugBoard(kb.length, smap))
-      machine <- Machine(kb, wh, rf, pb, smap)
-      mstate  <- settings.toMachineState(smap, wh.size, kb.length)
+      entry   = Entry(kbwires)
+      uncfg   <- wheels.reverse.traverse(_.toWheel(symbols, cabinet))
+      wh      <- uncfg.zipWithIndex.traverse((wheel, i) => wheel.copy(wheelNum = i))
+      rf      <- reflector.toReflector(symbols, cabinet)
+      machine <- Machine(entry, wh, rf, symbols)
+      mstate  <- settings.toMachineState(symbols, wh.size, entry.length)
+      _       = println()
 
     yield MachineRequest(machine, mstate, text)
 

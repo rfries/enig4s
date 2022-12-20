@@ -10,8 +10,6 @@ import scala.collection.immutable.ArraySeq
 trait PlugBoard extends Bidirectional:
   def length: Int
 
-  val maxPlugs: Int = length / 2
-
   def forward: Transformer
   def reverse: Transformer
 
@@ -26,6 +24,8 @@ trait PlugBoard extends Bidirectional:
   */
 sealed abstract case class EnigmaPlugBoard private (length: Int, mapping: Map[Glyph, Glyph])
   extends PlugBoard:
+
+  val maxPlugs: Int = length / 2
 
   def forward: Transformer = (state, glyph) =>
     val out = mapping.getOrElse(glyph, glyph)
@@ -53,7 +53,7 @@ object EnigmaPlugBoard:
       else
         Right(new EnigmaPlugBoard(size, pairings.toMap ++ pairings.map(_.swap).toMap) {})
 
-  def apply(size: Int, pairings: IndexedSeq[String], symbols: SymbolMap): Either[String, PlugBoard] =
+  def apply(size: Int, pairings: IndexedSeq[String], symbols: SymbolMap): Either[String, EnigmaPlugBoard] =
     if pairings.exists(_.length != 2) then
       Left("Pairing strings must contain only two symbols per string.")
     else

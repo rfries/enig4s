@@ -10,20 +10,21 @@ import scala.collection.immutable.ArraySeq
 case class SettingsJs private (
   rings: GlyphsJs,
   wheels: GlyphsJs,
-  reflector: Option[GlyphJs]
+  reflector: Option[GlyphJs],
+  plugboard: Option[PlugBoardJs]
 ):
   def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
     for
-      rings <- rings.toGlyphs(symbols).map(_.reverse)
+      ringGlyphs <- rings.toGlyphs(symbols).map(_.reverse)
       posGlyphs <- wheels.toGlyphs(symbols).map(_.reverse)
-      //_ <- Either.cond(ringCodes.size === posCodes.size, (), "Position and ring settings strings must be the same length")
-      //ws = posGlyphs
+      _ <- Either.cond(ringGlyphs.size === posGlyphs.size, (), "Position and ring settings strings must be the same length")
+      pb <- plugboard.traverse(pb => pb.toPlugBoard(busSize, symbols))
 
       ref <- reflector
               .map( _.toGlyph(symbols))
               .getOrElse(Right(Glyph.zero))
-
-    yield MachineState(posGlyphs, rings, ref, symbols)
+    yield
+      MachineState(posGlyphs, ringGlyphs, ref, pb, symbols)
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec
