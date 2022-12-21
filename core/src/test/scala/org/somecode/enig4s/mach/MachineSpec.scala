@@ -2,14 +2,10 @@ package org.somecode.enig4s
 package mach
 
 import cats.implicits.*
-import org.scalatest.EitherValues.*
-import org.scalatest.OptionValues.*
-import org.scalatest.matchers.*
-import org.scalatest.wordspec.AnyWordSpec
 
 import scala.collection.immutable.ArraySeq
 
-final class MachineSpec extends AnyWordSpec with should.Matchers:
+final class MachineSpec extends Enig4sSpec:
 
   import MachineSpec.*
 

@@ -6,14 +6,15 @@ There are three basic parts to each MachineRequest:
 - machine settings
 - text to transform
 
-The machine definition represents the structural parts of the machine, such as number of wheels, bus size (number of characters), presence of plugboard, and the like.
+The machine definition represents the structural parts of the machine, such as the wheel order, wiring, character set, and the like.
 
 The machine settings represent the configuration for the parts of the defined machine,
-such as wheel wiring and order, ring settings, plugboard configuration, and the like.
-These are roughly analogous to the user configurable settings of an actual machine, which
-do not change during symbol translation.
+such as the starting wheel positions, ring settings, and plugboard configuration.
 
 The wheel state represents the subset of machine settings which changes during each symbol translation.  As such, any successful symbol translation will result in a new wheel state.
+
+The following is an example of a machine request, with all attributes defined (Note that
+since some of these attributes are mutually exclusive, only subsets of the example will be valid)
 
 ```json
   {

@@ -8,7 +8,7 @@ ThisBuild / version          := "0.9.1-SNAPSHOT"
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
 val v = new {
-  val cats                  = "2.8.0"
+  val cats                  = "2.9.0"
   val catsEffect            = "3.3.14"
   val ciString              = "1.2.0"
   val circe                 = "0.14.3"
@@ -16,7 +16,7 @@ val v = new {
   val http4s                = "1.0.0-M37"
   val scalatest             = "3.2.13"
   val scalatest_scalacheck  = "3.2.13.0"
-  val scalajs               = "1.11.0"      // not used directly (appears in plugins.sbt)
+  val scalajs               = "1.12.0"      // not used directly (appears in plugins.sbt)
   val scalajsCss            = "1.0.0"
   val scalajsDom            = "2.3.0"
 }
