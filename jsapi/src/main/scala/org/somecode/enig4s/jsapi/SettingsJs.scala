@@ -8,10 +8,10 @@ import org.somecode.enig4s.mach.{Glyph, MachineState, RingSetting, SymbolMap, Wh
 import scala.collection.immutable.ArraySeq
 
 case class SettingsJs private (
-  rings: GlyphsJs,
-  wheels: GlyphsJs,
-  reflector: Option[GlyphJs],
-  plugboard: Option[PlugBoardJs]
+                                rings: GlyphArrayJs,
+                                wheels: GlyphArrayJs,
+                                reflector: Option[GlyphJs],
+                                plugboard: Option[PlugBoardJs]
 ):
   def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
     for

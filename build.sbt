@@ -5,6 +5,8 @@ ThisBuild / organizationName := "Some Code"
 ThisBuild / scalaVersion     := "3.2.1"
 ThisBuild / version          := "0.9.1-SNAPSHOT"
 
+ThisBuild / scalacOptions    += "--deprecation"
+
 ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
 val v = new {

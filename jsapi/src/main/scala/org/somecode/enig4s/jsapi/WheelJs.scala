@@ -7,9 +7,9 @@ import io.circe.generic.semiauto.*
 import org.somecode.enig4s.mach.{Cabinet, Glyph, SymbolMap, Wheel, Wiring}
 
 final case class WheelJs(
-  name: Option[String],
-  wiring: Option[GlyphsJs],
-  notches: Option[GlyphsJs]
+                          name: Option[String],
+                          wiring: Option[GlyphArrayJs],
+                          notches: Option[GlyphArrayJs]
 ):
   def toWheel(symbols: SymbolMap, cabinet: Cabinet): Either[String, Wheel] = this match
     case WheelJs(Some(name), None, None) => cabinet.findWheel(name).toRight(s"Wheel '$name' not found'")

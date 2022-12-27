@@ -12,9 +12,9 @@ import scala.collection.immutable.ArraySeq
 // if name is provided, no other attributes allowed
 // else with wiring, positions and advance have defaults
 final case class ReflectorJs(
-  name: Option[String],
-  wiring: Option[GlyphsJs],
-  positions: Option[GlyphsJs]
+                              name: Option[String],
+                              wiring: Option[GlyphArrayJs],
+                              positions: Option[GlyphArrayJs]
 ):
   def toReflector(symbols: SymbolMap, cabinet: Cabinet): Either[String, Reflector] =
     this match

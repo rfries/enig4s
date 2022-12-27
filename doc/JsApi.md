@@ -6,15 +6,14 @@ There are three basic parts to each MachineRequest:
 - machine settings
 - text to transform
 
-The machine definition represents the structural parts of the machine, such as the wheel order, wiring, character set, and the like.
+The machine definition represents the structural parts of the machine, such as the symbol map, the wheel and reflector wiring, wheel order, and the like.
 
 The machine settings represent the configuration for the parts of the defined machine,
 such as the starting wheel positions, ring settings, and plugboard configuration.
 
-The wheel state represents the subset of machine settings which changes during each symbol translation.  As such, any successful symbol translation will result in a new wheel state.
-
 The following is an example of a machine request, with all attributes defined (Note that
-since some of these attributes are mutually exclusive, only subsets of the example will be valid)
+some of these attributes are mutually exclusive, and others have useful defaults, so only a subset
+of these attributes would typically be used)
 
 ```json
   {
@@ -22,475 +21,87 @@ since some of these attributes are mutually exclusive, only subsets of the examp
       "name": "AZ",
       "mapping": {
         "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
+        "codepoints": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
       }
     },
     "keyboard": {
       "name": "AZ",
       "wiring": {
         "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+        "numbers": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]
       }
     },
     "wheels": [
       {
         "name": "I",
         "wiring": {
-          "symbols": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1]
+          "symbols": "BCDEFGHIJKLMNOPQRSTUVWXYZA",
+          "numbers": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,1]
         },
-        "notches": { "symbols": "NR", "codes": [1, 16] }
+        "notches": { "symbols": "NR", "numbers": [1, 16] }
       }
     ],
     "reflector": {
       "name": "UKW-B",
       "wiring": {
         "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
+        "numbers": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
       },
       "positions": {
         "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
+        "numbers": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
+      }
     },
     "settings": {
-      "rings":      { "symbols": "ABC", "codes": [0, 1, 2] },
-      "wheels":     { "symbols": "ABC", "codes": [0, 1, 2] },
-      "reflector":  { "symbol": "B", "code": 2 },
+      "rings":      { "symbols": "ABC", "numbers": [0, 1, 2] },
+      "wheels":     { "symbols": "ABC", "numbers": [0, 1, 2] },
+      "reflector":  { "symbol": "B", "number": 2 },
       "plugs": {
         "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
+        "numbers": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
       }
     },
     "text": "SENDMORECHUCKBERRY"
   }
 ```
 
-```json
-  {
-    "symbolMap": {
-      "name": "AZ",
-      "mapping": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-      }
-    },
-    "keyboard": {
-      "name": "AZ",
-      "wiring": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-      }
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "wiring": {
-          "symbols": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1]
-        },
-        "notches": { "symbols": "NR", "codes": [1, 16] }
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "wiring": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "positions": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-    },
-    "plugboard": {
-      "wiring": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "plugs": {
-        "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-      }
-    },
-    "settings": {
-      "rings":      { "symbols": "ABC", "codes": [0, 1, 2] },
-      "wheels":     { "symbols": "ABC", "codes": [0, 1, 2] },
-      "reflector":  { "symbol": "B", "code": 2 }
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
+### Named Components
+
+In general, components such as the wheels and reflector can be specified in full, by
+providing a wiring (and notches, for a wheel), or by name, referencing a pre-defined wiring.  
+A list of available component names can be found [here](Cabinet.md).
 
 
+### Wiring
 
-```json
-  {
-    "symbolMap": {
-      "name": "AZ",
-      "mapping": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-      }
-    },
-    "keyboard": {
-      "name": "AZ",
-      "wiring": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-      }
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "wiring": {
-          "symbols": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1]
-        },
-        "notches": { "symbols": "NR", "codes": [1, 16] }
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "wiring": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "positions": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-    },
-    "plugboard": "enigma",  // default, or "typex"
-    "settings": {
-      "rings":      { "symbols": "ABC", "codes": [0, 1, 2] },
-      "wheels":     { "symbols": "ABC", "codes": [0, 1, 2] },
-      "reflector":  { "symbol": "B", "code": 2 },
-      "plugs": {
-        "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-      }
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
+The wiring of wheels, reflectors, and other components is specified by providing either a string
+or an array of numbers. When using a string, the "symbols" attribute is used, and in the provided
+string each character position represents a mapping to the character specified at that position.
+For instance, assuming for brevity a 4-position wheel with a symbol map of "ABCD", then the attribute
+```"symbols": "BDAC"```
+would indicate that the first position of the wheel ("A" in the symbol map) is mapped to "B",
+the second position ("B" in the symbol map) is mapped to "D", and so on.  If specified using (ordinal)
+numbers, then:
+```"numbers": [2,4,1,3]```
+represents the same mapping. In addition, 0-based indices can be used by specifying the "indices"
+attribute, so:
+```"indices": [1,3,0,2]```
+describes the same wiring as the previous two examples. 
 
+The 1-based (ordinal) numbers correspond to the numeric labels used on wheels, reflectors, and
+plugboards of some Enigma models.
 
+### Top Level Attributes
 
-```json
-  {
-    "drive": "ratchet", // ratchet or gear
-    "symbolMap": {
-      "name": "AZ",
-      "mapping": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-      }
-    },
-    "keyboard": {
-      "name": "AZ",
-      "wiring": {
-        "symbols": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-      }
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "wiring": {
-          "symbols": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1]
-        },
-        "notches": { "symbols": "NR", "codes": [1, 16] }
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "wiring": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "positions": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "advance": false
-    },
-    "settings": {
-      "rings":      { "symbols": "ABC", "codes": [0, 1, 2] },
-      "wheels":     { "symbols": "ABC", "codes": [0, 1, 2] },
-      "reflector":  { "symbol": "B", "code": 2 },
-      "plugs": {
-        "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-      }
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
-
-
-```json
-  {
-    "busSize": 26,
-    "characterMap": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-    },
-    "keyboard": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-        "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1],
-        "notches": "NR",
-        "notchCodes": [1, 16]
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "mapping": "EJMZALYXVBWFCRQUONTSPIKHGD",
-      "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-    },
-    "settings": {
-      "rings": { "mapping": "ABC", "codes": [0, 1, 2] },
-      "wheels": { "mapping": "ABC", "codes": [0, 1, 2] },
-      "reflector": { "mapping": "B", "codes": [2] },
-      "plugs": {
-        "mapping": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-      }
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
-
-
-```json
-  {
-    "busSize": 26,
-    "characterMap": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-    },
-    "keyboard": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-        "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1],
-        "notches": { "mapping": "NR", "codes": [1, 16] },
-        "position": { "mapping": "A", "code": 1 },
-        "ringSetting": { "mapping": "A", "code": 1 }
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "mapping": "EJMZALYXVBWFCRQUONTSPIKHGD",
-      "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3],
-      "position": { "mapping": "A", "code": 1 }
-    },
-    "plugs": {
-      "mapping": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-      "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
-## Attributes
-
-| Attribute        | Optional  | Default | Description                                                    |
-|------------------|-----------|---------|----------------------------------------------------------------|
-| busSize          | optional  | 26      | size of all bus components                                     |
-| characterMapName | optional  | "AZ"    | name of predefined character map                               |
-| characterMap     | optional  | n/a     | inline character map definition                                |
-| keyboardName     | optional  | "AZ"    | name of predefined keyboard                                    |
-| keyboard         | optional  | n/a     | inline keyboard mapping                                        |
-| wheels           | required  | n/a     | wheel definitions                                              |
-| reflector        | required  | n/a     | reflector mapping                                              |
-| plugs            | required  | n/a     | plugboard pairs                                                |
-| text             | optional  | n/a     | input text, if present -- if absent, input is the request body |
+| Attribute | Optional | Default | Description                                                |
+|-----------|----------|---------|------------------------------------------------------------|
+| symbolMap | optional | "A-Z"   | inline character map definition                            |
+| keyboard  | optional | "A-Z"   | inline keyboard mapping                                    |
+| wheels    | required | n/a     | wheel definitions                                          |
+| reflector | required | n/a     | reflector mapping                                          |
+| settings  | required | n/a     | wheel positions and ring settings, plugboard configuration |
+| text      | required | n/a     | input text                                                 |
 
 Other API validation rules:
-- Only one of `characterMapName` or `characterMap` may exist.
-- Only one of `keyboardName` or `keyboard` may exist.
-- Either `reflectorName` or `reflector` (but not both) must exist.
-- In mapping objects, either `mapping` or `codes` (but not both) must exist.
-- In wheel objects, only one of ``
-- All strings must be a subset of the character map in use.
-
-
-```json
-  {
-    "busSize": 26,
-    "characterMap": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-    },
-    "keyboard": {
-      "name": "AZ",
-      "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-    },
-    "wheels": [
-      {
-        "name": "I",
-        "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-        "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1],
-        "notches": { "mapping": "NR", "codes": [1, 16] }
-      }
-    ],
-    "reflector": {
-      "name": "UKW-B",
-      "mapping": "EJMZALYXVBWFCRQUONTSPIKHGD",
-      "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-    },
-    "plugs": {
-      "mapping": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-      "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-    },
-    "state": {
-      "wheelPositions": "ABC",
-      "wheelPositionCodes": [1, 2, 3],
-      "ringSettings": "ABC",
-      "ringSettingCodes": [1, 2, 3],
-      "reflectorPosition": "A",
-      "reflectorPositionCode": 0
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
-
-
-```json
-  {
-    "state": {
-      "wheelPositions": "ABC",
-      "wheelPositionCodes": [1, 2, 3],
-      "ringSettings": "ABC",
-      "ringSettingCodes": [1, 2, 3],
-      "reflectorPosition": "A",
-      "reflectorPositionCode": 0
-    },
-    "text": "SENDMORECHUCKBERRY"
-  }
-```
-
-
-## Attributes
-
-| Attribute        | Optional  | Default | Description                                                    |
-|------------------|-----------|---------|----------------------------------------------------------------|
-| busSize          | optional  | 26      | size of all bus components                                     |
-| characterMapName | optional  | "AZ"    | name of predefined character map                               |
-| characterMap     | optional  | n/a     | inline character map definition                                |
-| keyboardName     | optional  | "AZ"    | name of predefined keyboard                                    |
-| keyboard         | optional  | n/a     | inline keyboard mapping                                        |
-| wheels           | required  | n/a     | wheel definitions                                              |
-| reflector        | required  | n/a     | reflector mapping                                              |
-| plugs            | required  | n/a     | plugboard pairs                                                |
-| text             | optional  | n/a     | input text, if present -- if absent, input is the request body |
-
-Other API validation rules:
-- Only one of `characterMapName` or `characterMap` may exist.
-- Only one of `keyboardName` or `keyboard` may exist.
-- Either `reflectorName` or `reflector` (but not both) must exist.
-- In mapping objects, either `mapping` or `codes` (but not both) must exist.
-- In wheel objects, only one of ``
-- All strings must be a subset of the character map in use.
-
-## Not as Old Format
-```json
-    {
-      "busSize": 26,
-      "characterMapName": "AZ",
-      "characterMap": {
-        "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90]
-      },
-      "keyboardName": "AZ",
-      "keyboard": {
-        "mapping": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-        "codes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
-      },
-      "wheels": [
-        {
-          "wheelName": "I",
-          "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1],
-
-          "position": "A",
-          "ringSetting": "P"
-        }
-      ],
-      "reflectorName": "UKW-B",
-      "reflector": {
-        "mapping": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "codes": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "plugs": {
-        "mapping": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "codes": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
-      },
-      "state": {
-        "wheels": [
-          {
-            "ringSetting": 0,
-            "position": 5
-          }
-        ],
-        "reflectorPosition": 0
-      },
-      "text": "SENDMORECHUCKBERRY"
-    }
-  ```
-
-## Old Format
-
-  ```json
-    {
-      "busSize": 26,
-      "charMap": "AZ",
-      "keyboardCodes": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
-      "wheels": [
-        {
-          "wheelName": "I",
-          "position": "A",
-          "ringSetting": "P"
-        },
-        {
-          "wheelName": "II",
-          "position": "Q",
-          "ringSetting": "E"
-        },
-        {
-          "mapping": "YZABCDEFGHIJKLMNOPQRSTUVWX",
-          "notches": "CJ",
-          "position": "M",
-          "ringSetting": "C"
-        },
-        {
-          "codes": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,0,1],
-          "notches": [3, 14],
-          "position": "M",
-
-          "ringSetting": "C"
-        }
-      ],
-      "reflectorName": "UKW-B",
-      "plugs": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-      "text": "THIS IS A TEST MESSAGE"
-    }
-
-```
+- All 'symbols' strings must be a subset of the symbol map in use.
+- For wiring specifications, only one of "symbols", "numbers", or "indices" should be present.

@@ -8,8 +8,8 @@ import org.somecode.enig4s.mach.Wiring
 import org.somecode.enig4s.mach.PlugBoard
 
 final case class PlugBoardJs(
-  wiring: Option[GlyphsJs],
-  plugs: Option[PlugsJs]
+                              wiring: Option[GlyphArrayJs],
+                              plugs: Option[PlugsJs]
 ):
   def toPlugBoard(size: Int, symbols: SymbolMap): Either[String, EnigmaPlugBoard] = this match
     case PlugBoardJs(Some(glyphsJs), None) =>

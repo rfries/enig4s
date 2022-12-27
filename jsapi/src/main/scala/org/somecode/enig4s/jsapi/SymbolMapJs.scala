@@ -6,7 +6,7 @@ import io.circe.Codec
 import io.circe.generic.semiauto.*
 import org.somecode.enig4s.mach.{Cabinet, SymbolMap}
 
-final case class SymbolMapJs(name: Option[String], mapping: Option[GlyphsJs]):
+final case class SymbolMapJs(name: Option[String], mapping: Option[GlyphArrayJs]):
   def toSymbolMap(cabinet: Cabinet): Either[String, SymbolMap] = this match
     case SymbolMapJs(Some(nm), None) =>
       cabinet.findSymbolMap(nm).toRight(s"Symbol map '$nm' not found")
