@@ -71,7 +71,6 @@ In general, components such as the wheels and reflector can be specified in full
 providing a wiring (and notches, for a wheel), or by name, referencing a pre-defined wiring.  
 A list of available component names can be found [here](Cabinet.md).
 
-
 ### Wiring
 
 The wiring of wheels, reflectors, and other components is specified by providing either a string

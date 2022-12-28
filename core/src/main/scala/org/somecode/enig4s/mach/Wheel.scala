@@ -25,7 +25,7 @@ sealed abstract case class Wheel private (
       val off = pos %- ring
       val out = wires.wire(glyph %+ off) %- off
       Trace.trace(state, glyph, out, Component.Wheel(wheelNum), direction,
-        s"pos: ${state.symbols.displayCode(pos)}, ring: ${state.symbols.displayCode(ring)}")
+        s"pos: ${state.symbols.displayGlyph(pos)}, ring: ${state.symbols.displayGlyph(ring)}")
 
   def notchedAt(p: Glyph): Boolean = notches.contains(p)
 

@@ -22,8 +22,8 @@ object Trace:
     extra: String = ""): (MachineState, Glyph) =
 
     val newState = state.traceQ.map { q =>
-      val in = state.symbols.displayCode(inGlyph)
-      val out = state.symbols.displayCode(outGlyph)
+      val in = state.symbols.displayGlyph(inGlyph)
+      val out = state.symbols.displayGlyph(outGlyph)
 
       val glyphs =
         if direction == Direction.Reverse || direction == Direction.Reflect then

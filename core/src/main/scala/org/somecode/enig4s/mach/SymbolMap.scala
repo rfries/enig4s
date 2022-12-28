@@ -46,7 +46,15 @@ final class SymbolMap private(val codePoints: IndexedSeq[Int]):
   def pointToGlyph(point: Int): Either[String,Glyph] =
     glyphMap.get(point).toRight(s"Code point $point not found in symbol map.")
 
-  def displayCode(in: Glyph): String = f"${glyphToPoint(in).map(Character.toString).getOrElse("?")} ($in%02d)"
+  /**
+   * Format a glyph for display with character and numeric code. Note external
+   * numeric codes are 1-based to correspond with numeric Enigma wheel labeling.
+   *
+   * @param in
+   * @return A string with both the character and numeric representation of the glyph
+   */
+  def displayGlyph(in: Glyph): String =
+    f"${glyphToPoint(in).map(Character.toString).getOrElse("?")} (${in.toInt + 1}%02d)"
 
    /**
     * Convert a sequence of glyphs into a string, via the symbol map.

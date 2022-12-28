@@ -117,9 +117,9 @@ object Cabinet:
     WheelInit("r.I",        "r.I",        "AZ",   "N"),
     WheelInit("r.II",       "r.II",       "AZ",   "E"),
     WheelInit("r.III",      "r.III",      "AZ",   "Y"),
-    // WheelInit("z.I",        "z.I",        "10",   "9"),
-    // WheelInit("z.II",       "z.II",       "10",   "9"),
-    // WheelInit("z.III",      "z.III",      "10",   "9"),
+    WheelInit("z.I",        "z.I",        "10",   "9"),
+    WheelInit("z.II",       "z.II",       "10",   "9"),
+    WheelInit("z.III",      "z.III",      "10",   "9")
   )
 
   val defaultReflectorInits: Vector[ReflectorInit] = Vector(
@@ -132,7 +132,7 @@ object Cabinet:
     ReflectorInit("d.UKW",      "d.UKW"),
     ReflectorInit("r.UKW",      "r.UKW"),
     ReflectorInit("g312.UKW",   "g312.UKW"),
-    ReflectorInit("z.UKW",      "z.UKW"),
+    ReflectorInit("z.UKW",      "z.UKW")
   )
 
   val defaultWiringInits: Vector[WiringInit] = Vector(
@@ -197,5 +197,5 @@ object Cabinet:
     WiringInit("z.I",       "10",   "6418270359"),
     WiringInit("z.II",      "10",   "5841097632"),
     WiringInit("z.III",     "10",   "3581620794"),
-    WiringInit("z.UKW",     "10",   "5079183642"),
+    WiringInit("z.UKW",     "10",   "5079183642")
   )
