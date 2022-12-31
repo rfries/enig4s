@@ -8,7 +8,7 @@ import org.somecode.enig4s.mach.Cabinet
 
 val cab = Cabinet().getOrElse(throw new IllegalStateException("Can't init cabinet."))
 
-val js = """
+val jsorg = """
   {
     "symbolMap": {
       "name": "AZ"
@@ -28,6 +28,29 @@ val js = """
   }
 """
 
+val js =
+  """
+    |{
+    |  "wheels": [
+    |    { "name": "V" },
+    |    { "name": "m3.VI" },
+    |    { "name": "m3.VIII" },
+    |    { "name": "m4.BETA" }
+    |  ],
+    |  "reflector": { "name": "m4.UKW-C" },
+    |  "settings": {
+    |    "rings":      { "symbols": "EPEL" },
+    |    "wheels":     { "symbols": "NAEM" },
+    |    "plugboard": {
+    |      "plugs": {
+    |        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
+    |      }
+    |    }
+    |  },
+    |  "text": "QEOB"
+    |}
+    |
+    |""".stripMargin
 
 
 val json = parse(js).value

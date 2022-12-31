@@ -28,6 +28,6 @@ final case class MachineState(
       .getOrElse("<invalid>")
 
     val plug = plugboard.map(pb => s"${pb.mapping.size} mappings")
-      .getOrElse("not present")
+      .getOrElse("<not present>")
 
-    s"pos: $pos ring: $ring ref: $reflect plugboard: $plug"
+    s"pos[$pos] ring[$ring] plugs[$plug]"

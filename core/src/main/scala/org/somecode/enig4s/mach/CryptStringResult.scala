@@ -10,5 +10,6 @@ final case class CryptStringResult(
   trace: Option[IndexedSeq[String]]
 ):
   def traceMsg: String =
-    state.traceQ.toVector.mkString("\n") + s"""==> "$text"\n """
+    //state.traceQ.toVector.mkString("\n") + s"""==> "$text"\n """
+    state.traceQ.map(_.mkString("\n") + s"\n==> \"$text\"\n").getOrElse("")
 

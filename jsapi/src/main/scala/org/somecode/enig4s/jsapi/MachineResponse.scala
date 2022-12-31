@@ -6,7 +6,8 @@ import io.circe.Codec
 
 final case class MachineResponse(
   wheelPositions: String,
-  text: String
+  text: String,
+  trace: String
 )
 
 object MachineResponse:

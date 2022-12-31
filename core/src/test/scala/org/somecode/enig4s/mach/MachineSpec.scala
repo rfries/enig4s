@@ -9,29 +9,21 @@ final class MachineSpec extends Enig4sSpec:
 
   import MachineSpec.*
 
-  "encrypt a string with basic wheel settings (original)" in {
+  "encrypt a string with basic wheel settings" in {
     val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
     val state = machState(position = "AAA", rings = "AAA").require
 
     verify(mach, state, "AAAAA", "BDZGO")
   }
 
-  "encrypt a string with basic wheel and ring settings" in {
+  "encrypt a string with wheel and ring settings" in {
     val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
-    val state = machState(position = "ABC", rings = "DEF", "A").require
-    println(s">>> $state")
+    val state = machState(position = "ABC", rings = "DEF").require
 
     verify(mach, state, "ABCDE", "DXXVP")
   }
 
-  "encrypt a string with basic wheel settings plus ring settings" in {
-    val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
-    val state = machState(position = "AAA", rings = "BBB", "A").require
-
-    verify(mach, state, "AAAAA", "EWTYX")
-  }
-
-  "encrypt a valid string with basic wheel settings and plugs" in {
+  "encrypt a valid string with plugboard" in {
     val mach = machine(wheels = Vector("I", "II", "III"), reflector = "UKW-B").require
     val state = machState(position = "AAA", rings = "AAA", plugboard = Some(Vector("AZ", "SO", "FB"))).require
     verify(mach, state, "AAAAA", "UTZJY")
@@ -51,6 +43,13 @@ final class MachineSpec extends Enig4sSpec:
 
     val newState = verify(mach, state, "AAAAA", "ULMHJ")
     SymbolMap.AZ.glyphsToString(newState.positions).require.reverse shouldBe "LFT"
+  }
+
+  "decrypt the message key from the 1945 Dönitz message" in {
+    val mach = machine(wheels = Vector("m4.BETA", "V", "m3.VI", "m3.VIII"), reflector = "m4.UKW-C").require
+    val plugs = Some(Vector("AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"))
+    val state = machState(position = "NAEM", rings = "EPEL", plugboard = plugs).require
+    verify(mach, state, "QEOB", "CDSZ")
   }
 
   def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
