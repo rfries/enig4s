@@ -103,14 +103,17 @@ object Cabinet:
     WheelInit("III",        "III",        "AZ",   "V"),
     WheelInit("IV",         "IV",         "AZ",   "J"),
     WheelInit("V",          "V",          "AZ",   "Z"),
-    WheelInit("m3.VI",      "m3.VI",      "AZ",   "ZM"),
-    WheelInit("m3.VII",     "m3.VII",     "AZ",   "ZM"),
-    WheelInit("m3.VIII",    "m3.VIII",    "AZ",   "ZM"),
+    WheelInit("VI",         "VI",         "AZ",   "ZM"),
+    WheelInit("VII",        "VII",        "AZ",   "ZM"),
+    WheelInit("VIII",       "VIII",       "AZ",   "ZM"),
     WheelInit("m4.BETA",    "m4.BETA",    "AZ",   ""),
     WheelInit("m4.GAMMA",   "m4.GAMMA",   "AZ",   ""),
     WheelInit("d.I",        "d.I",        "AZ",   "Y"),
     WheelInit("d.II",       "d.II",       "AZ",   "E"),
     WheelInit("d.III",      "d.III",      "AZ",   "N"),
+    WheelInit("sk.I",       "sk.I",       "AZ",   "Y"),
+    WheelInit("sk.II",      "sk.II",      "AZ",   "E"),
+    WheelInit("sk.III",     "sk.III",     "AZ",   "N"),
     WheelInit("g.I",        "d.I",        "AZ",   "SUVWZABCEFGIKLOPQ"),
     WheelInit("g.II",       "d.II",       "AZ",   "STVYZACDFGHKMNQ"),
     WheelInit("g.III",      "d.III",      "AZ",   "UWXAEFHKMNR"),
@@ -151,9 +154,9 @@ object Cabinet:
     WiringInit("UKW-C",     "AZ",   "FVPJIAOYEDRZXWGCTKUQSBNMHL"),
 
     // M3 & M4
-    WiringInit("m3.VI",     "AZ",   "JPGVOUMFYQBENHZRDKASXLICTW"),
-    WiringInit("m3.VII",    "AZ",   "NZJHGRCXMYSWBOUFAIVLPEKQDT"),
-    WiringInit("m3.VIII",   "AZ",   "FKQHTLXOCBJSPDZRAMEWNIUYGV"),
+    WiringInit("VI",        "AZ",   "JPGVOUMFYQBENHZRDKASXLICTW"),
+    WiringInit("VII",       "AZ",   "NZJHGRCXMYSWBOUFAIVLPEKQDT"),
+    WiringInit("VIII",      "AZ",   "FKQHTLXOCBJSPDZRAMEWNIUYGV"),
 
     // M4
     WiringInit("m4.BETA",   "AZ",   "LEYJVCNIXWPBQMDRTAKZGFUHOS"),
@@ -169,10 +172,10 @@ object Cabinet:
     WiringInit("d.UKW",     "AZ",   "IMETCGFRAYSQBZXWLHKDVUPOJN"),
 
     // Enigma K - Swiss Variant ("Swiss K")
-    WiringInit("sk.ETW",    "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
-    WiringInit("sk.I",      "AZ",   "PEZUOHXSCVFMTBGLRINQJWAYDK"),
-    WiringInit("sk.II",     "AZ",   "ZOUESYDKFWPCIQXHMVBLGNJRAT"),
-    WiringInit("sk.III",    "AZ",   "EHRVXGAOBQUSIMZFLYNWKTPDJC"),
+    WiringInit("sk.ETW",     "AZ",   "QWERTZUIOASDFGHJKPYXCVBNML"),
+    WiringInit("sk.I",       "AZ",   "PEZUOHXSCVFMTBGLRINQJWAYDK"),
+    WiringInit("sk.II",      "AZ",   "ZOUESYDKFWPCIQXHMVBLGNJRAT"),
+    WiringInit("sk.III",     "AZ",   "EHRVXGAOBQUSIMZFLYNWKTPDJC"),
 
     // Enigma G-312 (One of several Enigma G wirings used by the Abwehr)
     WiringInit("g312.I",    "AZ",   "DMTWSILRUYQNKFEJCAZBPGXOHV"),

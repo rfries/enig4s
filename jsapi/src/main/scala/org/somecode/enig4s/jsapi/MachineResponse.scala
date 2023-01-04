@@ -5,8 +5,8 @@ import io.circe.generic.semiauto._
 import io.circe.Codec
 
 final case class MachineResponse(
-  wheelPositions: String,
   text: String,
+  wheelPositions: String,
   trace: String
 )
 

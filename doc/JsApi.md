@@ -54,11 +54,11 @@ of these attributes would typically be used)
     },
     "settings": {
       "rings":      { "symbols": "ABC", "numbers": [0, 1, 2] },
-      "wheels":     { "symbols": "ABC", "numbers": [0, 1, 2] },
+      "positions":  { "symbols": "ABC", "numbers": [1, 2, 3] },
       "reflector":  { "symbol": "B", "number": 2 },
       "plugs": {
         "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
-        "numbers": [[0, 13], [18, 19], [25, 6], [20, 7], [10, 15], [24, 12]]
+        "numbers": [[1, 14], [19, 20], [26, 7], [21, 8], [11, 16], [25, 13]]
       }
     },
     "text": "SENDMORECHUCKBERRY"

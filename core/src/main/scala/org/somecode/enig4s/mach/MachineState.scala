@@ -14,20 +14,20 @@ final case class MachineState(
   traceQ: Option[Queue[String]] = Some(Queue.empty)
 ):
   def display(symbols: SymbolMap): String =
-    val pos = symbols.glyphsToString(positions.reverse)
-      .toOption
-      .getOrElse("<invalid>")
-
+    val pos = displayPositions(symbols)
     val ring = symbols.glyphsToString(rings.reverse)
       .toOption
       .getOrElse("<invalid>")
-
     val reflect = symbols.glyphToPoint(reflector)
       .map(Character.toString)
       .toOption
       .getOrElse("<invalid>")
-
     val plug = plugboard.map(pb => s"${pb.mapping.size} mappings")
       .getOrElse("<not present>")
 
-    s"pos[$pos] ring[$ring] plugs[$plug]"
+    s"pos[$pos] ring[$ring] ref[$reflect] plugs[$plug]"
+
+  def displayPositions(symbols: SymbolMap): String =
+    symbols.glyphsToString(positions.reverse)
+      .toOption
+      .getOrElse("<invalid>")

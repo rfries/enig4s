@@ -25,14 +25,15 @@ object Trace:
       val in = state.symbols.displayGlyph(inGlyph)
       val out = state.symbols.displayGlyph(outGlyph)
 
-      val glyphs =
-        if direction == Direction.Reverse || direction == Direction.Reflect then
-          s"$in ${direction.longArrow} $out"
-        else
-          f"$out ${direction.longArrow} $in"
+      val glyphs = s"$in ==> $out"
+//        if direction == Direction.Reverse || direction == Direction.Reflect then
+//          s"$in ${direction.longArrow} $out"
+//        else
+//          f"$out ${direction.longArrow} $in"
 
-      val msg = f"${direction.shortArrow} ${component.shortName}%-9s $glyphs $extra"
+      val msg = f"${component.shortName}%-9s $glyphs $extra"
+
+      //val msg = f"${direction.shortArrow} ${component.shortName}%-9s $glyphs $extra"
       state.copy(traceQ = Some(q.enqueue(msg)))
     }
     (newState.getOrElse(state), outGlyph)
-

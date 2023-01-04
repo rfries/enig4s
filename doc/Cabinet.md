@@ -1,27 +1,27 @@
 
 ### Wirings
 
-These wirings are pre-defined in the Cabinet, and can be referenced by name
+These wirings are pre-defined in the `Cabinet`, and can be referenced by name
 in the web API. Names are case-insensitive.
 
 | name     | mapping                    | notes                                   |
 |----------|----------------------------|-----------------------------------------|
-| ETW      | ABCDEFGHIJKLMNOPQRSTUVWXYZ | Enigma M1                               |
+| ETW      | ABCDEFGHIJKLMNOPQRSTUVWXYZ | Enigma M1 Entry Disc                    |
+| UKW-A    | EJMZALYXVBWFCRQUONTSPIKHGD | Enigma M1 Reflector                     |
+| UKW-B    | YRUHQSLDPXNGOKMIEBFZCWVJAT | Enigma M1 Reflector                     |
+| UKW-C    | FVPJIAOYEDRZXWGCTKUQSBNMHL | Enigma M1 Reflector                     |
 | I        | EKMFLGDQVZNTOWYHXUSPAIBRCJ | Enigma M1                               |
 | II       | AJDKSIRUXBLHWTMCQGZNPYFVOE | Enigma M1                               |
 | III      | BDFHJLCPRTXVZNYEIWGAKMUSQO | Enigma M1                               |
 | IV       | ESOVPZJAYQUIRHXLNFTGKDCMWB | Enigma M1                               |
 | V        | VZBRGITYUPSDNHLXAWMJQOFECK | Enigma M1                               |
-| UKW-A    | EJMZALYXVBWFCRQUONTSPIKHGD | Enigma M1                               |
-| UKW-B    | YRUHQSLDPXNGOKMIEBFZCWVJAT | Enigma M1                               |
-| UKW-C    | FVPJIAOYEDRZXWGCTKUQSBNMHL | Enigma M1                               |
-| M3.VI    | JPGVOUMFYQBENHZRDKASXLICTW | Enigma M3                               |
-| M3.VII   | NZJHGRCXMYSWBOUFAIVLPEKQDT | Enigma M3                               |
-| M3.VIII  | FKQHTLXOCBJSPDZRAMEWNIUYGV | Enigma M3                               |
-| M4.BETA  | LEYJVCNIXWPBQMDRTAKZGFUHOS | Enigma M4                               |
-| M4.GAMMA | FSOKANUERHMBTIYCWLQPZXVGJD | Enigma M4                               |
-| M4.UKW-B | ENKQAUYWJICOPBLMDXZVFTHRGS | Enigma M4                               |
-| M4.UKW-C | RDOBJNTKVEHMLFCWZAXGYIPSUQ | Enigma M4                               |
+| VI       | JPGVOUMFYQBENHZRDKASXLICTW | Enigma M3                               |
+| VII      | NZJHGRCXMYSWBOUFAIVLPEKQDT | Enigma M3                               |
+| VIII     | FKQHTLXOCBJSPDZRAMEWNIUYGV | Enigma M3                               |
+| M4.BETA  | LEYJVCNIXWPBQMDRTAKZGFUHOS | Enigma M4 (thin) "Greek Wheel"          |
+| M4.GAMMA | FSOKANUERHMBTIYCWLQPZXVGJD | Enigma M4 (thin) "Greek Wheel"          |
+| M4.UKW-B | ENKQAUYWJICOPBLMDXZVFTHRGS | Enigma M4 (thin) Reflector              |
+| M4.UKW-C | RDOBJNTKVEHMLFCWZAXGYIPSUQ | Enigma M4 (thin) Reflector              |
 | D.ETW    | QWERTZUIOASDFGHJKPYXCVBNML | Enigma D (A26), K & G (Zählwerk Enigma) |
 | D.I      | LPGSZMHAEOQKVXRFYBUTNICJDW | Enigma D (A26), K & G (Zählwerk Enigma) |
 | D.II     | SLVGBTFXJQOHEWIRZYAMKPCNDU | Enigma D (A26), K & G (Zählwerk Enigma) |
@@ -49,6 +49,9 @@ in the web API. Names are case-insensitive.
 | Z.III    | 3581620794                 | Enigma Z (10 position numeric Enigma)   |
 | Z.UKW    | 5079183642                 | Enigma Z (10 position numeric Enigma)   |
 
+NOTE: The [Crypto Museum](https://www.cryptomuseum.com/) was an invaluable resource in
+finding the wiring details for these various models.
+
 ### Wheels
 
 Named wheels have wirings that correspond to their name, as well as notches defined
@@ -61,14 +64,17 @@ at the following positions:
 | III      | V                 |
 | IV       | J                 |
 | V        | Z                 |
-| M3.VI    | ZM                |
-| M3.VII   | ZM                |
-| M3.VIII  | ZM                |
+| VI       | ZM                |
+| VII      | ZM                |
+| VIII     | ZM                |
 | M4.BETA  | (none)            |
 | M4.GAMMA | (none)            |
 | D.I      | Y                 |
 | D.II     | E                 |
 | D.III    | N                 |
+| SK.I     | Y                 |
+| SK.II    | E                 |
+| SK.III   | N                 |
 | G.I      | SUVWZABCEFGIKLOPQ |
 | G.II     | STVYZACDFGHKMNQ   |
 | G.III    | UWXAEFHKMNR       |

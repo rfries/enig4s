@@ -8,7 +8,7 @@ Park, and technologies related to the early history of computing.
 That said, I think it is a decent attempt, if you happen to need a WWII-era Enigma with
 a JSON api.  It has pre-defined wirings for most models used during WWII, plus you can define
 your own wheels, character set, bus size, etc. within the request if you don't want to use
-predefined wirings (this can also simulate a reconfigurable reflector or TypeX style plug board)
+predefined wirings (this can also simulate a reconfigurable reflector)
 
 Please note that, as far as I am aware, Engima is not useful for encryption in any modern
 context, as it is vulnerable to any number of modern code breaking techniques.

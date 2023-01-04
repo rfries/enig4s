@@ -11,7 +11,6 @@ sealed abstract case class Machine(
   entry: Entry,
   wheels: ArraySeq[Wheel],
   reflector: Reflector,
-  //plugboard: Option[PlugBoard],
   symbols: SymbolMap
 ):
   import entry.wiring.modulus
@@ -38,23 +37,11 @@ sealed abstract case class Machine(
     // compose to a single Transformer
     Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
 
-  // def crypt(state: MachineState, in: Int, trace: Boolean): Either[String, CryptResult] =
-  //   if (state.wheelState.size != wheels.size)
-  //     Left(s"Wheel count in state (${state.wheelState.size}) does not match configuration (${wheels.size}).")
-  //   else if (in >= entry.length)
-  //     Left(s"KeyCode ($in) not in range of wheel size (${entry.length}).")
-  //   else
-  //     Glyph(in).map( g =>
-  //       val newState = advance(state)
-  //       val (endState, out) = transformer(newState, g)
-  //       CryptResult(endState, out)
-  //     )
-
   def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
     for
       validState <- ValidState(state)
       validGlyphs <- validateGlyphs(in)
-      res = codeStream(validGlyphs, state, trace).toVector
+      res = codeStream(validGlyphs, validState, trace).toVector
       trc = res.traverse(_._1.traceQ).map(_.map(_.mkString("\n")))
       endState = res.lastOption.map(_._1).getOrElse(state)
       out <- symbols.glyphsToString(res.map(_._2))
@@ -63,12 +50,14 @@ sealed abstract case class Machine(
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
 
-  private def codeStream(glyphs: ValidGlyphs, state: MachineState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
+  private def codeStream(glyphs: ValidGlyphs, validState: ValidState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
+    val traceQ: Option[Queue[String]] = if trace then Some(Queue.empty) else None
     Stream.emits(glyphs.glyphs)
-      .mapAccumulate(state) ( (state, in) =>
-        transformer(advance(state.copy(traceQ = Some(Queue.empty))), in)
+      .mapAccumulate(validState.state) ( (state, in) =>
+        transformer(advance(state.copy(traceQ = traceQ)), in)
       )
 
+  /** Advance to the next position */
   private def advance(start: MachineState): MachineState =
     def advanceIf(idx: Int, cond: Boolean) =
       if (cond)
@@ -80,6 +69,8 @@ sealed abstract case class Machine(
       .zip(wheels)
       .map((pos, wheel) => wheel.notchedAt(pos))
 
+    // Enigma will step the 2nd wheel when either the wheel to the left
+    // is at a notch or the wheel itself is at a notch ("double stepping")
     start.copy(positions =
       wheels.indices
         .map {
@@ -152,7 +143,7 @@ sealed abstract case class Machine(
       yield new ValidState(state) {}
 
 object Machine:
- 
+
   def apply (
     entry: Entry,
     wheels: IndexedSeq[Wheel],

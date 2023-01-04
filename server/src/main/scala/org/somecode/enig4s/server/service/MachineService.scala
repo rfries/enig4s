@@ -21,12 +21,12 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Eni
     HttpRoutes.of[F] {
       case req @ POST -> Root =>
         jsonResponseEither[MachineRequestJs](req) {
-          mreqJs =>
+          (mreqJs: MachineRequestJs) =>
             for
               mreq <- mreqJs.toMachineRequest(cabinet)
               mstate <- mreq.machine.ValidState(mreq.state)
-              out <- mreq.machine.crypt(mstate.state, mreq.text, trace = false)
-              resp = MachineResponse(out.state.display(mreq.machine.symbols), out.text, out.traceMsg)
+              out <- mreq.machine.crypt(mstate.state, mreq.text, trace = mreqJs.trace.getOrElse(false))
+              resp = MachineResponse(out.text, out.state.display(mreq.machine.symbols), out.traceMsg)
             yield resp.asJson
         }
 

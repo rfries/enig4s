@@ -39,14 +39,14 @@ final class MachineSpec extends Enig4sSpec:
 
   "encrypt a valid string through a double-step sequence" in {
     val mach = machine(wheels = Vector("III", "II", "I"), reflector = "UKW-B").require
-    val state = machState(position = "KDO", rings = "AAA", "A").require
+    val state = machState(position = "KDO", rings = "AAA").require
 
     val newState = verify(mach, state, "AAAAA", "ULMHJ")
     SymbolMap.AZ.glyphsToString(newState.positions).require.reverse shouldBe "LFT"
   }
 
   "decrypt the message key from the 1945 Dönitz message" in {
-    val mach = machine(wheels = Vector("m4.BETA", "V", "m3.VI", "m3.VIII"), reflector = "m4.UKW-C").require
+    val mach = machine(wheels = Vector("m4.BETA", "V", "VI", "VIII"), reflector = "m4.UKW-C").require
     val plugs = Some(Vector("AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"))
     val state = machState(position = "NAEM", rings = "EPEL", plugboard = plugs).require
     verify(mach, state, "QEOB", "CDSZ")

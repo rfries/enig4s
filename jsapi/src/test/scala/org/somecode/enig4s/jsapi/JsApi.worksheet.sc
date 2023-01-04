@@ -1,6 +1,6 @@
 import org.somecode.enig4s.mach.SymbolMap
-import io.circe.*
-import io.circe.parser.*
+import _root_.io.circe.*
+import _root_.io.circe.parser.*
 import org.scalatest.OptionValues.*
 import org.scalatest.EitherValues.*
 import org.somecode.enig4s.jsapi.MachineRequestJs
@@ -8,39 +8,19 @@ import org.somecode.enig4s.mach.Cabinet
 
 val cab = Cabinet().getOrElse(throw new IllegalStateException("Can't init cabinet."))
 
-val jsorg = """
-  {
-    "symbolMap": {
-      "name": "AZ"
-    },
-    "wheels": [
-      { "name": "I" },
-      { "name": "II" },
-      { "name": "III" }
-    ],
-    "reflector": { "name": "UKW-B" },
-    "settings": {
-      "wheels":     { "symbols": "ABC" },
-      "rings":      { "symbols": "DEF" },
-      "reflector":  { "symbol": "A" }
-    },
-    "text": "ABCDE"
-  }
-"""
-
 val js =
   """
     |{
     |  "wheels": [
+    |    { "name": "m4.BETA" },
     |    { "name": "V" },
-    |    { "name": "m3.VI" },
-    |    { "name": "m3.VIII" },
-    |    { "name": "m4.BETA" }
+    |    { "name": "VI" },
+    |    { "name": "VIII" }
     |  ],
     |  "reflector": { "name": "m4.UKW-C" },
     |  "settings": {
     |    "rings":      { "symbols": "EPEL" },
-    |    "wheels":     { "symbols": "NAEM" },
+    |    "positions":  { "symbols": "NAEM" },
     |    "plugboard": {
     |      "plugs": {
     |        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
@@ -51,7 +31,6 @@ val js =
     |}
     |
     |""".stripMargin
-
 
 val json = parse(js).value
 val mreqJs = json.as[MachineRequestJs].value
