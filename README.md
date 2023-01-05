@@ -21,11 +21,82 @@ each key and its mapping to a UTF-8 code point. The number of entries in this ma
 and indicator lights, and so too to the number of positions in the rotory components and size of all `Wiring`s within
 a given machine instance.
 
-The core is purely functional, and has no dependencies other than cats (because traverse), and scalatest for testing.
-At least that was the intention, right now it also depends on typelevel's `CIString` for case-insensitive map keys,
-because I have been too lazy to move the `Cabinet` (a library of pre-defined wirings) out of the core.
+The core is purely functional, and contains the machine implementation and a number of pre-defined wirings.
 
 The 'jsapi' module contains the classes and Circe codecs used to translate to and from JSON requests,
 and isolates the web server JSON from a direct dependency on the core model.  The 'server' module contains an http4s web
 server providing a basic api to the core. All modules except for 'server' are cross-compiled for the JVM and
 Scala.JS. The server is JVM only. 
+
+The following example request shows the decryption of a short M4 Enigma message, "QEOB":
+
+```
+$ curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
+{
+  "wheels": [
+    { "name": "m4.BETA" },
+    { "name": "V" },
+    { "name": "VI" },
+    { "name": "VIII" }
+  ],
+  "reflector": { "name": "m4.UKW-C" },
+  "settings": {
+    "positions": { "symbols": "NAEM" },
+    "rings":     { "symbols": "EPEL" },
+    "plugboard": {
+      "plugs": {
+        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
+      }
+    }
+  },
+  "text": "QEOB"
+}'
+```
+results in:
+```
+{
+  "text": "CDSZ",
+  "wheelPositions": "NAFQ",
+  "trace": ""
+}
+```
+In fact, this is an actual message key used for the ["Dönitz Message"](https://www.cryptomuseum.com/crypto/enigma/msg/p1030681.htm) sent on May 1 1945.  Using the result, "CDSZ",
+as the ground setting (starting wheel positions), the message itself can then be decoded:
+```
+curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
+{            
+  "wheels": [             
+    { "name": "m4.BETA" },
+    { "name": "V" }, 
+    { "name": "VI" }, 
+    { "name": "VIII" }
+  ],                                  
+  "reflector": { "name": "m4.UKW-C" },
+  "settings": {                         
+    "positions":  { "symbols": "CDSZ" },
+    "rings":      { "symbols": "EPEL" },
+    "plugboard": {
+      "plugs": {                                                               
+        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
+      }
+    }
+  },
+  "text": "LANOTCTOUARBBFPMHPHGCZXTDYGAHGUFXGEWKBLKGJWLQXXTGPJJAVTOCKZFSLPPQIHZFXOEBWI
+IEKFZLCLOAQJULJOYHSSMBBGWHZANVOIIPYRBRTDJQDJJOQKCXWDNBBTYVXLYTAPGVEATXSONPNYNQFUDBBHHV
+WEPYEYDOHNLXKZDNWRHDUWUJUMWWVIIWZXIVIUQDRHYMNCYEFUAPNHOTKHKGDNPSAKNUAGHJZSMJBMHVTREQED
+GXHLZWIFUSKDQVELNMIMITHBHDBWVHDFYHJOQIHORTDJDBWXEMEAYXGYQXOHFDMYUXXNOJAZRSGHPLWMLRECWW
+UTLRTTVLBHYOORGLGOWUXNXHMHYFAACQEKTHSJW"
+}' | jq```
+```
+results in the clear text (see link for more info and translation):
+```
+{
+  "text": "KRKRALLEXXFOLGENDESISTSOFORTBEKANNTZUGEBENXXICHHABEFOLGELNBEBEFEHLERHALTENXX
+JANSTERLEDESBISHERIGXNREICHSMARSCHALLSJGOERINGJSETZTDERFUEHRERSIEYHVRRGRZSSADMIRALYALSS
+EINENNACHFOLGEREINXSCHRIFTLSCHEVOLLMACHTUNTERWEGSXABSOFORTSOLLENSIESAEMTLICHEMASSNAHMEN
+VERFUEGENYDIESICHAUSDERGEGENWAERTIGENLAGEERGEBENXGEZXREICHSLEITEIKKTULPEKKJBORMANNJXXOB
+XDXMMMDURNHFKSTXKOMXADMXUUUBOOIEXKP",
+  "wheelPositions": "CFXH",
+  "trace": ""
+}
+```
