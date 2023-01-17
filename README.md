@@ -63,7 +63,7 @@ results in:
 In fact, this is an actual message key used for the ["Dönitz Message"](https://www.cryptomuseum.com/crypto/enigma/msg/p1030681.htm) sent on May 1 1945.  Using the result, "CDSZ",
 as the ground setting (starting wheel positions), the message itself can then be decoded:
 ```
-curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
+$ curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
 {            
   "wheels": [             
     { "name": "m4.BETA" },
@@ -86,7 +86,7 @@ IEKFZLCLOAQJULJOYHSSMBBGWHZANVOIIPYRBRTDJQDJJOQKCXWDNBBTYVXLYTAPGVEATXSONPNYNQFU
 WEPYEYDOHNLXKZDNWRHDUWUJUMWWVIIWZXIVIUQDRHYMNCYEFUAPNHOTKHKGDNPSAKNUAGHJZSMJBMHVTREQED
 GXHLZWIFUSKDQVELNMIMITHBHDBWVHDFYHJOQIHORTDJDBWXEMEAYXGYQXOHFDMYUXXNOJAZRSGHPLWMLRECWW
 UTLRTTVLBHYOORGLGOWUXNXHMHYFAACQEKTHSJW"
-}' | jq```
+}'
 ```
 results in the clear text (see link for more info and translation):
 ```

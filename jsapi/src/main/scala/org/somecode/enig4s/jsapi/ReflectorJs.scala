@@ -28,7 +28,7 @@ final case class ReflectorJs(
           pos <- posOpt match
             case Some(posJs) => posJs.toGlyphs(symbols)
             case None => Right(None)
-          ref <- Reflector(wires, pos.toSet)
+          ref <- Reflector(wires, pos.iterator.toSet)
         yield ref
 
       case _ => Left("One of 'name' or 'wiring' must be provided for a reflector")

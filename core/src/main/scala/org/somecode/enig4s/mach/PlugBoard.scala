@@ -29,12 +29,12 @@ sealed abstract case class EnigmaPlugBoard private (length: Int, mapping: Map[Gl
 
   def forward: Transformer = (state, glyph) =>
     val out = mapping.getOrElse(glyph, glyph)
-    Trace.trace(state, glyph, out, Component.Plugboard, Direction.Forward)
+    Trace.trace(state, glyph, out, Component.Plugboard(Direction.Forward))
 
   // for the enigma plugboard, reciprocal mappings are always added, so forward/reverse is the same operation
   def reverse: Transformer = (state, glyph) =>
     val out = mapping.getOrElse(glyph, glyph)
-    Trace.trace(state, glyph, out, Component.Plugboard, Direction.Reverse)
+    Trace.trace(state, glyph, out, Component.Plugboard(Direction.Reverse))
 
 object EnigmaPlugBoard:
 

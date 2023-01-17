@@ -15,7 +15,7 @@ sealed abstract case class Reflector private (
   val reflect: Transformer = (state, in) =>
       val pos = state.reflector
       val out = wiring.wire(in %+ pos) %- pos
-      Trace.trace(state, in, out, Component.Reflector, Trace.Direction.Reflect, s"pos: ${state.symbols.displayGlyph(pos)}")
+      Trace.trace(state, in, out, Component.Reflector, s"pos ${state.symbols.displayGlyph(pos)}")
 
   def validPosition(g: Glyph): Boolean = positions.contains(g)
 

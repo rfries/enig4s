@@ -11,7 +11,7 @@ final case class MachineState(
   reflector: Glyph,
   plugboard: Option[EnigmaPlugBoard],
   symbols: SymbolMap,
-  traceQ: Option[Queue[String]] = Some(Queue.empty)
+  traceQ: Option[Queue[String]] = None
 ):
   def display(symbols: SymbolMap): String =
     val pos = displayPositions(symbols)
@@ -31,3 +31,9 @@ final case class MachineState(
     symbols.glyphsToString(positions.reverse)
       .toOption
       .getOrElse("<invalid>")
+
+  /** Return a copy of the current state with the trace buffer cleared (or `this` if tracing disabled) */
+  def newTrace: MachineState = traceQ.map(_ => this.copy(traceQ = Some(Queue.empty))).getOrElse(this)
+
+  /** Return a copy of the current state with the tracing enabled */
+  def withTrace: MachineState = this.copy(traceQ = Some(Queue.empty))

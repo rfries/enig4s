@@ -15,14 +15,12 @@ sealed abstract case class Machine(
 ):
   import entry.wiring.modulus
 
-  import Machine.*
-
   /**
     * Compose an aggregate transformer for the forward and return paths
     * through the plugboard, entry disc, wheels, and reflector.
     */
   protected[mach] val transformer: Transformer = (state, glyph) =>
-    // entry disc -> wheels -> reflector -> wheels -> entry disc
+    // entry disc -> wheels -> reflector -> wheels.reverse -> entry disc
     val wheelfuns = Vector(entry.forward)
       :++ wheels.map(_.forward)
       :+  reflector.reflect
@@ -37,18 +35,29 @@ sealed abstract case class Machine(
     // compose to a single Transformer
     Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
 
-  def crypt(state: MachineState, in: String, trace: Boolean): Either[String, CryptStringResult] =
+  def crypt(state: MachineState, in: String): Either[String, CryptStringResult] =
     for
       validState <- ValidState(state)
       validGlyphs <- validateGlyphs(in)
-      res = codeStream(validGlyphs, validState, trace).toVector
-      trc = res.traverse(_._1.traceQ).map(_.map(_.mkString("\n")))
-      endState = res.lastOption.map(_._1).getOrElse(state)
-      out <- symbols.glyphsToString(res.map(_._2))
-    yield CryptStringResult(endState, out, trc)
+      (endState, results) = cryptGlyphs(validGlyphs, validState)
+      outGlyphs = results.map(_._2)
+      outText <- symbols.glyphsToString(outGlyphs)
+    yield CryptStringResult(endState, outText, formatTrace(results))
+
+  private def formatTrace(states: Queue[(MachineState, Glyph)]): Option[String] =
+    val traces = states.flatMap(_._1.traceQ).map(_.mkString("\n")).mkString("\n\n")
+    if traces.nonEmpty then Some(traces) else None
 
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
+
+  private def cryptGlyphs(glyphs: ValidGlyphs, validState: ValidState): (MachineState, Queue[(MachineState, Glyph)]) =
+    // fold the glyphs into a running state and history
+    glyphs.glyphs.foldLeft((validState.state, Queue.empty[(MachineState, Glyph)])) {
+      case ((state, hist), in) =>
+        val (newState, out) = transformer(advance(state.newTrace), in)
+        (newState, hist.enqueue(newState, out))
+    }
 
   private def codeStream(glyphs: ValidGlyphs, validState: ValidState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
     val traceQ: Option[Queue[String]] = if trace then Some(Queue.empty) else None

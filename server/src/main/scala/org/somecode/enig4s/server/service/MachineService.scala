@@ -25,8 +25,8 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Eni
             for
               mreq <- mreqJs.toMachineRequest(cabinet)
               mstate <- mreq.machine.ValidState(mreq.state)
-              out <- mreq.machine.crypt(mstate.state, mreq.text, trace = mreqJs.trace.getOrElse(false))
-              resp = MachineResponse(out.text, out.state.displayPositions(mreq.machine.symbols), out.traceMsg)
+              out <- mreq.machine.crypt(mstate.state, mreq.text)
+              resp = MachineResponse(out.text, out.state.displayPositions(mreq.machine.symbols), out.trace)
             yield resp.asJson
         }
 

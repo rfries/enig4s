@@ -7,9 +7,5 @@ import scala.collection.immutable.Queue
 final case class CryptStringResult(
   state: MachineState,
   text: String,
-  trace: Option[IndexedSeq[String]]
-):
-  def traceMsg: String =
-    //state.traceQ.toVector.mkString("\n") + s"""==> "$text"\n """
-    state.traceQ.map(_.mkString("\n") + s"\n==> \"$text\"\n").getOrElse("")
-
+  trace: Option[String]
+)

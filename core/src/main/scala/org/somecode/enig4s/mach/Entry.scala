@@ -4,7 +4,7 @@ package mach
 import Trace.*
 
 /**
- * An [[Entry]] disk is a trivial wrapper around a static [[Wiring]],
+ * An [[Entry]] disk is a simple wrapper around a static [[Wiring]],
  * providing a forward and reverse [[Transformer]].
  *
  * @param wiring The wiring for which to provide bidirectional [[Transformer]]s.
@@ -14,12 +14,10 @@ final case class Entry (wiring: Wiring) extends Bidirectional:
   val length: Int = wiring.length
 
   val forward: Transformer = (state, in) =>
-    trace(state, in, wiring.wire(in), Direction.Forward)
-  val reverse: Transformer = (state, in) =>
-    trace(state, in, wiring.inverse.wire(in), Direction.Reverse)
+    Trace.trace(state, in, wiring.wire(in), Component.EntryDisc(Direction.Forward))
 
-  def trace(state: MachineState, in: Glyph, out: Glyph, direction: Direction): (MachineState, Glyph) =
-    Trace.trace(state, in, out, Component.EntryDisc, direction)
+  val reverse: Transformer = (state, in) =>
+    Trace.trace(state, in, wiring.inverse.wire(in), Component.EntryDisc(Direction.Reverse))
 
 object Entry:
 

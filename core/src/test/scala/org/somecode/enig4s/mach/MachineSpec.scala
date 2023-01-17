@@ -52,17 +52,10 @@ final class MachineSpec extends Enig4sSpec:
     verify(mach, state, "QEOB", "CDSZ")
   }
 
-  def verifyText(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
-    val res = mach.crypt(state, in, true).require
-    info(s"$in => ${res.text}")
-    info(res.trace.map(_.mkString("\n")).getOrElse(""))
-    res.text shouldBe expected
-    res.state
-
   def verify(mach: Machine, state: MachineState, in: String, expected: String): MachineState =
-    val res = mach.crypt(state, in, true).require
+    val res = mach.crypt(state, in).require
     info(s"$in => ${res.text}")
-    info(s"${res.trace.map(_.mkString("\n")).getOrElse("")}")
+    info(res.trace.getOrElse(""))
     res.text shouldBe expected
     res.state
 
@@ -94,4 +87,4 @@ object MachineSpec:
       ring <- symbols.stringToGlyphs(rings).map(_.reverse)
       ref <- symbols.pointToGlyph(reflector.codePointAt(0))
       plugs <- plugboard.traverse(pb => EnigmaPlugBoard(symbols.size, pb, symbols))
-    yield MachineState(pos, ring, ref, plugs, symbols)
+    yield MachineState(pos, ring, ref, plugs, symbols).withTrace
