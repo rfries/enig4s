@@ -143,12 +143,6 @@ sealed abstract case class Machine(
                 case Some(pb) => if pb.length === entry.length then Right(()) else
                   Left(s"Plugboard size (${pb.length}) does not match the bus size (${entry.length})")
                 case None => Right(())
-
-        _ <-  Either.cond(
-                reflector.positions.contains(state.reflector),
-                (),
-                s"Reflector position (${state.reflector}) is not allowed for this reflector."
-              )
       yield new ValidState(state) {}
 
 object Machine:

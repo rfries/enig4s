@@ -1,15 +1,32 @@
-# MachineRequest
 
-There are three basic parts to each MachineRequest:
+## Endpoints
+The web API supports the following endpoints:
+
+|URL                |Method |Description                  |
+|-------------------|-------|-----------------------------|
+|/enigma            |POST   |Encypt/Decrypt request       |
+|/enigma/reflectors |GET    |List pre-defined reflectors  |
+|/enigma/symbolmaps |GET    |List pre-defined symbol maps |
+|/enigma/wheels     |GET    |List pre-defined wheels      |
+|/enigma/wirings    |GET    |List pre-defined wirings     |
+
+### POST /enigma (Encypt/Decrypt)
+
+There are three basic parts to each Machine Request:
 
 - machine definition
 - machine settings
 - text to transform
 
-The machine definition represents the structural parts of the machine, such as the symbol map, the wheel and reflector wiring, wheel order, and the like.
+The machine definitions define the structural parts of the machine, such as the symbol map,
+wheel and reflector wiring, wheel order, and the like.
 
-The machine settings represent the configuration for the parts of the defined machine,
-such as the starting wheel positions, ring settings, and plugboard configuration.
+The machine settings represent the per-message settings, such as the starting wheel positions, ring settings, and plugboard configuration.
+
+In general, components with wiring can be specified by either referencing a pre-defined component
+via the name attribute, or inline by specifying a `wiring` object.
+
+Within a wiring object, the mapping can be specified by a string of symbols, via the `symbols` attribute, by 
 
 The following is an example of a machine request, with all attributes defined (Note that
 some of these attributes are mutually exclusive, and others have useful defaults, so only a subset
@@ -33,28 +50,24 @@ of these attributes would typically be used)
     },
     "wheels": [
       {
-        "name": "I",
+        "name": "IV",
         "wiring": {
-          "symbols": "BCDEFGHIJKLMNOPQRSTUVWXYZA",
-          "numbers": [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,1]
+          "symbols": "ESOVPZJAYQUIRHXLNFTGKDCMWB",
+          "numbers": [5,19,15,22,16,26,10,1,25,17,21,9,18,8,24,12,14,6,20,7,11,4,3,13,23,2]
         },
-        "notches": { "symbols": "NR", "numbers": [1, 16] }
+        "notches": { "symbols": "NR", "numbers": [14, 18] }
       }
     ],
     "reflector": {
       "name": "UKW-B",
       "wiring": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "numbers": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
-      },
-      "positions": {
-        "symbols": "EJMZALYXVBWFCRQUONTSPIKHGD",
-        "numbers": [4,9,12,25,0,11,24,23,21,1,22,5,2,17,16,20,14,13,19,18,15,8,10,7,6,3]
+        "symbols": "YRUHQSLDPXNGOKMIEBFZCWVJAT",
+        "numbers": [6,22,16,10,9,1,15,25,5,4,18,26,24,23,7,3,20,11,21,17,19,2,14,13,8,12]
       }
     },
     "settings": {
-      "rings":      { "symbols": "ABC", "numbers": [0, 1, 2] },
-      "positions":  { "symbols": "ABC", "numbers": [1, 2, 3] },
+      "rings":      { "symbols": "ABC", "numbers": [1, 2, 3] },
+      "positions":  { "symbols": "QEL", "numbers": [17, 5, 12] },
       "reflector":  { "symbol": "B", "number": 2 },
       "plugs": {
         "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
@@ -65,11 +78,33 @@ of these attributes would typically be used)
   }
 ```
 
+### Top Level Attributes
+
+| Attribute | Optional | Default | Description                                                |
+|-----------|----------|---------|------------------------------------------------------------|
+| symbolMap | optional | "A-Z"   | inline character map definition                            |
+| keyboard  | optional | "A-Z"   | inline keyboard mapping                                    |
+| wheels    | required | n/a     | wheel order and inline definitions (if any)                |
+| reflector | required | n/a     | reflector name or definition                               |
+| settings  | required | n/a     | wheel positions, ring settings, and plugboard configuration |
+| text      | required | n/a     | input text                                                 |
+
+Other API validation rules:
+- All 'symbols' strings must be a subset of the symbol map in use.
+- For wiring specifications, only one of "symbols", "numbers", or "indices" should be present.
+
 ### Named Components
 
 In general, components such as the wheels and reflector can be specified in full, by
 providing a wiring (and notches, for a wheel), or by name, referencing a pre-defined wiring.  
 A list of available component names can be found [here](Cabinet.md).
+
+
+### Symbol Maps
+
+The symbol map defines the character range of the machine instance as a whole
+as well as the mapping of individual unicode code points to each position or input
+in the wheels, keyboard, reflector, and other components in the machine. The default symbol map, "AZ", represents the 26 letters A-Z (the most common character set in actual Enigma machine).
 
 ### Wiring
 
@@ -90,17 +125,3 @@ describes the same wiring as the previous two examples.
 The 1-based (ordinal) numbers correspond to the numeric labels used on wheels, reflectors, and
 plugboards of some Enigma models.
 
-### Top Level Attributes
-
-| Attribute | Optional | Default | Description                                                |
-|-----------|----------|---------|------------------------------------------------------------|
-| symbolMap | optional | "A-Z"   | inline character map definition                            |
-| keyboard  | optional | "A-Z"   | inline keyboard mapping                                    |
-| wheels    | required | n/a     | wheel definitions                                          |
-| reflector | required | n/a     | reflector mapping                                          |
-| settings  | required | n/a     | wheel positions and ring settings, plugboard configuration |
-| text      | required | n/a     | input text                                                 |
-
-Other API validation rules:
-- All 'symbols' strings must be a subset of the symbol map in use.
-- For wiring specifications, only one of "symbols", "numbers", or "indices" should be present.

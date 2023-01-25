@@ -8,7 +8,7 @@
 |Funkschlüssel C |            |1926       |ratchet  |28        |3            |0            |no       |4                  |no              |KB: adds Ä, Ö and Ü; 'X' unencrypted                                |
 |Enigma D        |A26, Ch. 8  |1926       |ratchet  |26        |3            |0            |no       |26                 |no              |                                                                    |
 |Enigma K        |A27, Ch. 11b|1927       |ratchet  |26        |3            |0            |no       |26                 |no              |                                                                    |
-|Swiss K         |            |1939       |ratchet  |26        |3            |0            |no       |26                 |no              |Modified stepping: right wheel stationary, middle steps w/ every key|
+|Swiss K         |            |1939       |ratchet  |26        |2            |1            |no       |26                 |no              |Modified stepping: right wheel stationary, middle steps w/ every key|
 |Enigma I        |Ch. 11a     |1932       |ratchet  |26        |3            |0            |yes      |1                  |no              |                                                                    |
 |Enigma M1-M3    |Ch. 11g     |1934 – 1940|ratchet  |26        |3            |0            |yes      |1                  |no              |Introduced UKW-D                                                    |
 |Enigma M4       |            |1942       |ratchet  |26        |3            |1            |yes      |1                  |no              |                                                                    |
