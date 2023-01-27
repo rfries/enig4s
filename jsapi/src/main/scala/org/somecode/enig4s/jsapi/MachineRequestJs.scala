@@ -31,7 +31,6 @@ final case class MachineRequestJs(
       rf      <- reflector.toReflector(symbols, cabinet)
       machine <- Machine(entry, wh, rf, symbols)
       mstate  <- settings.toMachineState(symbols, wh.size, entry.length)
-      _       = println()
 
     yield MachineRequest(machine, mstate, text)
 

@@ -28,8 +28,7 @@ and isolates the web server JSON from a direct dependency on the core model.  Th
 server providing a basic api to the core. All modules except for 'server' are cross-compiled for the JVM and
 Scala.JS. The server is JVM only. 
 
-The following example request shows the decryption of a short M4 Enigma message, "QEOB":
-
+The following example request shows the decryption of an actual naval Enigma message sent to U-538 in May 1945:
 ```
 $ curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
 {
@@ -41,62 +40,32 @@ $ curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
   ],
   "reflector": { "name": "m4.UKW-C" },
   "settings": {
-    "positions": { "symbols": "NAEM" },
-    "rings":     { "symbols": "EPEL" },
+    "positions":  { "symbols": "LWGN" },
+    "rings":      { "symbols": "AAEL" },
     "plugboard": {
       "plugs": {
         "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
       }
     }
   },
-  "text": "QEOB"
+  "text": "SCXBDTZLXVDMEIHBBHNETIJLDFCWBGRMTHSWQNTYOKQGVZKZNJVPGAKDDQAZAGVJHKIFNLQIXOYAK
+  FQQUBAKGYAHRDRXLTOVYPNHJDZFTYOCLTIHHCSQBPFTOHDIZJGGDSJICPJDEXIBLDYCMTGYARLTCHJKFNTNLFE
+  YGFLYTBILLXTKFXNHPWYYOFLDBQVQ"
 }'
+
 ```
 results in:
 ```
 {
-  "text": "CDSZ",
-  "wheelPositions": "NAFQ",
-  "trace": ""
+  "text": "VONVONUUUEINSNULNULACHTKKGESSNERKRTXNULNEUNDREINULUHRVONLUEBECKTRAVEMUENDEEINX
+  ZUSATZFUERFUNFUUUFLOTTXJTREIBOALVERBRXVOMEINSXVIRXBISDREINULXVIRXSECHSYEINSCBMXBESTANDA
+  MEINSXFUNFXXVIRFUNFYNEUNCBM",
+  "wheelPositions": "LXVX"
 }
+
 ```
-In fact, this is an actual message key used for the ["Dönitz Message"](https://www.cryptomuseum.com/crypto/enigma/msg/p1030681.htm) sent on May 1 1945.  Using the result, "CDSZ",
-as the ground setting (starting wheel positions), the message itself can then be decoded:
-```
-$ curl -s localhost:8080/enigma -H 'Content-Type: application/json' -d '
-{            
-  "wheels": [             
-    { "name": "m4.BETA" },
-    { "name": "V" }, 
-    { "name": "VI" }, 
-    { "name": "VIII" }
-  ],                                  
-  "reflector": { "name": "m4.UKW-C" },
-  "settings": {                         
-    "positions":  { "symbols": "CDSZ" },
-    "rings":      { "symbols": "EPEL" },
-    "plugboard": {
-      "plugs": {                                                               
-        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
-      }
-    }
-  },
-  "text": "LANOTCTOUARBBFPMHPHGCZXTDYGAHGUFXGEWKBLKGJWLQXXTGPJJAVTOCKZFSLPPQIHZFXOEBWI
-IEKFZLCLOAQJULJOYHSSMBBGWHZANVOIIPYRBRTDJQDJJOQKCXWDNBBTYVXLYTAPGVEATXSONPNYNQFUDBBHHV
-WEPYEYDOHNLXKZDNWRHDUWUJUMWWVIIWZXIVIUQDRHYMNCYEFUAPNHOTKHKGDNPSAKNUAGHJZSMJBMHVTREQED
-GXHLZWIFUSKDQVELNMIMITHBHDBWVHDFYHJOQIHORTDJDBWXEMEAYXGYQXOHFDMYUXXNOJAZRSGHPLWMLRECWW
-UTLRTTVLBHYOORGLGOWUXNXHMHYFAACQEKTHSJW"
-}'
-```
-results in the clear text (see link for more info and translation):
-```
-{
-  "text": "KRKRALLEXXFOLGENDESISTSOFORTBEKANNTZUGEBENXXICHHABEFOLGELNBEBEFEHLERHALTENXX
-JANSTERLEDESBISHERIGXNREICHSMARSCHALLSJGOERINGJSETZTDERFUEHRERSIEYHVRRGRZSSADMIRALYALSS
-EINENNACHFOLGEREINXSCHRIFTLSCHEVOLLMACHTUNTERWEGSXABSOFORTSOLLENSIESAEMTLICHEMASSNAHMEN
-VERFUEGENYDIESICHAUSDERGEGENWAERTIGENLAGEERGEBENXGEZXREICHSLEITEIKKTULPEKKJBORMANNJXXOB
-XDXMMMDURNHFKSTXKOMXADMXUUUBOOIEXKP",
-  "wheelPositions": "CFXH",
-  "trace": ""
-}
-```
+which translates roughly as
+> From U-1008 "(Gessner)": [At] 0938 hours entered [port] at Travemünde from Lübeck. Addition for 5th
+> Submarine Flotilla: Fuel oil consumption from 1st April to 30th April 6.1 cubic meters. Remaining [fuel] on 1st May 45.9 cubic meters. "
+
+For details, see [Michael Hörenberg's naval Enigma project](https://enigma.hoerenberg.com/index.php?cat=The%20U534%20messages&page=P1030671)

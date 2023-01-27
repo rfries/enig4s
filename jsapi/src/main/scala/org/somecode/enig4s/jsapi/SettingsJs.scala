@@ -11,7 +11,8 @@ case class SettingsJs private (
     rings: GlyphArrayJs,
     positions: GlyphArrayJs,
     reflector: Option[GlyphJs],
-    plugboard: Option[PlugBoardJs]
+    plugboard: Option[PlugBoardJs],
+    trace: Option[Boolean]
 ):
   def toMachineState(symbols: SymbolMap, numWheels: Int, busSize: Int): Either[String, MachineState] =
     for
@@ -23,8 +24,10 @@ case class SettingsJs private (
       ref <- reflector
               .map( _.toGlyph(symbols))
               .getOrElse(Right(Glyph.zero))
+      mstate = MachineState(posGlyphs, ringGlyphs, ref, pb, symbols)
     yield
-      MachineState(posGlyphs, ringGlyphs, ref, pb, symbols)
+      if trace.getOrElse(false) then mstate.withTrace
+      else mstate
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec
