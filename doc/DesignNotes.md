@@ -1,12 +1,14 @@
 ## Concepts
 
-The machine is represented by an immutable Machine instance, which the defines the number wheels, bus size, wheel and reflector
-wiring, keyboard/symbol mapping, and plug-board settings.  The machine state, which is configured per-message, contains the wheel positions, ring settings, and plugboard configuration.
+The machine is represented by an immutable Machine instance, which the defines the number and order of wheels, bus size,
+wheel and reflector
+wiring, keyboard/symbol mapping, and plug-board settings. The machine state, which is configured per-message, contains
+the wheel positions, ring settings, and plugboard configuration.
 
-The keyboard is represented
+The keyboard and indicator lights are represented
 by a `SymbolMap`, which defines all possible keys (and so the bus size) and their mapping to UTF-8 code points.  Internally these keys
 are represented by integers from 0 to n-1, where n is the bus size for the machine; all translation to and from the internal representation
-is done via a `SymbolMap`. The default SymbolMap, "AZ", maps the characters A-Z (i.e. Unicde/ASCII 'A' through 'Z')to the key codes 0-25.
+is done via a `SymbolMap`. The default SymbolMap, "AZ", maps the characters A-Z (i.e. Unicde/ASCII 'A' through 'Z') to the key codes 0-25.
 
 Internally, a Machine consists of several components, most of which transform key codes in various ways.
 
@@ -18,7 +20,7 @@ reflector.
 
 ### Entry Disc
 
-This is a components that consist of a single static wiring instance, and represents the connection
+This is a component that consist of a single static wiring instance, and represents the connection
 between the keyboard and the rotors.  In most Enigma models, the wiring was straight through, and performed no translation.
 
 ### Wheel
@@ -39,22 +41,3 @@ but there is no equivalent of a ring setting.
 A `PlugBoard` is a stateful component that allows for the swapping of specified values in pairs,
 for example the pair "AN" specifies that all A's become 'N's, and that all 'N's become 'A's. All
 values not specified in the plug pairs are passed through unchanged.
-
-## Implementation
-
-### Collections Usage
-
-Character transformations in wheels and reflectors use indexed lookups, so they would generally
-be `IndexedSeq`s.  However, since there is no Applicative instance for IndexedSeq,
-and traverse/sequence is 80% of why I use cats, I use a concrete class (ArraySeq) in a
-number of places to prevent the need for conversion when doing traverse/sequence.
-
-The trace log uses a Queue, as it has constant-ish append time.
-
-I use typelevel CIString for case-insensitive string keys in the Cabinet, as it just works
-and includes some useful cats instances.
-
-### Error Types
-
-Generally, errors are expressed as Either[String, A].  This is mostly an expediency, and in larger
-or more enterprisey software I would recommend the use an ADT instead of String for `Left`s.

@@ -22,7 +22,7 @@ what it would look like in functional scala (and I was just starting to play
 around with scala 3 at the time).
 
 That said, I think it is a decent attempt, if you happen to need a WWII-era
-Enigma with a [JSON API](doc/JsApi.md) (or just as a Scala component).
+Enigma machine with a [JSON API](doc/JsApi.md) (or just as a Scala component).
 It has pre-defined wirings for most models used during WWII, plus you can
 define your own wheels, character set, bus size, etc. (this
 can also simulate a reconfigurable reflector).
@@ -90,13 +90,9 @@ which has been interpreted as
 
 For details, see [Michael Hörenberg's naval Enigma project](https://enigma.hoerenberg.com/index.php?cat=The%20U534%20messages&page=P1030671).
 
-Note that this is not "breaking" Enigma, since the complete machine configuration is included with the encrypted text.
-This simulates how someone with the correct machine settings would decode a received message.  Breaking Enigma involved
-a number of other machines and quite a large amount of language and military analysis which is not trivially automated.
-
 ### Planned Additions
 
-These features are still in progress:
+These items are still in progress:
 
 - Support for Enigma K stepping (gear/cog drive)
-- Support for TypeX stepping (with static wheels)
+- Support for TypeX stepping (with static wheels) and TypeX style plugboard.

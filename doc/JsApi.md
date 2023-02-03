@@ -26,8 +26,6 @@ The machine settings represent the per-message settings, such as the starting wh
 In general, components with wiring can be specified by either referencing a pre-defined component
 via the name attribute, or inline by specifying a `wiring` object.
 
-Within a wiring object, the mapping can be specified by a string of symbols, via the `symbols` attribute, by 
-
 The following is an example of a machine request, with all attributes defined (Note that
 some of these attributes are mutually exclusive, and others have useful defaults, so only a subset
 of these attributes would typically be used)
@@ -96,7 +94,8 @@ Other API validation rules:
 ### Named Components
 
 In general, components such as the wheels and reflector can be specified in full, by
-providing a wiring (and notches, for a wheel), or by name, referencing a pre-defined wiring.  
+providing a wiring (and notches, for a wheel), or by name, referencing a pre-defined wiring.
+
 A list of available component names can be found [here](Cabinet.md).
 
 
@@ -112,16 +111,15 @@ The wiring of wheels, reflectors, and other components is specified by providing
 or an array of numbers. When using a string, the "symbols" attribute is used, and in the provided
 string each character position represents a mapping to the character specified at that position.
 For instance, assuming for brevity a 4-position wheel with a symbol map of "ABCD", then the attribute
-```"symbols": "BDAC"```
-would indicate that the first position of the wheel ("A" in the symbol map) is mapped to "B",
-the second position ("B" in the symbol map) is mapped to "D", and so on.  If specified using (ordinal)
+```"symbols": "BDAC"``` would indicate mappings of A -> B, B -> D, C -> A, and D -> C.
+
+If specified using (ordinal)
 numbers, then:
 ```"numbers": [2,4,1,3]```
-represents the same mapping. In addition, 0-based indices can be used by specifying the "indices"
+represents the same mapping. The ordinal numbers correspond to the numeric labels used on wheels,
+reflectors, and plugboards of some Enigma models.
+
+In addition, 0-based indices can be used by specifying the "indices"
 attribute, so:
 ```"indices": [1,3,0,2]```
 describes the same wiring as the previous two examples. 
-
-The 1-based (ordinal) numbers correspond to the numeric labels used on wheels, reflectors, and
-plugboards of some Enigma models.
-
