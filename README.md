@@ -11,25 +11,24 @@ victory of the Allies and in the early development of electro-mechanical and
 electronic computing. Ironically, those developments went largely
 unacknowledged for decades after the war due to the secrecy imposed by their use.
 
-Generally, Enig4s simulates a class of rotory, reciprocal cipher machines
+This seemed like an interesting programming challenge, and I was curious to see
+what it would look like in functional scala (and I was just starting to play
+around with scala 3 at the time).
+
+Generally, enig4s simulates a class of rotory, reciprocal cipher machines
 which includes Enigma, TypeX, and the Swiss NEMA machine. This type of machine
 implements a reciprocal substitution cipher, where each character goes through
 a series of successive substitutions based on the rotor positions, plugboard
 configuration, and other settings.
 
-This seemed like an interesting programming challenge, and I was curious to see
-what it would look like in functional scala (and I was just starting to play
-around with scala 3 at the time).
-
-That said, I think it is a decent attempt, if you happen to need a WWII-era
-Enigma machine with a [JSON API](doc/JsApi.md) (or just as a Scala component).
-It has pre-defined wirings for most models used during WWII, plus you can
-define your own wheels, character set, bus size, etc. (this
-can also simulate a reconfigurable reflector).
+It can be embedded as a component, and there is a module that exposes a [JSON API](doc/JsApi.md).
+There are pre-defined wirings for most models used during WWII, plus you can
+define your own wheels, character set, bus size, etc. (this can also simulate
+a reconfigurable reflector).
 
 Please note that, as far as I am aware, Engima is not useful for
-encryption in any modern context, as it is vulnerable to any number
-of modern code breaking techniques (indeed it was, as it turns out,
+encryption in a modern context, as it is vulnerable to any number
+of modern code breaking techniques (and indeed it was, as it turns out,
 vulnerable at the time).
 
 ### Structure
