@@ -3,11 +3,20 @@
 Enig4s is an Enigma machine simulator which I wrote for fun while playing
 around with Scala 3.
 
+It can be embedded as a scala component, and there is a module that exposes
+a [JSON API](doc/JsApi.md).
+
+There are [pre-defined wirings](doc/Cabinet.md) for most models used during WWII, plus you can
+define your own wheels, character set, bus size, etc. (this can also simulate
+a reconfigurable reflector).
+
+### Context
+
 The Enigma machine was an encryption device used by Germany (and several other
 countries) prior to and during WWII.
-The efforts of Polish and British cryptanalysts in breaking Enigma and other
+The efforts of Polish and British cryptographers in breaking Enigma and other
 military ciphers of the era proved crucial both to the
-victory of the Allies and in the early development of electro-mechanical and
+victory of the Allies and in the early development of electromechanical and
 electronic computing. Ironically, those developments went largely
 unacknowledged for decades after the war due to the secrecy imposed by their use.
 
@@ -15,18 +24,17 @@ This seemed like an interesting programming challenge, and I was curious to see
 what it would look like in functional scala (and I was just starting to play
 around with scala 3 at the time).
 
-Generally, enig4s simulates a class of rotory, reciprocal cipher machines
-which includes Enigma, TypeX, and the Swiss NEMA machine. This type of machine
-implements a reciprocal substitution cipher, where each character goes through
-a series of successive substitutions based on the rotor positions, plugboard
-configuration, and other settings.
+Generally, enig4s simulates a class of rotor-based, reciprocal cipher machines
+which includes Enigma, TypeX, and the Swiss NEMA. They are reciprocal
+in that the same settings are used for enciphering and deciphering a particular
+message. This symmetry arises from the electrical reversibility of rotor-based machines
+which use a reflector similar to Enigma.
 
-It can be embedded as a component, and there is a module that exposes a [JSON API](doc/JsApi.md).
-There are pre-defined wirings for most models used during WWII, plus you can
-define your own wheels, character set, bus size, etc. (this can also simulate
-a reconfigurable reflector).
+This type of machine implements a substitution cipher, where each character goes
+through a series of successive substitutions based on the rotor positions,
+plugboard configuration, and other settings.
 
-Please note that, as far as I am aware, Engima is not useful for
+Please note that, as far as I am aware, Enigma is not useful for
 encryption in a modern context, as it is vulnerable to any number
 of modern code breaking techniques (and indeed it was, as it turns out,
 vulnerable at the time).
@@ -43,6 +51,8 @@ The `server` module contains an `http4s` server providing a JSON api.
 
 All modules
 except for 'server' are cross-compiled for the JVM and Scala.JS. The server is JVM only. 
+
+Note that the server can be started from sbt with `server/reStart`.
 
 ### Example
 
