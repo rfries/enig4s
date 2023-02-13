@@ -1,8 +1,8 @@
 package org.somecode.enig4s
 package mach
 
-import fs2.{Pure, Stream}
 import cats.implicits.*
+import fs2.{Pure, Stream}
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
 import scala.collection.immutable.Queue
@@ -39,31 +39,23 @@ sealed abstract case class Machine(
     for
       validState <- ValidState(state)
       validGlyphs <- validateGlyphs(in)
-      (endState, results) = cryptGlyphs(validGlyphs, validState)
+      results = codeStream(validGlyphs, validState).toVector
       outGlyphs = results.map(_._2)
+      endState = results.lastOption.map(_._1).getOrElse(state)
       outText <- symbols.glyphsToString(outGlyphs)
     yield CryptStringResult(endState, outText, formatTrace(results))
 
-  private def formatTrace(states: Queue[(MachineState, Glyph)]): Option[String] =
+  private def formatTrace(states: Vector[(MachineState, Glyph)]): Option[String] =
     val traces = states.flatMap(_._1.traceQ).map(_.mkString("\n")).mkString("\n\n")
     if traces.nonEmpty then Some(traces) else None
 
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
 
-  private def cryptGlyphs(glyphs: ValidGlyphs, validState: ValidState): (MachineState, Queue[(MachineState, Glyph)]) =
-    // fold the glyphs into a running state and history
-    glyphs.glyphs.foldLeft((validState.state, Queue.empty[(MachineState, Glyph)])) {
-      case ((state, hist), in) =>
-        val (newState, out) = transformer(advance(state.newTrace), in)
-        (newState, hist.enqueue(newState, out))
-    }
-
-  private def codeStream(glyphs: ValidGlyphs, validState: ValidState, trace: Boolean): Stream[Pure, (MachineState, Glyph)] =
-    val traceQ: Option[Queue[String]] = if trace then Some(Queue.empty) else None
+  private def codeStream(glyphs: ValidGlyphs, validState: ValidState): Stream[Pure, (MachineState, Glyph)] =
     Stream.emits(glyphs.glyphs)
-      .mapAccumulate(validState.state) ( (state, in) =>
-        transformer(advance(state.copy(traceQ = traceQ)), in)
+      .mapAccumulate(validState.state) ((state, in) =>
+        transformer(advance(state.newTrace), in)
       )
 
   /** Advance to the next position */
