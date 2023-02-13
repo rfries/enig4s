@@ -1,7 +1,7 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / organization     := "org.somecode"
-ThisBuild / organizationName := "Some Code"
+ThisBuild / organizationName := "SomeCode"
 ThisBuild / scalaVersion     := "3.2.1"
 ThisBuild / version          := "0.9.2-SNAPSHOT"
 
@@ -11,16 +11,14 @@ ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS
 
 val v = new {
   val cats                  = "2.9.0"
-  val catsEffect            = "3.3.14"
+  val catsEffect            = "3.4.6"
   val ciString              = "1.2.0"
   val circe                 = "0.14.3"
-  val fs2                   = "3.3.0"
-  val http4s                = "1.0.0-M37"
-  val scalatest             = "3.2.13"
-  val scalatest_scalacheck  = "3.2.13.0"
-  val scalajs               = "1.12.0"      // not used directly (appears in plugins.sbt)
-  val scalajsCss            = "1.0.0"
-  val scalajsDom            = "2.3.0"
+  val fs2                   = "3.6.0"
+  val http4s                = "1.0.0-M39"
+  val scalatest             = "3.2.15"
+  val scalatest_scalacheck  = "3.2.15.0"
+  // note that the scalajs version is defined in plugins.sbt
 }
 
 lazy val commonLibs = Seq(
@@ -30,30 +28,21 @@ lazy val commonLibs = Seq(
     "org.typelevel"               %%% "cats-effect"         % v.catsEffect,
     "org.typelevel"               %%% "case-insensitive"    % v.ciString,
     "org.scalatest"               %%% "scalatest"           % v.scalatest             % Test,
-    "org.scalatestplus"           %%% "scalacheck-1-16"     % v.scalatest_scalacheck  % Test,
+    "org.scalatestplus"           %%% "scalacheck-1-17"     % v.scalatest_scalacheck  % Test,
     // added for web API (circe codecs, etc)
     "co.fs2"                      %%% "fs2-core"            % v.fs2,
     "io.circe"                    %%% "circe-core"          % v.circe,
     "io.circe"                    %%% "circe-generic"       % v.circe,
-    "io.circe"                    %%% "circe-parser"        % v.circe,
+    "io.circe"                    %%% "circe-parser"        % v.circe
   )
 )
 
 lazy val jvmLibs = Seq(
   libraryDependencies ++= Seq(
-    //"co.fs2"                      %% "fs2-io"               % v.fs2,
     "org.http4s"                  %% "http4s-ember-server"  % v.http4s,
     "org.http4s"                  %% "http4s-ember-client"  % v.http4s,
     "org.http4s"                  %% "http4s-circe"         % v.http4s,
     "org.http4s"                  %% "http4s-dsl"           % v.http4s
-  )
-)
-
-lazy val jsLibs = Seq(
-  libraryDependencies ++= Seq(
-    "com.github.japgolly.scalacss"        %%% "core"          % v.scalajsCss,
-    "com.github.japgolly.scalacss"        %%% "ext-react"     % v.scalajsCss,
-    "org.scala-js"                        %%% "scalajs-dom"   % v.scalajsDom
   )
 )
 
@@ -73,7 +62,6 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(jvmLibs)
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
-  .jsSettings(jsLibs)
 
 lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
@@ -88,7 +76,6 @@ lazy val jsapi = crossProject(JSPlatform, JVMPlatform)
   )
   .jvmSettings(jvmLibs)
   .jsConfigure(_.enablePlugins(ScalaJSBundlerPlugin))
-  .jsSettings(jsLibs)
 
 lazy val server = project.in(file("server"))
   .enablePlugins(NoPublishPlugin, BuildInfoPlugin)
