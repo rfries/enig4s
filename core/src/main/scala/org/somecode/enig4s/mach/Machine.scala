@@ -52,8 +52,10 @@ sealed abstract case class Machine(
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
 
-  private def codeStream(glyphs: ValidGlyphs, validState: ValidState): Stream[Pure, (MachineState, Glyph)] =
-    Stream.emits(glyphs.glyphs)
+  private def codeStream(validGlyphs: ValidGlyphs, validState: ValidState): Stream[Pure, (MachineState, Glyph)] =
+    // using a stream here because mapAccumulate in a stream includes intermediate states, while
+    // mapAccumulate from Traverse only returns the final state (there is probably a cleaner solution)
+    Stream.emits(validGlyphs.glyphs)
       .mapAccumulate(validState.state) ((state, in) =>
         transformer(advance(state.newTrace), in)
       )

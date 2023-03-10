@@ -4,7 +4,7 @@ package jsapi
 import cats.implicits.*
 import io.circe.Codec
 import io.circe.generic.semiauto.*
-import org.somecode.enig4s.mach.{Glyph, MachineState, RingSetting, SymbolMap, WheelState}
+import org.somecode.enig4s.mach.{Glyph, MachineState, SymbolMap}
 import scala.collection.immutable.ArraySeq
 
 case class SettingsJs private (

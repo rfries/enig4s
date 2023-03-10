@@ -5,7 +5,7 @@ import cats.data.NonEmptyVector
 
 /**
   * Represents the modulus, or the value at which increasing values wrap
-  * around to zero. This, in effect, defines the domain of the transposition
+  * around to zero. This, in effect, defines the codomain of the transposition
   * functions of the various components in the [[Machine]], and of the modular
   * operations they are built on.
   */
