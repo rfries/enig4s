@@ -1,11 +1,14 @@
 package org.somecode.enig4s
 package mach
 
+import cats.*
+import cats.data.Chain
 import cats.implicits.*
+import cats.syntax.*
 import fs2.{Pure, Stream}
+
 import scala.annotation.tailrec
 import scala.collection.immutable.ArraySeq
-import scala.collection.immutable.Queue
 
 sealed abstract case class Machine(
   entry: Entry,
@@ -32,33 +35,30 @@ sealed abstract case class Machine(
       case Some(pb) => pb.forward +: wheelfuns :+ pb.reverse
       case None     => wheelfuns
 
-    // compose to a single Transformer
-    Function.chain[(MachineState, Glyph)](allfuns)(state, glyph)
+    allfuns.foldLeftM(glyph) { (g, transform) =>
+      transform(state, g)
+    }
 
   def crypt(state: MachineState, in: String): Either[String, CryptStringResult] =
     for
       validState <- ValidState(state)
       validGlyphs <- validateGlyphs(in)
-      results = codeStream(validGlyphs, validState).toVector
-      outGlyphs = results.map(_._2)
-      endState = results.lastOption.map(_._1).getOrElse(state)
+      (endState, runs) = runAll(validGlyphs, validState)
+      outGlyphs = runs.map(_._2)
       outText <- symbols.glyphsToString(outGlyphs)
-    yield CryptStringResult(endState, outText, formatTrace(results))
+    yield CryptStringResult(endState, outText, formatTrace(runs.map(_._1)))
 
-  private def formatTrace(states: Vector[(MachineState, Glyph)]): Option[String] =
-    val traces = states.flatMap(_._1.traceQ).map(_.mkString("\n")).mkString("\n\n")
-    if traces.nonEmpty then Some(traces) else None
+  private def formatTrace(traces: ArraySeq[Chain[String]]): Option[String] =
+    Some(traces.map(_.toList.mkString("\n")).mkString("\n\n"))
 
   private def validateGlyphs(in: String): Either[String, ValidGlyphs] =
     symbols.stringToGlyphs(in).flatMap(ValidGlyphs.apply)
 
-  private def codeStream(validGlyphs: ValidGlyphs, validState: ValidState): Stream[Pure, (MachineState, Glyph)] =
-    // using a stream here because mapAccumulate in a stream includes intermediate states, while
-    // mapAccumulate from Traverse only returns the final state (there is probably a cleaner solution)
-    Stream.emits(validGlyphs.glyphs)
-      .mapAccumulate(validState.state) ((state, in) =>
-        transformer(advance(state.newTrace), in)
-      )
+  private def runAll(validGlyphs: ValidGlyphs, validState: ValidState): (MachineState, ArraySeq[(Chain[String],Glyph)]) =
+    validGlyphs.glyphs.mapAccumulate(validState.state)((state, glyph) =>
+      val newState = advance(state)
+      (newState, transformer(newState, glyph).run)
+    )
 
   /** Advance to the next position */
   private def advance(start: MachineState): MachineState =
@@ -92,12 +92,12 @@ sealed abstract case class Machine(
    * of a Machine (path dependent type).
    */
 
-  sealed abstract case class ValidGlyphs private (glyphs: IndexedSeq[Glyph]):
+  sealed abstract case class ValidGlyphs private (glyphs: ArraySeq[Glyph]):
     override def toString: String = symbols.glyphsToString(glyphs).getOrElse("<invalid>")
 
   object ValidGlyphs:
 
-    def apply(glyphs: IndexedSeq[Glyph]): Either[String, ValidGlyphs] =
+    def apply(glyphs: ArraySeq[Glyph]): Either[String, ValidGlyphs] =
       if glyphs.exists(g => g.invalidFor(entry.length)) then
         Left(s"All glyphs must be between 0 and ${entry.length-1}, inclusive")
       else

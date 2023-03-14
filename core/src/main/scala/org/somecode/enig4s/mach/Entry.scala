@@ -1,6 +1,8 @@
 package org.somecode.enig4s
 package mach
 
+import cats.data.Writer
+
 import Trace.*
 
 /**
@@ -14,10 +16,12 @@ final case class Entry (wiring: Wiring) extends Bidirectional:
   val length: Int = wiring.length
 
   val forward: Transformer = (state, in) =>
-    Trace.trace(state, in, wiring.wire(in), Component.EntryDisc(Direction.Forward))
+    val out = wiring.wire(in)
+    Writer(Trace.trace(state, in, out, Component.EntryDisc(Direction.Forward)), out)
 
   val reverse: Transformer = (state, in) =>
-    Trace.trace(state, in, wiring.inverse.wire(in), Component.EntryDisc(Direction.Reverse))
+    val out = wiring.inverse.wire(in)
+    Writer(Trace.trace(state, in, out, Component.EntryDisc(Direction.Reverse)), out)
 
 object Entry:
 

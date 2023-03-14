@@ -1,6 +1,10 @@
 package org.somecode.enig4s
 package mach
 
+import cats.data.Chain
+
+import scala.collection.immutable.Queue
+
 object Trace:
 
   enum Direction(val dir: String):
@@ -17,14 +21,9 @@ object Trace:
     inGlyph: Glyph,
     outGlyph: Glyph,
     component: Component,
-    extra: String = ""): (MachineState, Glyph) =
+    extra: String = ""): Chain[String] =
 
-    val newState = state.traceQ.map { q =>
-      val in = state.
-        symbols.displayGlyph(inGlyph)
-      val out = state.symbols.displayGlyph(outGlyph)
-      val glyphs = s"$in ==> $out"
-      val msg = f"${component.name}%-10s $glyphs $extra"
-      state.copy(traceQ = Some(q.enqueue(msg)))
-    }
-    (newState.getOrElse(state), outGlyph)
+    val in = state.symbols.displayGlyph(inGlyph)
+    val out = state.symbols.displayGlyph(outGlyph)
+    val glyphs = s"$in ==> $out"
+    Chain.one(f"${component.name}%-10s $glyphs $extra")

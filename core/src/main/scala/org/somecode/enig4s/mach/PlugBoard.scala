@@ -1,6 +1,7 @@
 package org.somecode.enig4s
 package mach
 
+import cats.data.Writer
 import cats.*
 import cats.implicits.*
 import Trace.*
@@ -25,16 +26,14 @@ trait PlugBoard extends Bidirectional:
 sealed abstract case class EnigmaPlugBoard private (length: Int, mapping: Map[Glyph, Glyph])
   extends PlugBoard:
 
-  val maxPlugs: Int = length / 2
-
   def forward: Transformer = (state, glyph) =>
     val out = mapping.getOrElse(glyph, glyph)
-    Trace.trace(state, glyph, out, Component.Plugboard(Direction.Forward))
+    Writer(Trace.trace(state, glyph, out, Component.Plugboard(Direction.Forward)), out)
 
   // for the enigma plugboard, reciprocal mappings are always added, so forward/reverse is the same operation
   def reverse: Transformer = (state, glyph) =>
     val out = mapping.getOrElse(glyph, glyph)
-    Trace.trace(state, glyph, out, Component.Plugboard(Direction.Reverse))
+    Writer(Trace.trace(state, glyph, out, Component.Plugboard(Direction.Reverse)), out)
 
 object EnigmaPlugBoard:
 
