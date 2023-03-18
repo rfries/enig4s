@@ -12,8 +12,7 @@ final case class MachineRequestJs(
   wheels: Vector[WheelJs],
   reflector: ReflectorJs,
   settings: SettingsJs,
-  text: String,
-  trace: Option[Boolean]
+  text: String
 ):
   def toMachineRequest(cabinet: Cabinet): Either[String, MachineRequest] =
     for

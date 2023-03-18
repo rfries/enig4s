@@ -70,7 +70,8 @@ of these attributes would typically be used)
       "plugs": {
         "symbols": ["AN", "ST", "ZG", "UH", "KP", "YM"],
         "numbers": [[1, 14], [19, 20], [26, 7], [21, 8], [11, 16], [25, 13]]
-      }
+      },
+      "trace": false
     },
     "text": "SENDMORECHUCKBERRY"
   }

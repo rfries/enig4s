@@ -20,14 +20,11 @@ case class SettingsJs private (
       posGlyphs <- positions.toGlyphs(symbols).map(_.reverse)
       _ <- Either.cond(ringGlyphs.size === posGlyphs.size, (), "Position and ring settings strings must be the same length")
       pb <- plugboard.traverse(pb => pb.toPlugBoard(busSize, symbols))
-
       ref <- reflector
               .map( _.toGlyph(symbols))
               .getOrElse(Right(Glyph.zero))
-      mstate = MachineState(posGlyphs, ringGlyphs, ref, pb, symbols)
     yield
-      if trace.getOrElse(false) then mstate.withTrace
-      else mstate
+      MachineState(posGlyphs, ringGlyphs, ref, pb, symbols, trace.getOrElse(false))
 
 object SettingsJs:
   given Codec[SettingsJs] = deriveCodec

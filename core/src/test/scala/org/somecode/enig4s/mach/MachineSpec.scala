@@ -87,4 +87,4 @@ object MachineSpec:
       ring <- symbols.stringToGlyphs(rings).map(_.reverse)
       ref <- symbols.pointToGlyph(reflector.codePointAt(0))
       plugs <- plugboard.traverse(pb => EnigmaPlugBoard(symbols.size, pb, symbols))
-    yield MachineState(pos, ring, ref, plugs, symbols).withTrace
+    yield MachineState(pos, ring, ref, plugs, symbols, true)
