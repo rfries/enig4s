@@ -3,7 +3,7 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / organization     := "org.somecode"
 ThisBuild / organizationName := "SomeCode"
 ThisBuild / scalaVersion     := "3.2.2"
-ThisBuild / version          := "0.9.2-SNAPSHOT"
+ThisBuild / version          := "0.9.2"
 
 ThisBuild / scalacOptions    += "--deprecation"
 
