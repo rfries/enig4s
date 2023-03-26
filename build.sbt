@@ -18,6 +18,7 @@ val v = new {
   val http4s                = "1.0.0-M39"
   val scalatest             = "3.2.15"
   val scalatest_scalacheck  = "3.2.15.0"
+  val logBack               = "1.2.6"
   // note that the scalajs version is defined in plugins.sbt
 }
 
@@ -45,6 +46,13 @@ lazy val jvmLibs = Seq(
     "org.http4s"                  %% "http4s-dsl"           % v.http4s
   )
 )
+
+lazy val serverLibs = Seq(
+  libraryDependencies ++= Seq(
+    "ch.qos.logback"              % "logback-classic"       % v.logBack
+  )
+)
+
 
 lazy val root = project.in(file("."))
   .enablePlugins(NoPublishPlugin)
@@ -83,6 +91,7 @@ lazy val server = project.in(file("server"))
     name := "enig4s-server",
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
     buildInfoPackage := "org.somecode.enig4s.server",
-    commonLibs
+    commonLibs,
+    serverLibs
   )
   .dependsOn(core.jvm, jsapi.jvm)
