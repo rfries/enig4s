@@ -11,10 +11,10 @@ ThisBuild / Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDS
 
 val v = new {
   val cats                  = "2.9.0"
-  val catsEffect            = "3.4.6"
-  val ciString              = "1.2.0"
-  val circe                 = "0.14.3"
-  val fs2                   = "3.6.0"
+  val catsEffect            = "3.4.8"
+  val ciString              = "1.3.0"
+  val circe                 = "0.14.5"
+  val fs2                   = "3.6.1"
   val http4s                = "1.0.0-M39"
   val scalatest             = "3.2.15"
   val scalatest_scalacheck  = "3.2.15.0"
