@@ -94,4 +94,4 @@ lazy val server = project.in(file("server"))
     commonLibs,
     serverLibs
   )
-  .dependsOn(core.jvm, jsapi.jvm)
+  .dependsOn(core.jvm % "compile->compile;test->test", jsapi.jvm % "compile->compile;test->test")

@@ -15,7 +15,9 @@ import org.somecode.enig4s.jsapi.MachineRequestJs
 import org.somecode.enig4s.jsapi.MachineResponse
 import org.somecode.enig4s.mach.Cabinet
 
-class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Enig4sService[F]:
+import java.time.Instant
+
+class MachineService[F[_]](cabinet: Cabinet, streamerSvc: StreamerService[F])(using F: Concurrent[F]) extends Enig4sService[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
@@ -30,6 +32,13 @@ class MachineService[F[_]](cabinet: Cabinet)(using F: Concurrent[F]) extends Eni
               resp = MachineResponse(out.text, out.state.displayPositions(mreq.machine.symbols), trc)
             yield resp.asJson
         }
+
+      case req @ POST -> Root / "stream" / UUIDVar(uuid) =>
+        for
+          streamer <- streamerSvc.get(uuid.toString, Instant.now())
+          //inStream <- req.body.mapAccumulate(0L) { (count, b) => (count + 1, b) }
+          resp <- if streamer.isDefined then Ok("That's a Bingo!") else NotFound("So sorry it didn't work out.")
+        yield resp
 
       case GET -> Root / "wheels" =>
         Ok(cabinet.wheelInits.asJson)

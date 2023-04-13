@@ -20,13 +20,14 @@ object Main extends ResourceApp.Simple:
 
   def serverResource[F[_]: Async]: Resource[F, SignallingRef[F, Boolean]] =
     for
-      shutdown  <- Resource.eval(SignallingRef[F, Boolean].apply(false))
-      cabinet   <- cabinetResource
+      shutdown    <- Resource.eval(SignallingRef[F, Boolean].apply(false))
+      cabinet     <- cabinetResource
+      streamerSvc <- Resource.eval(StreamerService.localMapService)
       _ <- EmberServerBuilder
         .default[F]
         .withHost(ipv4"0.0.0.0")
         .withPort(port"8080")
-        .withHttpApp(routes[F](shutdown, cabinet).orNotFound)
+        .withHttpApp(routes[F](shutdown, cabinet, streamerSvc).orNotFound)
         .build
     yield shutdown
 
@@ -36,9 +37,9 @@ object Main extends ResourceApp.Simple:
   def shutdownResource[F[_]: Async](ref: SignallingRef[F, Boolean]): Resource[F, Unit] =
     ref.discrete.takeWhile(_ === false).compile.resource.drain
 
-  private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean], cabinet: Cabinet): HttpRoutes[F] =
+  private[server] def routes[F[_]: Async](shutdown: SignallingRef[F, Boolean], cabinet: Cabinet, streamerSvc: StreamerService[F]): HttpRoutes[F] =
     Router(
       "files"   ->  fileService[F](FileService.Config[F]("./static")),
-      "enigma"  ->  MachineService(cabinet).routes,
+      "enigma"  ->  MachineService(cabinet, streamerSvc).routes,
       "meta"    ->  MetaService.routes(shutdown)
     )
