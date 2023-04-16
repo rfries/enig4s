@@ -2,8 +2,10 @@ package org.somecode.enig4s
 package server
 package service
 
-import cats.effect.Concurrent
+import cats.effect.kernel.Async
+import cats.effect.{Concurrent, Sync, SyncIO}
 import cats.implicits.*
+import fs2.Stream
 import io.circe.Encoder
 import io.circe.Json
 import io.circe.generic.semiauto.*
@@ -17,7 +19,7 @@ import org.somecode.enig4s.mach.Cabinet
 
 import java.time.Instant
 
-class MachineService[F[_]](cabinet: Cabinet, streamerSvc: StreamerService[F])(using F: Concurrent[F]) extends Enig4sService[F]:
+class MachineService[F[_]](cabinet: Cabinet, streamerSvc: StreamerService[F])(using F: Async[F]) extends Enig4sService[F]:
 
   def routes: HttpRoutes[F] = {
     HttpRoutes.of[F] {
@@ -36,8 +38,11 @@ class MachineService[F[_]](cabinet: Cabinet, streamerSvc: StreamerService[F])(us
       case req @ POST -> Root / "stream" / UUIDVar(uuid) =>
         for
           streamer <- streamerSvc.get(uuid.toString, Instant.now())
-          //inStream <- req.body.mapAccumulate(0L) { (count, b) => (count + 1, b) }
-          resp <- if streamer.isDefined then Ok("That's a Bingo!") else NotFound("So sorry it didn't work out.")
+          resp <- streamer match
+            case Some(st) => Ok(req.body)
+            //case Some(st) => req.body.mapAccumulate(0L) { (count, b) => (count + 1, b) }
+            case None => NotFound(())
+          //resp <- if streamer.isDefined then Ok("That's a Bingo!") else NotFound("So sorry it didn't work out.")
         yield resp
 
       case GET -> Root / "wheels" =>

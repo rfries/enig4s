@@ -21,7 +21,7 @@ class StreamerSpec extends Enig4sSpec with EitherValues:
     "add an entry that can then be looked up" in {
       val runTest = {
         for
-          svc <- StreamerService.localMapService[SyncIO]
+          svc <- StreamerService.localMapService[IO]
           streamer <- svc.create(mach, state, Instant.now(), 5.seconds)
           found <- svc.get(streamer.name, Instant.now())
         yield
@@ -36,7 +36,7 @@ class StreamerSpec extends Enig4sSpec with EitherValues:
       val now = Instant.now()
       val testcase = {
         for
-          svc <- StreamerService.localMapService[SyncIO]
+          svc <- StreamerService.localMapService[IO]
           streamer <- svc.create(mach, state, now, 5.seconds)
 
           tooSoon <- svc.get(streamer.name, now.minusSeconds(3))
@@ -55,7 +55,7 @@ class StreamerSpec extends Enig4sSpec with EitherValues:
       val now = Instant.now()
       val testcase = {
         for
-          svc <- StreamerService.localMapService[SyncIO]
+          svc <- StreamerService.localMapService[IO]
           streamer <- svc.create(mach, state, now, 5.seconds)
           found <- svc.get(streamer.name, now.plusSeconds(1))
           _ <- svc.expire(now.plusSeconds(6))

@@ -13,22 +13,32 @@ import org.somecode.enig4s.mach.Cabinet
 import org.somecode.enig4s.server.service.MachineService
 import org.somecode.enig4s.server.service.MetaService
 
+import java.time.Instant
+import scala.concurrent.duration.*
+
 object Main extends ResourceApp.Simple:
 
   override def run: Resource[IO, Unit] =
     serverResource[IO].flatMap(signal => shutdownResource(signal))
 
-  def serverResource[F[_]: Async]: Resource[F, SignallingRef[F, Boolean]] =
+  def serverResource[F[_]](using F: Async[F]): Resource[F, SignallingRef[F, Boolean]] =
     for
       shutdown    <- Resource.eval(SignallingRef[F, Boolean].apply(false))
       cabinet     <- cabinetResource
       streamerSvc <- Resource.eval(StreamerService.localMapService)
-      _ <- EmberServerBuilder
-        .default[F]
-        .withHost(ipv4"0.0.0.0")
-        .withPort(port"8080")
-        .withHttpApp(routes[F](shutdown, cabinet, streamerSvc).orNotFound)
-        .build
+      _           <- fs2.Stream
+                      .awakeEvery(5.seconds)
+                      .evalMap(_ => streamerSvc.expire(Instant.now()))
+                      .compile
+                      .resource
+                      .drain
+
+      _           <- EmberServerBuilder
+                      .default[F]
+                      .withHost(ipv4"0.0.0.0")
+                      .withPort(port"8080")
+                      .withHttpApp(routes[F](shutdown, cabinet, streamerSvc).orNotFound)
+                      .build
     yield shutdown
 
   def cabinetResource[F[_]](using F: Async[F]): Resource[F, Cabinet] =

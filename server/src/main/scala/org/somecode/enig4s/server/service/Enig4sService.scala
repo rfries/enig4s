@@ -2,7 +2,7 @@ package org.somecode.enig4s
 package server
 package service
 
-import cats.effect.Concurrent
+import cats.effect.Async
 import cats.implicits.*
 import io.circe.Json
 import org.http4s.EntityDecoder
@@ -11,7 +11,7 @@ import org.http4s.Request
 import org.http4s.Response
 import org.http4s.dsl.Http4sDsl
 
-trait Enig4sService[F[_]: Concurrent] extends Http4sDsl[F] {
+trait Enig4sService[F[_]: Async] extends Http4sDsl[F] {
 
   /**
     * Standard response adapter for code in F that returns an `Either[String, Json]`

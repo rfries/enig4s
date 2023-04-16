@@ -1,6 +1,7 @@
 package org.somecode.enig4s
 package server
 
+import cats.Applicative
 import cats.MonadError
 import cats.implicits.*
 import cats.effect.{Concurrent, Sync}
@@ -29,8 +30,8 @@ trait StreamerService[F[_]]:
 
 object StreamerService:
 
-  def localMapService[F[_]](using F: Sync[F]): F[StreamerService[F]] = F.pure(LocalMapStreamerService[F])
-  private class LocalMapStreamerService[F[_]](using F: Sync[F]) extends StreamerService[F]:
+  def localMapService[F[_]](using F: Async[F]): F[StreamerService[F]] = F.pure(LocalMapStreamerService[F])
+  private class LocalMapStreamerService[F[_]](using F: Async[F]) extends StreamerService[F]:
 
     private val streamerMap: collection.concurrent.TrieMap[String, Streamer] = TrieMap.empty
 
