@@ -1,0 +1,20 @@
+{
+  "wheels": [
+    { "name": "m4.BETA" },
+    { "name": "V" },
+    { "name": "VI" },
+    { "name": "VIII" }
+  ],
+  "reflector": { "name": "m4.UKW-C" },
+  "settings": {
+    "positions": { "symbols": "NAEM" },
+    "rings":     { "symbols": "EPEL" },
+    "plugboard": {
+      "plugs": {
+        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
+      }
+    }
+  },
+  "text": "QEOB"
+}
+

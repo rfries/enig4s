@@ -1,0 +1,20 @@
+{
+  "wheels": [
+    { "name": "m4.BETA" },
+    { "name": "V" },
+    { "name": "VI" },
+    { "name": "VIII" }
+  ],
+  "reflector": { "name": "m4.UKW-C" },
+  "settings": {
+    "positions":  { "symbols": "LWGN" },
+    "rings":      { "symbols": "AAEL" },
+    "plugboard": {
+      "plugs": {
+        "symbols": ["AE", "BF", "CM", "DQ", "HU", "JN", "LX", "PR", "SZ", "VW"]
+      }
+    },
+    "trace": false
+  },
+  "text": "SCXBDTZLXVDMEIHBBHNETIJLDFCWBGRMTHSWQNTYOKQGVZKZNJVPGAKDDQAZAGVJHKIFNLQIXOYAKFQQUBAKGYAHRDRXLTOVYPNHJDZFTYOCLTIHHCSQBPFTOHDIZJGGDSJICPJDEXIBLDYCMTGYARLTCHJKFNTNLFEYGFLYTBILLXTKFXNHPWYYOFLDBQVQ"
+}
